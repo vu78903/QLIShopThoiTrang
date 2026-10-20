@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đổi trả sản phẩm - Y-Fashion ERP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
+    <link rel="stylesheet" href="css/giao-dien.css?v=20261017-3">
+</head>
+<body data-view="returns">
+    <div class="shell">
+        <aside class="side" aria-label="Điều hướng chính">
+            <div class="brand">Y</div>
+            <nav class="nav" id="nav-main">
+                <button class="nav-btn manager-only" data-view="report" aria-label="Tổng quan"><i data-lucide="layout-dashboard"></i><span class="tip">Tổng quan</span></button>
+                <button class="nav-btn" data-view="pos" aria-label="POS"><i data-lucide="shopping-cart"></i><span class="tip">POS bán hàng</span></button>
+                <button class="nav-btn cashier-only" data-view="delivery" aria-label="Giao hàng"><i data-lucide="package-check"></i><span class="tip">Giao hàng</span></button>
+                <button class="nav-btn cashier-only active" data-view="returns" aria-label="Đổi trả"><i data-lucide="rotate-ccw"></i><span class="tip">Đổi trả</span></button>
+                <button class="nav-btn manager-only" data-view="partners" aria-label="Đối tác"><i data-lucide="users"></i><span class="tip">Đối tác</span></button>
+                <button class="nav-btn manager-only" data-view="products" aria-label="Sản phẩm"><i data-lucide="shirt"></i><span class="tip">Sản phẩm</span></button>
+                <button class="nav-btn manager-only" data-view="product-types" aria-label="Loại sản phẩm"><i data-lucide="tags"></i><span class="tip">Loại sản phẩm</span></button>
+                <button class="nav-btn manager-only" data-view="inventory" aria-label="Tồn kho"><i data-lucide="warehouse"></i><span class="tip">Tồn kho</span></button>
+                <button class="nav-btn manager-only" data-view="promotions" aria-label="Khuyến mãi"><i data-lucide="ticket-percent"></i><span class="tip">Khuyến mãi</span></button>
+            </nav>
+        </aside>
+
+        <div class="workspace">
+            <header class="header">
+                <div class="branch"><i data-lucide="map-pin" style="width:17px"></i> Chi nhánh Quận Tân Phú</div>
+                <div class="account">
+                    <button class="role-switch" id="roleSwitch" type="button"><i data-lucide="shield-check" style="width:15px"></i> Vai trò: Thu ngân</button>
+                    <button class="btn btn-secondary logout-button" onclick="dangXuat()" title="Đăng xuất"><i data-lucide="log-out" style="width:15px"></i> Đăng xuất</button>
+                </div>
+            </header>
+
+            <main>
+                <section class="view active" id="view-returns">
+                    <div class="page-head">
+                        <div>
+                            <h1>Đổi trả sản phẩm</h1>
+                            <p>Tiếp nhận và xử lý đổi trả từ hóa đơn đã thanh toán</p>
+                        </div>
+                    </div>
+
+                    <div class="return-workspace">
+                        <section class="card pad return-search-card">
+                            <div class="section-heading"><i data-lucide="receipt-text"></i><div><strong>Tra cứu hóa đơn</strong><small>Mã hóa đơn hoặc số điện thoại mua hàng</small></div></div>
+                            <div class="input-wrap">
+                                <i data-lucide="search"></i>
+                                <input id="returnSearchInput" class="input icon" autocomplete="off" placeholder="Nhập mã hóa đơn hoặc số điện thoại..." oninput="scheduleReturnSearch()">
+                            </div>
+                            <div class="table-wrap return-search-results">
+                                <table class="data-table">
+                                    <thead><tr><th>Mã hóa đơn</th><th>Ngày mua</th><th>Khách hàng</th><th>Nguồn</th><th>Điều kiện</th><th></th></tr></thead>
+                                    <tbody id="returnSearchBody"><tr><td colspan="6" class="table-message">Nhập thông tin để tra cứu hóa đơn.</td></tr></tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <section class="card pad return-form-card hidden" id="returnInvoicePanel">
+                            <div class="return-invoice-head">
+                                <div>
+                                    <span class="eyebrow">Hóa đơn được chọn</span>
+                                    <strong id="returnInvoiceId">-</strong>
+                                </div>
+                                <button class="icon-button" type="button" title="Bỏ chọn hóa đơn" onclick="clearReturnInvoice()"><i data-lucide="x"></i></button>
+                            </div>
+                            <div class="return-invoice-meta" id="returnInvoiceMeta"></div>
+                            <div class="return-eligibility" id="returnEligibility"></div>
+
+                            <h2 class="return-section-title">Sản phẩm đã mua</h2>
+                            <div class="table-wrap">
+                                <table class="data-table return-items-table">
+                                    <thead><tr><th></th><th>Mã sản phẩm</th><th>Tên sản phẩm</th><th>Màu sắc</th><th>Kích cỡ</th><th>Đã mua</th><th>Còn được đổi</th><th class="money-heading">Đơn giá</th></tr></thead>
+                                    <tbody id="returnInvoiceItems"></tbody>
+                                </table>
+                            </div>
+
+                            <div class="return-controls">
+                                <label>Số lượng đổi trả
+                                    <input id="returnQty" class="input" type="number" min="1" value="1" oninput="updateReturnCalculation()">
+                                </label>
+                                <label>Lỗi sản phẩm
+                                    <select id="returnReason" class="input" onchange="updateReturnCalculation()">
+                                        <option value="">Chọn lỗi sản phẩm</option>
+                                        <option>Hàng bị hư</option>
+                                        <option>Hàng bị lem màu</option>
+                                        <option>Sản phẩm bị bung chỉ</option>
+                                        <option>Sản phẩm không giống đơn đã đặt</option>
+                                        <option>Giao sai sản phẩm</option>
+                                        <option>Số lượng không đúng</option>
+                                    </select>
+                                </label>
+                                <label>Hình thức xử lý
+                                    <select id="returnResolution" class="input" onchange="updateReturnCalculation()">
+                                        <option value="">Chọn hình thức xử lý</option>
+                                        <option value="DOI_SAN_PHAM">Đổi sản phẩm khác</option>
+                                        <option value="HOAN_TIEN">Hoàn tiền</option>
+                                    </select>
+                                </label>
+                                <label class="return-replacement hidden" id="returnReplacementField">Sản phẩm đổi mới
+                                    <select id="returnReplacementSku" class="input" onchange="updateReturnCalculation()"></select>
+                                </label>
+                            </div>
+
+                            <div class="return-summary">
+                                <div><span>Giá trị hàng nhận lại</span><strong id="returnOldValue">0 ₫</strong></div>
+                                <div><span>Giá trị hàng đổi mới</span><strong id="returnNewValue">0 ₫</strong></div>
+                                <div class="return-balance"><span id="returnBalanceLabel">Tiền hoàn cho khách</span><strong id="returnBalance">0 ₫</strong></div>
+                            </div>
+                            <div class="return-submit-row">
+                                <span id="returnValidationMessage">Chọn sản phẩm cần đổi trả.</span>
+                                <button class="btn btn-primary" id="createReturnButton" type="button" onclick="createReturnRequest()" disabled><i data-lucide="file-check-2"></i> Tạo phiếu đổi trả</button>
+                            </div>
+                        </section>
+                    </div>
+
+                    <section class="card pad return-history-card">
+                        <div class="section-heading"><i data-lucide="history"></i><div><strong>Phiếu đổi trả đã tạo</strong><small>Mở lại hoặc in lại phiếu đã lưu</small></div></div>
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead><tr><th>Số phiếu</th><th>Ngày lập</th><th>Hóa đơn</th><th>Khách hàng</th><th>Hình thức</th><th>Sản phẩm</th><th>Số lượng</th><th class="money-heading">Hoàn/Thu thêm</th><th></th></tr></thead>
+                                <tbody id="returnHistoryBody"><tr><td colspan="9" class="table-message">Đang tải dữ liệu...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </section>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <div class="modal-bg" id="returnReceiptModalBg" role="dialog" aria-modal="true">
+        <div class="modal return-receipt-modal">
+            <div class="modal-title-row">
+                <h2>Phiếu đổi trả sản phẩm</h2>
+                <button class="icon-button" type="button" title="Đóng" onclick="closeReturnReceipt()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="receipt-wrap" id="returnPrintArea">
+                <div class="return-slip" id="returnReceiptContent"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" type="button" onclick="closeReturnReceipt()">Đóng</button>
+                <button class="btn btn-primary" type="button" onclick="printReturnReceipt()"><i data-lucide="printer"></i> In phiếu</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" role="status" aria-live="polite"><i data-lucide="check-circle" style="width:18px;color:#6ee7b7"></i><span id="toastText">Đã cập nhật thành công</span></div>
+    <script src="js/ung-dung.js?v=20261020-2"></script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao hàng - Y-Fashion ERP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
+    <link rel="stylesheet" href="css/giao-dien.css?v=20261020-2">
+</head>
+<body data-view="delivery">
+    <div class="shell">
+        <aside class="side" aria-label="Điều hướng chính">
+            <div class="brand">Y</div>
+            <nav class="nav" id="nav-main">
+                <button class="nav-btn manager-only" data-view="report" aria-label="Tổng quan"><i data-lucide="layout-dashboard"></i><span class="tip">Tổng quan</span></button>
+                <button class="nav-btn" data-view="pos" aria-label="POS"><i data-lucide="shopping-cart"></i><span class="tip">POS bán hàng</span></button>
+                <button class="nav-btn active cashier-only" data-view="delivery" aria-label="Giao hàng"><i data-lucide="package-check"></i><span class="tip">Giao hàng</span></button>
+                <button class="nav-btn cashier-only" data-view="returns" aria-label="Đổi trả"><i data-lucide="rotate-ccw"></i><span class="tip">Đổi trả</span></button>
+                <button class="nav-btn manager-only" data-view="partners" aria-label="Đối tác"><i data-lucide="users"></i><span class="tip">Đối tác</span></button>
+                <button class="nav-btn manager-only" data-view="products" aria-label="Sản phẩm"><i data-lucide="shirt"></i><span class="tip">Sản phẩm</span></button>
+                <button class="nav-btn manager-only" data-view="product-types" aria-label="Loại sản phẩm"><i data-lucide="tags"></i><span class="tip">Loại sản phẩm</span></button>
+                <button class="nav-btn manager-only" data-view="inventory" aria-label="Tồn kho"><i data-lucide="warehouse"></i><span class="tip">Tồn kho</span></button>
+                <button class="nav-btn manager-only" data-view="promotions" aria-label="Khuyến mãi"><i data-lucide="ticket-percent"></i><span class="tip">Khuyến mãi</span></button>
+            </nav>
+        </aside>
+
+        <div class="workspace">
+            <header class="header">
+                <div class="branch"><i data-lucide="map-pin"></i> Chi nhánh Quận Tân Phú</div>
+                <div class="account">
+                    <button class="role-switch" id="roleSwitch" type="button"><i data-lucide="shield-check"></i> Vai trò: Thu ngân</button>
+                    <button class="btn btn-secondary logout-button" onclick="dangXuat()"><i data-lucide="log-out"></i> Đăng xuất</button>
+                </div>
+            </header>
+
+            <main>
+                <section class="view active" id="view-delivery">
+                    <div class="page-head">
+                        <div>
+                            <h1>Giao hàng</h1>
+                            <p>Theo dõi toàn bộ đơn giao đã thanh toán và đơn shipper cần thu tiền.</p>
+                        </div>
+                        <button class="btn btn-primary" type="button" onclick="refreshShipments()"><i data-lucide="refresh-cw"></i> Tải đơn mới</button>
+                    </div>
+
+                    <div class="shipment-tabs" role="tablist" aria-label="Loại đơn giao hàng">
+                        <button id="shipmentTabDelivery" class="shipment-tab active" type="button" role="tab" onclick="setShipmentTab('delivery')">
+                            <i data-lucide="badge-check"></i><span><strong>Giao hàng</strong><small>Khách đã thanh toán</small></span>
+                        </button>
+                        <button id="shipmentTabCod" class="shipment-tab" type="button" role="tab" onclick="setShipmentTab('cod')">
+                            <i data-lucide="hand-coins"></i><span><strong>Giao hàng COD</strong><small>Shipper thu tiền khi giao</small></span>
+                        </button>
+                    </div>
+
+                    <div id="deliveryPanel">
+                        <div class="shipment-kpis">
+                            <div class="shipment-kpi"><span class="kpi-icon blue"><i data-lucide="package-check"></i></span><div><small>Đơn đang xử lý</small><strong id="deliveryTotalCount">0</strong></div></div>
+                            <div class="shipment-kpi"><span class="kpi-icon amber"><i data-lucide="clock-3"></i></span><div><small>Chờ shipper lấy</small><strong id="deliveryWaitingCount">0</strong></div></div>
+                            <div class="shipment-kpi"><span class="kpi-icon green"><i data-lucide="truck"></i></span><div><small>Đang giao</small><strong id="deliveryMovingCount">0</strong></div></div>
+                        </div>
+                        <section class="card shipment-card">
+                            <div class="shipment-card-head"><div><strong>Đơn đã thanh toán</strong><small>Shipper giao hàng và không thu thêm tiền</small></div><span class="paid-pill"><i data-lucide="badge-check"></i> Đã thanh toán</span></div>
+                            <div class="table-wrap">
+                                <table class="data-table shipment-table">
+                                    <thead><tr><th>Mã đơn</th><th>Người nhận</th><th>Địa chỉ giao</th><th>Ghi chú cho shipper</th><th class="money-heading">Phí giao</th><th class="money-heading">Cần thu</th><th>Trạng thái</th><th>Thao tác tiếp theo</th></tr></thead>
+                                    <tbody id="deliveryBody"></tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div id="codPanel" class="hidden">
+                        <div class="shipment-kpis">
+                            <div class="shipment-kpi"><span class="kpi-icon blue"><i data-lucide="packages"></i></span><div><small>Đơn COD đang xử lý</small><strong id="codTotalCount">0</strong></div></div>
+                            <div class="shipment-kpi"><span class="kpi-icon amber"><i data-lucide="clock-3"></i></span><div><small>Chờ shipper lấy</small><strong id="codWaitingCount">0</strong></div></div>
+                            <div class="shipment-kpi"><span class="kpi-icon red"><i data-lucide="hand-coins"></i></span><div><small>Tổng tiền cần thu</small><strong id="codCollectTotal">0 ₫</strong></div></div>
+                        </div>
+                        <section class="card shipment-card">
+                            <div class="shipment-card-head"><div><strong>Đơn giao hàng COD</strong><small>Shipper thu đúng số tiền hiển thị khi giao</small></div><span class="cod-pill"><i data-lucide="circle-dollar-sign"></i> Chưa thanh toán</span></div>
+                            <div class="table-wrap">
+                                <table class="data-table shipment-table">
+                                    <thead><tr><th>Mã đơn</th><th>Người nhận</th><th>Địa chỉ giao</th><th>Ghi chú cho shipper</th><th class="money-heading">Phí giao</th><th class="money-heading">Shipper cần thu</th><th>Trạng thái</th><th>Thao tác tiếp theo</th></tr></thead>
+                                    <tbody id="codBody"></tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <div id="toast" role="status" aria-live="polite"><i data-lucide="check-circle"></i><span id="toastText">Đã cập nhật</span></div>
+    <script src="js/ung-dung.js?v=20261020-2"></script>
+</body>
+</html>

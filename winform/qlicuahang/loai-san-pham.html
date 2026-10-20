@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loại sản phẩm - Y-Fashion ERP</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
+    <link rel="stylesheet" href="css/giao-dien.css?v=20261016-5">
+</head>
+<body data-view="product-types">
+    <div class="shell">
+        <aside class="side" aria-label="Điều hướng chính">
+            <div class="brand">Y</div>
+            <nav class="nav" id="nav-main">
+                <button class="nav-btn manager-only" data-view="report" aria-label="Tổng quan"><i data-lucide="layout-dashboard"></i><span class="tip">Tổng quan</span></button>
+                <button class="nav-btn active" data-view="pos" aria-label="POS"><i data-lucide="shopping-cart"></i><span class="tip">POS bán hàng</span></button>
+                <button class="nav-btn cashier-only" data-view="delivery" aria-label="Giao hàng"><i data-lucide="package-check"></i><span class="tip">Giao hàng</span></button>
+                <button class="nav-btn cashier-only" data-view="returns" aria-label="Đổi trả"><i data-lucide="rotate-ccw"></i><span class="tip">Đổi trả</span></button>
+                <button class="nav-btn manager-only" data-view="partners" aria-label="Đối tác"><i data-lucide="users"></i><span class="tip">Đối tác</span></button>
+                <button class="nav-btn manager-only" data-view="products" aria-label="Sản phẩm"><i data-lucide="shirt"></i><span class="tip">Sản phẩm</span></button>
+                <button class="nav-btn manager-only" data-view="product-types" aria-label="Loại sản phẩm"><i data-lucide="tags"></i><span class="tip">Loại sản phẩm</span></button>
+                <button class="nav-btn manager-only" data-view="inventory" aria-label="Tồn kho"><i data-lucide="warehouse"></i><span class="tip">Tồn kho</span></button>
+                <button class="nav-btn manager-only" data-view="promotions" aria-label="Khuyến mãi"><i data-lucide="ticket-percent"></i><span class="tip">Khuyến mãi</span></button>
+            </nav>
+            <div class="bottom-nav nav">
+                <button class="nav-btn manager-only" aria-label="Cài đặt" onclick="toast('Đã mở cài đặt hệ thống')"><i data-lucide="settings"></i><span class="tip">Cài đặt</span></button>
+
+            </div>
+        </aside>
+
+        <div class="workspace">
+            <header class="header">
+                <div class="branch">
+                    <i data-lucide="map-pin" style="width:17px"></i> Chi nhánh Quận Tân Phú
+                </div>
+                <div class="account">
+                    <button class="role-switch" id="roleSwitch" type="button"><i data-lucide="shield-check" style="width:15px"></i> Vai trò: Thu ngân</button>
+                    <button class="btn btn-secondary" style="height:36px; padding:0 12px; font-size:13px; color:#ef4444; border-color:#fecdd3; background:#fff1f2" onclick="dangXuat()" title="Đăng xuất">
+                        <i data-lucide="log-out" style="width:15px"></i> Đăng xuất
+                    </button>
+                </div>
+            </header>
+
+            <main>
+                <section class="view active" id="view-product-types">
+                    <div class="page-head">
+                        <div>
+                            <h1>Loại sản phẩm</h1>
+                            <p>Quản lý mã loại và tên loại dùng cho danh mục sản phẩm</p>
+                        </div>
+                        <div class="actions">
+                            <button class="btn btn-secondary" onclick="showView('products')"><i data-lucide="shirt" style="width:16px"></i> Quay lại sản phẩm</button>
+                            <button class="btn btn-primary" onclick="openAddProductType()"><i data-lucide="plus" style="width:16px"></i> Thêm loại</button>
+                        </div>
+                    </div>
+                    <div class="card pad">
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã loại</th>
+                                        <th>Tên loại</th>
+                                        <th>Số sản phẩm</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productTypeBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. MÀN HÌNH TỒN KHO -->
+            </main>
+        </div>
+    </div>
+    <!-- MODAL THÊM / SỬA CHUNG -->
+    <div class="modal-bg" id="crudModalBg" role="dialog" aria-modal="true">
+        <div class="modal">
+            <h2 id="crudModalTitle" style="margin:0 0 14px">Thao tác</h2>
+            <div id="crudModalFields" style="display:flex; flex-direction:column; gap:12px;"></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeCrudModal()">Hủy</button>
+                <button class="btn btn-primary" onclick="saveCrudData()">Lưu dữ liệu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL HÓA ĐƠN / IN BILL -->
+    <div class="modal-bg" id="receiptModalBg" role="dialog" aria-modal="true">
+        <div class="modal receipt-modal">
+            <h2>Hóa đơn thanh toán</h2>
+            <div class="receipt-wrap" id="receiptPrintArea">
+                <div id="receiptContent" class="receipt"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeReceiptModal()">Đóng</button>
+                <button class="btn btn-primary" onclick="printReceipt()"><i data-lucide="printer" style="width:16px"></i> In hóa đơn</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PHIẾU KẾT CA -->
+    <div class="modal-bg" id="shiftReportModalBg" role="dialog" aria-modal="true">
+        <div class="modal receipt-modal">
+            <h2>Phiếu kết ca bán hàng</h2>
+            <div class="receipt-wrap" id="shiftPrintArea">
+                <div id="shiftReportContent" class="receipt shift-report"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeShiftReportModal()">Đóng</button>
+                <button class="btn btn-primary" onclick="printShiftReport()"><i data-lucide="printer" style="width:16px"></i> In kết ca</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL THANH TOÁN QR -->
+    <div class="modal-bg" id="qrPaymentModalBg" role="dialog" aria-modal="true">
+        <div class="modal receipt-modal">
+            <h2>Thanh toán bằng mã QR</h2>
+            <div class="qr-payment">
+                <div class="qr-box">
+                    <img id="qrPaymentImage" alt="Mã QR thanh toán" onerror="this.style.display='none'; document.getElementById('qrFallback').style.display='block';">
+                    <div id="qrFallback" style="display:none; text-align:center; color:#64748b; line-height:1.5;">
+                        Không tải được QR.<br>Vui lòng kiểm tra mạng hoặc nhập chuyển khoản thủ công.
+                    </div>
+                </div>
+                <div class="qr-info">
+                    <div class="qr-info-row"><span>Số hóa đơn</span><strong id="qrInvoiceId">-</strong></div>
+                    <div class="qr-info-row"><span>Số tiền</span><strong id="qrAmount">0 ₫</strong></div>
+                    <div class="qr-info-row"><span>Nội dung</span><strong id="qrContent">-</strong></div>
+                    <div class="qr-note">
+                        Khách quét mã để thanh toán đúng số tiền. Sau khi kiểm tra giao dịch thành công, nhân viên bấm xác nhận để xuất hóa đơn.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="cancelQrPayment()">Hủy</button>
+                <button class="btn btn-primary" onclick="confirmQrPayment()"><i data-lucide="check-circle" style="width:16px"></i> Xác nhận đã thanh toán</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CHỌN SẢN PHẨM TỪ KHO -->
+    <div class="modal-bg" id="stockPickerModalBg" role="dialog" aria-modal="true">
+        <div class="modal receipt-modal">
+            <h2>Chọn sản phẩm từ kho</h2>
+            <div style="padding:18px 24px 8px">
+                <div class="input-wrap">
+                    <i data-lucide="search"></i>
+                    <input id="stockPickerSearch" class="input icon" placeholder="Tìm theo SKU hoặc tên sản phẩm..." oninput="renderStockPicker()">
+                </div>
+            </div>
+            <div style="padding:0 24px 20px; max-height:55vh; overflow:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Giá bán</th>
+                            <th>Tồn</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="stockPickerBody"></tbody>
+                </table>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeStockPicker()">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+   
+    <div id="toast" role="status" aria-live="polite">
+        <i data-lucide="check-circle" style="width:18px;color:#6ee7b7"></i>
+        <span id="toastText">Đã cập nhật thành công</span>
+    </div>
+
+    <script src="js/ung-dung.js?v=20261020-2"></script>
+</body>
+</html>
