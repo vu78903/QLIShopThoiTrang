@@ -15,6 +15,10 @@ Khong sua file SQL de thay doi du lieu dang chay. Them, sua, xoa du lieu qua for
 
 API doc chuoi ket noi tu bien moi truong `YODYSTORE_CONNECTION_STRING`.
 
+Anh san pham duoc luu trong Supabase Storage bucket `product-images`; cot
+`SanPham.HinhAnh` chi luu URL public. Chay `CAU_HINH_STORAGE_SUPABASE.ps1`
+mot lan de dat `SUPABASE_SERVICE_ROLE_KEY` tren may. Khong commit khoa nay len GitHub.
+
 Trong PowerShell:
 
 ```powershell

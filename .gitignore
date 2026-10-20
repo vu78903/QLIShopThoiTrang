@@ -98,6 +98,9 @@ StyleCopReport.xml
 *.tmp_proj
 *_wpftmp.csproj
 *.log
+**/appsettings.Local.json
+.env
+.env.*
 *.tlog
 *.vspscc
 *.vssscc

@@ -1,0 +1,18 @@
+CAU HINH ANH SAN PHAM TREN SUPABASE STORAGE
+
+1. API dung bucket public co ten: product-images
+2. API tu tao bucket trong lan upload dau tien bang service_role key.
+3. Dat hai bien moi truong trong PowerShell (thay gia tri that):
+
+[Environment]::SetEnvironmentVariable("SUPABASE_URL", "https://PROJECT_REF.supabase.co", "User")
+[Environment]::SetEnvironmentVariable("SUPABASE_SERVICE_ROLE_KEY", "SERVICE_ROLE_KEY", "User")
+
+4. Tat va mo lai Visual Studio sau khi dat bien moi truong.
+
+Lay SERVICE_ROLE_KEY tai Supabase Dashboard:
+Project Settings > API Keys > Legacy API Keys > service_role.
+
+Bao mat:
+- Khong dua service_role key vao GitHub, WinForms JavaScript hoac website.
+- Chi API backend duoc phep doc key nay.
+- Cot SanPham.HinhAnh se luu URL public; file anh nam trong Supabase Storage.

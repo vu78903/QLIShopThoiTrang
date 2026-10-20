@@ -10,6 +10,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddSingleton<SqlServerConnectionFactory>();
 builder.Services.AddSingleton<SqlServerDatabaseInitializer>();
+builder.Services.AddHttpClient();
 builder.Services.AddSingleton<ProductImageStorage>();
 builder.Services.AddScoped<StoreRepository>();
 
@@ -69,7 +70,7 @@ app.MapPost("/api/san-pham", async (ProductUpsertDto input, StoreRepository stor
         var savedProduct = input with { Image = savedImage };
         await store.SaveProductAsync(savedProduct);
         if (!string.Equals(oldImage, savedImage, StringComparison.OrdinalIgnoreCase))
-            images.DeleteManagedFile(oldImage);
+            await images.DeleteManagedFileAsync(oldImage);
         return Results.Ok(savedProduct);
     }
     catch (Exception ex)
@@ -103,7 +104,7 @@ app.MapDelete("/api/san-pham/{sku}", async (string sku, StoreRepository store, P
     {
         var image = await store.GetProductImageAsync(sku);
         if (!await store.DeleteProductAsync(sku)) return Results.NotFound();
-        images.DeleteManagedFile(image);
+        await images.DeleteManagedFileAsync(image);
         return Results.NoContent();
     }
     catch (InvalidOperationException ex)
