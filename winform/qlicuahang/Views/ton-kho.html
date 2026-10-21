@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Báo cáo thống kê - Y-Fashion ERP</title>
+    <title>Tồn kho - Y-Fashion ERP</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
-    <link rel="stylesheet" href="css/giao-dien.css?v=20261017-1">
+    <link rel="stylesheet" href="../css/giao-dien.css?v=20261016-5">
 </head>
-<body data-view="report">
+<body data-view="inventory">
     <div class="shell">
         <aside class="side" aria-label="Điều hướng chính">
             <div class="brand">Y</div>
@@ -45,60 +45,70 @@
             </header>
 
             <main>
-                <section class="view active" id="view-report">
+                <section class="view active" id="view-inventory">
                     <div class="page-head">
                         <div>
-                            <h1>Báo cáo & Thống kê</h1>
-                            <p>Doanh thu theo ngày trong 30 ngày gần nhất</p>
+                            <h1>Tồn kho & Kiểm kê</h1>
+                            <p>Theo dõi tồn lượng thực tế và tạo phiếu nhập kho chờ duyệt</p>
                         </div>
-                        <div class="report-date-actions">
-                            <label class="report-date-filter" for="reportDate">
-                                <span>Ngày báo cáo</span>
-                                <input id="reportDate" class="input" type="date" onchange="renderReport()">
-                            </label>
-                            <button class="icon-button" type="button" title="Ngày trước" onclick="changeReportDate(-1)"><i data-lucide="chevron-left"></i></button>
-                            <button class="btn btn-secondary" onclick="setReportToday()">Hôm nay</button>
-                            <button class="icon-button" type="button" title="Ngày sau" onclick="changeReportDate(1)"><i data-lucide="chevron-right"></i></button>
-                            <button class="btn btn-primary" onclick="openShiftReportModal()"><i data-lucide="printer" style="width:16px"></i> In kết ca</button>
+                        <div class="actions">
+                            <button class="btn btn-primary" type="button" onclick="openAddImportRequest()"><i data-lucide="file-plus-2" style="width:16px"></i> Tạo phiếu nhập kho</button>
                         </div>
                     </div>
                     <div class="kpis">
-                        <section class="card kpi">
-                            <p>Doanh thu ngày</p>
-                            <strong id="reportDayRevenue">0 ₫</strong>
-                            <span id="reportDayOrders">0 hóa đơn</span>
-                        </section>
-                        <section class="card kpi">
-                            <p>Sản phẩm đã bán</p>
-                            <strong id="reportDayItems">0 SP</strong>
-                            <span>Theo hóa đơn thành công</span>
-                        </section>
-                        <section class="card kpi">
-                            <p>Đơn COD hoàn tất</p>
-                            <strong id="reportDayCod">0 đơn</strong>
-                            <span>Đã giao thành công</span>
-                        </section>
-                        <section class="card kpi">
-                            <p>Doanh thu 30 ngày</p>
-                            <strong id="reportMonthRevenue">0 ₫</strong>
-                            <span>Trong phạm vi lưu báo cáo</span>
-                        </section>
+                        <article class="card kpi"><p>Tổng tồn kho</p><strong id="invTotalQty">0 sp</strong></article>
+                        <article class="card kpi"><p>Giá trị tồn bán</p><strong id="invTotalCost">0 ₫</strong></article>
+                        <article class="card kpi"><p>Cảnh báo sắp hết</p><strong style="color:#dc2626" id="invLowStock">0 SKU</strong></article>
+                        <article class="card kpi"><p>Mặt hàng kinh doanh</p><strong id="invTotalSku">0 SKU</strong></article>
                     </div>
-                    <div class="report-empty hidden" id="reportEmptyState">
-                        <i data-lucide="calendar-x"></i>
-                        <span>Không có hóa đơn đã thanh toán trong ngày này.</span>
+                    <div class="card pad" style="margin-top:16px">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                            <strong>Danh sách tồn kho</strong>
+                            <span class="badge amber">Dưới 10 sẽ báo sắp hết</span>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>SKU</th>
+                                        <th>Tên sản phẩm</th>
+                                        <th>Loại</th>
+                                        <th>Giá bán</th>
+                                        <th>Tồn hiện tại</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventoryBody"></tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="charts">
-                        <section class="card chartbox">
-                            <h2 style="font-size:16px;margin:0 0 10px">Doanh thu 30 ngày gần nhất</h2>
-                            <canvas id="revenueChart"></canvas>
-                        </section>
-                        <section class="card chartbox">
-                            <h2 style="font-size:16px;margin:0 0 10px">Top sản phẩm theo ngày chọn</h2>
-                            <canvas id="topChart"></canvas>
-                        </section>
+                    <div class="card pad" style="margin-top:16px">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                            <strong>Phiếu nhập kho</strong>
+                            <span class="badge blue">Cửa hàng trưởng duyệt mới cộng tồn</span>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã phiếu</th>
+                                        <th>Nhà cung cấp</th>
+                                        <th>Sản phẩm</th>
+                                        <th>Số lượng nhập</th>
+                                        <th>Người tạo</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Trạng thái</th>
+                                        <th>Ghi chú</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="importRequestBody"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </section>
+
+                <!-- 7. MÀN HÌNH KHUYẾN MÃI -->
             </main>
         </div>
     </div>
@@ -205,6 +215,6 @@
         <span id="toastText">Đã cập nhật thành công</span>
     </div>
 
-    <script src="js/ung-dung.js?v=20261020-2"></script>
+    <script src="../js/ung-dung.js?v=20261020-2"></script>
 </body>
 </html>

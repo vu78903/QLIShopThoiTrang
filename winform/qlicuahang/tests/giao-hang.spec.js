@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { pathToFileURL } from "url";
 import path from "path";
 
-const root = process.cwd();
+const root = path.join(process.cwd(), "Views");
 
 const appState = {
   productsData: [{ sku: "SP-001", name: "Áo polo", type: "Áo", color: "Xanh", size: "L", unit: "Cái", price: 200000, stock: 12 }],

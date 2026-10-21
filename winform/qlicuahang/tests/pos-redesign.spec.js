@@ -3,7 +3,7 @@ import { pathToFileURL } from "url";
 import path from "path";
 
 test("luồng khách hàng, giỏ hàng, VAT và xem lại hóa đơn", async ({ page }) => {
-  await page.goto(pathToFileURL(path.join(process.cwd(), "ban-hang.html")).href);
+  await page.goto(pathToFileURL(path.join(process.cwd(), "Views", "ban-hang.html")).href);
 
   await expect(page.locator("#saleProductFieldset")).toBeDisabled();
   await page.getByRole("button", { name: "Bỏ qua, bán cho khách lẻ" }).click();

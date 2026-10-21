@@ -21,7 +21,7 @@ public partial class formGiaoHang : Form
         Controls.Add(webView);
         await webView.EnsureCoreWebView2Async(null);
 
-        string fileHtml = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "giao-hang.html");
+        string fileHtml = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Views", "giao-hang.html");
         if (File.Exists(fileHtml)) webView.CoreWebView2.Navigate(fileHtml);
     }
 }

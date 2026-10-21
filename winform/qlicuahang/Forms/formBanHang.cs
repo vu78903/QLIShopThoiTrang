@@ -3,39 +3,39 @@ using System.IO;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.WinForms;
 
-namespace qlicuahang 
+namespace qlicuahang
 {
-    public partial class formNhapHang : Form 
+    public partial class formBanHang : Form
     {
-        // Tạm thời dùng màn hình tồn kho để phục vụ phần nhập hàng/quản lý kho.
+        // WebView2 dùng để nhúng giao diện HTML vào trong WinForms.
         private WebView2 webView = null!;
 
-        public formNhapHang()
+        public formBanHang()
         {
             InitializeComponent();
             this.WindowState = FormWindowState.Normal;
-            this.Size = new Size(1300, 780);
+            this.Size = new Size(2500, 1460);
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.Load += formNhapHang_Load;
+            this.Load += FormBanHang_Load;
         }
 
-        private async void formNhapHang_Load(object? sender, EventArgs e)
+        private async void FormBanHang_Load(object? sender, EventArgs e)
         {
-            // Load giao diện web rồi chuyển sang view kho.
+            // Tạo trình duyệt nội bộ rồi mở thẳng trang bán hàng.
             webView = new WebView2 { Dock = DockStyle.Fill };
             this.Controls.Add(webView);
 
             await webView.EnsureCoreWebView2Async(null);
 
-            string fileHtml = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ton-kho.html");
+            string fileHtml = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Views", "ban-hang.html");
             if (File.Exists(fileHtml))
             {
                 webView.CoreWebView2.Navigate(fileHtml);
 
+                // Sau khi web load xong, tự chuyển sang màn hình bán hàng.
                 webView.NavigationCompleted += (s, args) =>
                 {
-                    // Hiện tại nhập hàng đang dùng chung màn hình tồn kho.
-                    webView.CoreWebView2.ExecuteScriptAsync("showView('inventory');");
+                    webView.CoreWebView2.ExecuteScriptAsync("showView('pos');");
                 };
             }
         }

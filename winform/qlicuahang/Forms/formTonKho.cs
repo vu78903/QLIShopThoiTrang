@@ -5,37 +5,37 @@ using Microsoft.Web.WebView2.WinForms;
 
 namespace qlicuahang 
 {
-    public partial class formQLDoiTac : Form 
+    public partial class formTonKho : Form
     {
-        // Form riêng để mở nhanh màn hình khách hàng, nhà cung cấp, nhân viên.
+        // Form riêng để mở nhanh màn hình tồn kho.
         private WebView2 webView = null!;
 
-        public formQLDoiTac()
+        public formTonKho()
         {
             InitializeComponent();
             this.WindowState = FormWindowState.Normal;
             this.Size = new Size(1300, 780);
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.Load += formQLDoiTac_Load;
+            this.Load += FormTonKho_Load;
         }
 
-        private async void formQLDoiTac_Load(object? sender, EventArgs e)
+        private async void FormTonKho_Load(object? sender, EventArgs e)
         {
-            // Load trang đối tác.
+            // Load giao diện web rồi chuyển sang phần tồn kho.
             webView = new WebView2 { Dock = DockStyle.Fill };
             this.Controls.Add(webView);
 
             await webView.EnsureCoreWebView2Async(null);
 
-            string fileHtml = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "doi-tac.html");
+            string fileHtml = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Views", "ton-kho.html");
             if (File.Exists(fileHtml))
             {
                 webView.CoreWebView2.Navigate(fileHtml);
 
                 webView.NavigationCompleted += (s, args) =>
                 {
-                    // Vào thẳng màn hình quản lý đối tác.
-                    webView.CoreWebView2.ExecuteScriptAsync("showView('partners');");
+                    // Vào thẳng màn hình tồn kho.
+                    webView.CoreWebView2.ExecuteScriptAsync("showView('inventory');");
                 };
             }
         }

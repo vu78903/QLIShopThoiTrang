@@ -27,7 +27,7 @@ namespace qlicuahang
 
             await webView.EnsureCoreWebView2Async(null);
 
-            string fileHtml = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "san-pham.html");
+            string fileHtml = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Views", "san-pham.html");
             if (File.Exists(fileHtml))
             {
                 webView.CoreWebView2.Navigate(fileHtml);

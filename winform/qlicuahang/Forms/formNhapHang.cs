@@ -5,37 +5,37 @@ using Microsoft.Web.WebView2.WinForms;
 
 namespace qlicuahang 
 {
-    public partial class formKhuyenMai : Form 
+    public partial class formNhapHang : Form 
     {
-        // Form riêng để mở nhanh màn hình mã khuyến mãi.
+        // Tạm thời dùng màn hình tồn kho để phục vụ phần nhập hàng/quản lý kho.
         private WebView2 webView = null!;
 
-        public formKhuyenMai()
+        public formNhapHang()
         {
             InitializeComponent();
             this.WindowState = FormWindowState.Normal;
             this.Size = new Size(1300, 780);
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.Load += formKhuyenMai_Load;
+            this.Load += formNhapHang_Load;
         }
 
-        private async void formKhuyenMai_Load(object? sender, EventArgs e)
+        private async void formNhapHang_Load(object? sender, EventArgs e)
         {
-            // Load giao diện web rồi chuyển sang phần voucher/khuyến mãi.
+            // Load giao diện web rồi chuyển sang view kho.
             webView = new WebView2 { Dock = DockStyle.Fill };
             this.Controls.Add(webView);
 
             await webView.EnsureCoreWebView2Async(null);
 
-            string fileHtml = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "khuyen-mai.html");
+            string fileHtml = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Views", "ton-kho.html");
             if (File.Exists(fileHtml))
             {
                 webView.CoreWebView2.Navigate(fileHtml);
 
                 webView.NavigationCompleted += (s, args) =>
                 {
-                    // Vào thẳng màn hình khuyến mãi.
-                    webView.CoreWebView2.ExecuteScriptAsync("showView('promotions');");
+                    // Hiện tại nhập hàng đang dùng chung màn hình tồn kho.
+                    webView.CoreWebView2.ExecuteScriptAsync("showView('inventory');");
                 };
             }
         }

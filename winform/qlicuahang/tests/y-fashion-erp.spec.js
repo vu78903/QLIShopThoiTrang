@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { pathToFileURL } from "url";
 import path from "path";
 
-const root = process.cwd();
+const root = path.join(process.cwd(), "Views");
 const stateKey = "y_fashion_erp_state_v1";
 
 function fileUrl(fileName) {

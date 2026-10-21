@@ -3,39 +3,39 @@ using System.IO;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.WinForms;
 
-namespace qlicuahang 
+namespace qlicuahang
 {
-    public partial class formTonKho : Form
+    public partial class formCOD : Form
     {
-        // Form riêng để mở nhanh màn hình tồn kho.
+        // Form này chỉ là vỏ WinForms, nội dung thật nằm trong trang giao hàng COD.
         private WebView2 webView = null!;
 
-        public formTonKho()
+        public formCOD()
         {
             InitializeComponent();
             this.WindowState = FormWindowState.Normal;
             this.Size = new Size(1300, 780);
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.Load += FormTonKho_Load;
+            this.Load += FormCOD_Load;
         }
 
-        private async void FormTonKho_Load(object? sender, EventArgs e)
+        private async void FormCOD_Load(object? sender, EventArgs e)
         {
-            // Load giao diện web rồi chuyển sang phần tồn kho.
+            // Mở giao diện web và đưa người dùng thẳng tới màn hình COD.
             webView = new WebView2 { Dock = DockStyle.Fill };
             this.Controls.Add(webView);
 
             await webView.EnsureCoreWebView2Async(null);
 
-            string fileHtml = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ton-kho.html");
+            string fileHtml = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Views", "giao-hang-cod.html");
             if (File.Exists(fileHtml))
             {
                 webView.CoreWebView2.Navigate(fileHtml);
 
+                // Tự chuyển sang màn hình xử lý đơn giao hàng COD.
                 webView.NavigationCompleted += (s, args) =>
                 {
-                    // Vào thẳng màn hình tồn kho.
-                    webView.CoreWebView2.ExecuteScriptAsync("showView('inventory');");
+                    webView.CoreWebView2.ExecuteScriptAsync("showView('cod');");
                 };
             }
         }

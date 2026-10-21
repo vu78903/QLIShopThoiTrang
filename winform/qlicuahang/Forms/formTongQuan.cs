@@ -53,7 +53,7 @@ namespace qlicuahang
                     }
                 };
 
-                string fileHtml = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bao-cao.html");
+                string fileHtml = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Views", "bao-cao.html");
                 if (File.Exists(fileHtml))
                 {
                     webView.CoreWebView2.Navigate(fileHtml);

@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tồn kho - Y-Fashion ERP</title>
+    <title>Quản lý sản phẩm - Y-Fashion ERP</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
-    <link rel="stylesheet" href="css/giao-dien.css?v=20261016-5">
+    <link rel="stylesheet" href="../css/giao-dien.css?v=20261016-5">
 </head>
-<body data-view="inventory">
+<body data-view="products">
     <div class="shell">
         <aside class="side" aria-label="Điều hướng chính">
             <div class="brand">Y</div>
@@ -45,70 +45,41 @@
             </header>
 
             <main>
-                <section class="view active" id="view-inventory">
+                <section class="view active" id="view-products">
                     <div class="page-head">
                         <div>
-                            <h1>Tồn kho & Kiểm kê</h1>
-                            <p>Theo dõi tồn lượng thực tế và tạo phiếu nhập kho chờ duyệt</p>
+                            <h1>Danh mục & Sản phẩm</h1>
+                            <p>Quản lý danh sách mặt hàng thời trang Yody</p>
                         </div>
                         <div class="actions">
-                            <button class="btn btn-primary" type="button" onclick="openAddImportRequest()"><i data-lucide="file-plus-2" style="width:16px"></i> Tạo phiếu nhập kho</button>
+                            <button class="btn btn-secondary" onclick="openProductImport()"><i data-lucide="file-up" style="width:16px"></i> Nhập Excel/CSV</button>
+                            <button class="btn btn-secondary" onclick="showView('product-types')"><i data-lucide="tags" style="width:16px"></i> Loại sản phẩm</button>
+                            <button class="btn btn-primary" onclick="openAddProduct()"><i data-lucide="plus" style="width:16px"></i> Thêm Sản phẩm</button>
+                            <input id="productImportFile" type="file" accept=".csv,.xlsx,.xls" style="display:none" onchange="importProductsFile(event)">
                         </div>
                     </div>
-                    <div class="kpis">
-                        <article class="card kpi"><p>Tổng tồn kho</p><strong id="invTotalQty">0 sp</strong></article>
-                        <article class="card kpi"><p>Giá trị tồn bán</p><strong id="invTotalCost">0 ₫</strong></article>
-                        <article class="card kpi"><p>Cảnh báo sắp hết</p><strong style="color:#dc2626" id="invLowStock">0 SKU</strong></article>
-                        <article class="card kpi"><p>Mặt hàng kinh doanh</p><strong id="invTotalSku">0 SKU</strong></article>
-                    </div>
-                    <div class="card pad" style="margin-top:16px">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-                            <strong>Danh sách tồn kho</strong>
-                            <span class="badge amber">Dưới 10 sẽ báo sắp hết</span>
-                        </div>
+                    <div class="card pad">
                         <div class="table-wrap">
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>SKU</th>
+                                        <th>Hình ảnh</th>
+                                        <th>Mã SKU</th>
                                         <th>Tên sản phẩm</th>
-                                        <th>Loại</th>
+                                        <th>Loại sản phẩm</th>
+                                        <th>Màu sắc</th>
                                         <th>Giá bán</th>
-                                        <th>Tồn hiện tại</th>
-                                        <th>Trạng thái</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="inventoryBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="card pad" style="margin-top:16px">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-                            <strong>Phiếu nhập kho</strong>
-                            <span class="badge blue">Cửa hàng trưởng duyệt mới cộng tồn</span>
-                        </div>
-                        <div class="table-wrap">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Mã phiếu</th>
-                                        <th>Nhà cung cấp</th>
-                                        <th>Sản phẩm</th>
-                                        <th>Số lượng nhập</th>
-                                        <th>Người tạo</th>
-                                        <th>Ngày tạo</th>
-                                        <th>Trạng thái</th>
-                                        <th>Ghi chú</th>
+                                        <th>Tồn kho</th>
                                         <th>Thao tác</th>
                                     </tr>
                                 </thead>
-                                <tbody id="importRequestBody"></tbody>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
                 </section>
 
-                <!-- 7. MÀN HÌNH KHUYẾN MÃI -->
+                <!-- 5. MÀN HÌNH LOẠI SẢN PHẨM -->
             </main>
         </div>
     </div>
@@ -215,6 +186,6 @@
         <span id="toastText">Đã cập nhật thành công</span>
     </div>
 
-    <script src="js/ung-dung.js?v=20261020-2"></script>
+    <script src="../js/ung-dung.js?v=20261020-2"></script>
 </body>
 </html>

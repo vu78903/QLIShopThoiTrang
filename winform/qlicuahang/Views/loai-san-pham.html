@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Khuyến mãi - Y-Fashion ERP</title>
+    <title>Loại sản phẩm - Y-Fashion ERP</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
-    <link rel="stylesheet" href="css/giao-dien.css?v=20261016-5">
+    <link rel="stylesheet" href="../css/giao-dien.css?v=20261016-5">
 </head>
-<body data-view="promotions">
+<body data-view="product-types">
     <div class="shell">
         <aside class="side" aria-label="Điều hướng chính">
             <div class="brand">Y</div>
@@ -45,35 +45,35 @@
             </header>
 
             <main>
-                <section class="view active" id="view-promotions">
+                <section class="view active" id="view-product-types">
                     <div class="page-head">
                         <div>
-                            <h1>Voucher & Khuyến mãi</h1>
-                            <p>Quản lý mã giảm giá áp dụng tại POS</p>
+                            <h1>Loại sản phẩm</h1>
+                            <p>Quản lý mã loại và tên loại dùng cho danh mục sản phẩm</p>
                         </div>
-                        <button class="btn btn-primary" onclick="openAddPromotion()"><i data-lucide="plus" style="width:16px"></i> Thêm voucher</button>
+                        <div class="actions">
+                            <button class="btn btn-secondary" onclick="showView('products')"><i data-lucide="shirt" style="width:16px"></i> Quay lại sản phẩm</button>
+                            <button class="btn btn-primary" onclick="openAddProductType()"><i data-lucide="plus" style="width:16px"></i> Thêm loại</button>
+                        </div>
                     </div>
                     <div class="card pad">
                         <div class="table-wrap">
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>Mã khuyến mãi</th>
-                                        <th>% giảm</th>
-                                        <th>Ngày bắt đầu</th>
-                                        <th>Ngày kết thúc</th>
-                                        <th>Điều kiện</th>
-                                        <th>Trạng thái</th>
+                                        <th>Mã loại</th>
+                                        <th>Tên loại</th>
+                                        <th>Số sản phẩm</th>
                                         <th>Thao tác</th>
                                     </tr>
                                 </thead>
-                                <tbody id="promotionBody"></tbody>
+                                <tbody id="productTypeBody"></tbody>
                             </table>
                         </div>
                     </div>
                 </section>
 
-                <!-- 8. MÀN HÌNH BÁO CÁO TỔNG QUAN -->
+                <!-- 6. MÀN HÌNH TỒN KHO -->
             </main>
         </div>
     </div>
@@ -180,6 +180,6 @@
         <span id="toastText">Đã cập nhật thành công</span>
     </div>
 
-    <script src="js/ung-dung.js?v=20261020-2"></script>
+    <script src="../js/ung-dung.js?v=20261020-2"></script>
 </body>
 </html>

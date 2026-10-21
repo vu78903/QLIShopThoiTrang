@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Yody</title>
+    <style>
+        * { box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; margin: 0; }
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: #12233c;
+            background: #dfe6ee;
+            display: grid;
+            place-items: center;
+            overflow: auto;
+        }
+        .shell {
+            width: min(1040px, calc(100vw - 36px));
+            min-width: 820px;
+            height: min(652px, calc(100vh - 28px));
+            min-height: 520px;
+            display: grid;
+            grid-template-columns: 42% 58%;
+            background: #eef2f6;
+            border: 1px solid #c5d0dc;
+            box-shadow: 0 22px 55px rgba(18, 35, 60, .2);
+        }
+        .brand {
+            position: relative;
+            padding: 54px 48px;
+            background: #102844;
+            color: #f5f8fb;
+            display: flex;
+            flex-direction: column;
+        }
+        .brand::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 9px;
+            background: #f5a000;
+        }
+        .logo {
+            display: flex;
+            align-items: baseline;
+            font-size: 52px;
+            line-height: 1;
+            font-weight: 800;
+            letter-spacing: 0;
+        }
+        .logo-main { color: #f5f8fb; }
+        .logo-accent { color: #f5a000; }
+        .brand-kicker {
+            margin-top: 18px;
+            color: #f5a000;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .brand h2 {
+            margin: 72px 0 14px;
+            max-width: 280px;
+            font-size: 30px;
+            line-height: 1.25;
+            letter-spacing: 0;
+        }
+        .brand p {
+            margin: 0;
+            max-width: 290px;
+            color: #bdc9d6;
+            font-size: 15px;
+            line-height: 1.65;
+        }
+        .branch {
+            margin-top: auto;
+            color: #e6edf5;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .login-area {
+            padding: 58px 72px 48px;
+            background: #f4f6f8;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .eyebrow {
+            margin: 0 0 8px;
+            color: #61728a;
+            font-size: 13px;
+            font-weight: 650;
+            text-transform: uppercase;
+        }
+        h1 {
+            margin: 0 0 42px;
+            font-size: 35px;
+            line-height: 1.25;
+            letter-spacing: 0;
+            color: #102844;
+        }
+        .field { margin-bottom: 28px; }
+        label {
+            display: block;
+            margin-bottom: 9px;
+            color: #243750;
+            font-size: 15px;
+            font-weight: 700;
+        }
+        .input-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #9aabbc;
+            transition: border-color .18s ease;
+        }
+        .input-line:focus-within { border-color: #1769d2; }
+        input {
+            width: 100%;
+            height: 46px;
+            padding: 0;
+            border: 0;
+            outline: 0;
+            background: transparent;
+            color: #12233c;
+            font: inherit;
+            font-size: 17px;
+        }
+        input::placeholder { color: #8a98a9; }
+        .toggle-password {
+            width: 52px;
+            padding: 8px 0;
+            border: 0;
+            background: transparent;
+            color: #52657d;
+            cursor: pointer;
+            font-weight: 650;
+        }
+        .error {
+            min-height: 22px;
+            margin: -8px 0 15px;
+            color: #b42318;
+            font-size: 14px;
+        }
+        .login-button {
+            width: 100%;
+            height: 52px;
+            border: 0;
+            background: #102844;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 750;
+            text-transform: uppercase;
+        }
+        .login-button:hover { background: #183b62; }
+        .login-button:focus-visible { outline: 3px solid #f5a000; outline-offset: 3px; }
+        .login-button:disabled { cursor: wait; opacity: .65; }
+        .support {
+            margin: 20px 0 0;
+            color: #6b7b8f;
+            font-size: 13px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <section class="brand" aria-label="Thông tin cửa hàng">
+            <div class="logo" aria-label="Yody"><span class="logo-main">yo</span><span class="logo-accent">dy</span></div>
+            <div class="brand-kicker">POS Management System</div>
+            <h2>Quản lý cửa hàng thời trang Yody</h2>
+            <p>Không gian làm việc dành cho nhân viên bán hàng, kho và quản lý cửa hàng.</p>
+            <div class="branch"><strong>Chi nhánh Tân Sơn Nhì</strong><br>304 Tân Sơn Nhì, Quận Tân Phú, TP.HCM</div>
+        </section>
+
+        <section class="login-area">
+            <p class="eyebrow">Hệ thống nội bộ Yody</p>
+            <h1>Đăng nhập hệ thống</h1>
+            <form id="loginForm" novalidate>
+                <div class="field">
+                    <label for="username">Tên tài khoản</label>
+                    <div class="input-line">
+                        <input id="username" name="username" autocomplete="username" placeholder="Nhập tên tài khoản" autofocus>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="password">Mật khẩu</label>
+                    <div class="input-line">
+                        <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Nhập mật khẩu">
+                        <button class="toggle-password" id="togglePassword" type="button" aria-label="Hiển thị mật khẩu">Hiện</button>
+                    </div>
+                </div>
+                <div class="error" id="errorMessage" role="alert" aria-live="polite"></div>
+                <button class="login-button" id="loginButton" type="submit">Đăng nhập</button>
+            </form>
+            <p class="support">Yody POS V2026 · Hệ thống quản lý bán hàng</p>
+        </section>
+    </main>
+
+    <script>
+        const form = document.getElementById('loginForm');
+        const username = document.getElementById('username');
+        const password = document.getElementById('password');
+        const loginButton = document.getElementById('loginButton');
+        const errorMessage = document.getElementById('errorMessage');
+        const togglePassword = document.getElementById('togglePassword');
+
+        togglePassword.addEventListener('click', () => {
+            const isPassword = password.type === 'password';
+            password.type = isPassword ? 'text' : 'password';
+            togglePassword.textContent = isPassword ? 'Ẩn' : 'Hiện';
+            togglePassword.setAttribute('aria-label', isPassword ? 'Ẩn mật khẩu' : 'Hiển thị mật khẩu');
+            password.focus();
+        });
+
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+            errorMessage.textContent = '';
+            if (!username.value.trim() || !password.value) {
+                errorMessage.textContent = 'Vui lòng nhập đầy đủ tên tài khoản và mật khẩu.';
+                (!username.value.trim() ? username : password).focus();
+                return;
+            }
+
+            setLoginBusy(true);
+            window.chrome.webview.postMessage({
+                type: 'login',
+                username: username.value.trim(),
+                password: password.value
+            });
+        });
+
+        window.setLoginBusy = busy => {
+            loginButton.disabled = busy;
+            loginButton.textContent = busy ? 'Đang đăng nhập...' : 'Đăng nhập';
+        };
+
+        window.completeLogin = (success, message) => {
+            if (!success) {
+                errorMessage.textContent = message || 'Không thể đăng nhập.';
+                password.select();
+            }
+            setLoginBusy(false);
+        };
+    </script>
+</body>
+</html>
