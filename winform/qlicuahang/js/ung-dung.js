@@ -738,16 +738,18 @@
             return today >= start && today <= end && subtotal >= (Number(promo.minOrder) || 0);
         }
 
-        // Trạng thái trên danh sách chỉ dựa vào hạn kết thúc, không phụ thuộc giá trị đơn hàng.
+        // Trạng thái trên danh sách chỉ dựa vào khoảng thời gian, không phụ thuộc giá trị đơn hàng.
         function getPromotionStatus(promo) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
+            const start = parseLocalDate(promo.startDate);
             const end = parseLocalDate(promo.endDate);
-            if (!end) return { active: false, label: "Đã hết thời hạn" };
+            if (!start || !end) return { style: "red", label: "Đã hết thời hạn" };
+            start.setHours(0, 0, 0, 0);
             end.setHours(23, 59, 59, 999);
-            return today <= end
-                ? { active: true, label: "Đang trong thời hạn" }
-                : { active: false, label: "Đã hết thời hạn" };
+            if (today < start) return { style: "blue", label: "Sắp diễn ra" };
+            if (today <= end) return { style: "green", label: "Đang trong thời hạn" };
+            return { style: "red", label: "Đã hết thời hạn" };
         }
 
         // Vẽ danh sách voucher/khuyến mãi của cửa hàng.
@@ -769,7 +771,7 @@
                         <td>${promo.startDate}</td>
                         <td>${promo.endDate}</td>
                         <td>Đơn từ ${money(Number(promo.minOrder) || 0)}</td>
-                        <td><span class="badge ${status.active ? "green" : "amber"}">${status.label}</span></td>
+                        <td><span class="badge ${status.style}">${status.label}</span></td>
                         <td>
                             <button class="icon-button" title="Chỉnh sửa" onclick="openEditPromotion(${idx})"><i data-lucide="pencil" style="width:16px"></i></button>
                             <button class="icon-button" title="Xóa" onclick="deletePromotion(${idx})"><i data-lucide="trash-2" style="width:16px;color:#ef4444"></i></button>
