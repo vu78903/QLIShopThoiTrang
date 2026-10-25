@@ -14,10 +14,12 @@
         let appliedPromotion = null;
         let lastReceipt = null;
         let pendingQrReceipt = null;
+        let pendingCardReceipt = null;
         let pendingProductImage = null;
         let deleteConfirmationResolver = null;
         let invoiceSearchTimer = null;
         let invoiceSearchRequestId = 0;
+        let productSearchTimer = null;
         let returnSearchTimer = null;
         let returnSearchRequestId = 0;
         let selectedReturnInvoice = null;
@@ -135,18 +137,42 @@
             const tbody = document.querySelector("#view-products tbody");
             if (!tbody) return;
 
+            const searchInput = document.getElementById("productSearchInput");
+            const searchText = searchInput?.value || "";
+            const filteredProducts = productsData.filter(product => matchesProductSearch(product, searchText));
+            const summary = document.getElementById("productSearchSummary");
+            const clearButton = document.getElementById("productSearchClear");
+            const isSearching = Boolean(searchText.trim());
+            if (summary) {
+                summary.textContent = isSearching
+                    ? `Tìm thấy ${filteredProducts.length}/${productsData.length} SKU`
+                    : `${productsData.length} SKU`;
+            }
+            if (clearButton) clearButton.style.display = isSearching ? "inline-flex" : "none";
+
             if (productsData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:#94a3b8;">Chưa có sản phẩm nào. Hãy bấm "+ Thêm Sản phẩm".</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:30px; color:#94a3b8;">Chưa có sản phẩm nào. Hãy bấm "+ Thêm Sản phẩm".</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = productsData.map((p, idx) => `
+            if (filteredProducts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:30px; color:#94a3b8;">Không tìm thấy sản phẩm theo Mã SP, Mã SKU hoặc tên đã nhập.</td></tr>`;
+                if (window.lucide) lucide.createIcons();
+                updateInventoryKpi();
+                return;
+            }
+
+            tbody.innerHTML = filteredProducts.map(p => {
+                const idx = productsData.indexOf(p);
+                return `
                     <tr>
                         <td>${p.image ? `<img class="product-thumb" src="${escapeHtml(productImageUrl(p.image))}" alt="Ảnh ${escapeHtml(p.name)}">` : `<span class="product-no-image"><i data-lucide="image"></i></span>`}</td>
-                        <td><strong>${p.sku}</strong></td>
-                        <td>${p.name}</td>
-                        <td><span class="badge blue">${p.type || "Chưa phân loại"}</span></td>
+                        <td><strong>${escapeHtml(p.productId || p.sku)}</strong></td>
+                        <td><strong>${escapeHtml(p.sku)}</strong></td>
+                        <td>${escapeHtml(p.name)}</td>
+                        <td><span class="badge blue">${escapeHtml(p.type || "Chưa phân loại")}</span></td>
                         <td><span class="badge">${escapeHtml(p.color || "Mặc định")}</span></td>
+                        <td><span class="badge">${escapeHtml(p.size || "Free size")}</span></td>
                         <td>${new Intl.NumberFormat('vi-VN').format(p.price)} ₫</td>
                         <td><span class="badge ${p.stock <= 0 ? 'red' : (p.stock < 10 ? 'red' : 'green')}">${p.stock}</span></td>
                         <td>
@@ -155,9 +181,37 @@
                             <button class="icon-button" title="Xóa" onclick="deleteProduct(${idx})"><i data-lucide="trash-2" style="width:16px;color:#ef4444"></i></button>
                         </td>
                     </tr>
-                `).join("");
+                `;
+            }).join("");
             if (window.lucide) lucide.createIcons();
             updateInventoryKpi();
+        }
+
+        function normalizeProductSearchText(value) {
+            return normalizeSkuText(value).replace(/[^A-Z0-9]+/g, " ").trim();
+        }
+
+        function matchesProductSearch(product, keyword) {
+            const terms = normalizeProductSearchText(keyword).split(/\s+/).filter(Boolean);
+            if (terms.length === 0) return true;
+            const searchableFields = [product.productId, product.sku, product.name]
+                .map(normalizeProductSearchText);
+            return terms.every(term => searchableFields.some(field => field.includes(term)));
+        }
+
+        function clearProductSearch() {
+            clearTimeout(productSearchTimer);
+            const input = document.getElementById("productSearchInput");
+            if (input) {
+                input.value = "";
+                input.focus();
+            }
+            renderProducts();
+        }
+
+        function scheduleProductSearch() {
+            clearTimeout(productSearchTimer);
+            productSearchTimer = setTimeout(renderProducts, 300);
         }
 
         // Đường dẫn ảnh trong database là đường dẫn tương đối do API cung cấp.
@@ -728,11 +782,107 @@
 
         // Dùng danh sách màu cố định để dữ liệu sau này lọc trên website không bị lệch tên.
         function buildProductColorOptions(selected = "") {
-            const colors = ["Đen", "Trắng", "Xám", "Đỏ", "Xanh dương", "Xanh lá", "Xanh đậm", "Vàng", "Cam", "Hồng", "Tím", "Nâu", "Be"];
+            const colors = ["Đen", "Trắng", "Xám", "Đỏ", "Xanh dương", "Xanh navy", "Xanh lá", "Xanh đậm", "Vàng", "Cam", "Hồng", "Tím", "Nâu", "Be"];
             const values = selected && !colors.includes(selected) ? [selected, ...colors] : colors;
             return `<option value="">Chọn màu sản phẩm</option>` + values.map(color =>
                 `<option value="${escapeHtml(color)}" ${selected === color ? "selected" : ""}>${escapeHtml(color)}</option>`
             ).join("");
+        }
+
+        function getProductSizes(name = "", type = "") {
+            const text = normalizeSkuText(`${name} ${type}`);
+            if (/QUAN.*(JEAN|JEANS|KAKI)|(JEAN|JEANS|KAKI).*QUAN/.test(text)) {
+                return ["28", "30", "32", "34", "36"];
+            }
+            if (/DAY NI(T|CH)/.test(text)) return ["80", "85", "90", "95", "100"];
+            if (/\bVO\b/.test(text)) return ["35-38", "39-42", "43-46"];
+            if (/\bNON\b/.test(text)) return ["S", "M", "L", "XL", "Free size"];
+            if (/PHU KIEN|MAT KINH/.test(text)) return ["Free size"];
+            return ["S", "M", "L", "XL", "XXL"];
+        }
+
+        function buildProductSizeOptions(selected = "", name = "", type = "") {
+            const sizes = getProductSizes(name, type);
+            const values = selected && !sizes.includes(selected) ? [selected, ...sizes] : sizes;
+            return `<option value="">Chọn size sản phẩm</option>` + values.map(size =>
+                `<option value="${escapeHtml(size)}" ${selected === size ? "selected" : ""}>${escapeHtml(size)}</option>`
+            ).join("");
+        }
+
+        function normalizeSkuText(value) {
+            return String(value || "")
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/đ/gi, "D").toUpperCase();
+        }
+
+        function getProductSkuCode(name) {
+            const text = normalizeSkuText(name);
+            const rules = [
+                [/HOODIE/, "HD"], [/AO THUN/, "AT"], [/SO MI/, "ASM"], [/POLO/, "AP"],
+                [/AO KHOAC/, "AK"], [/VEST/, "AV"], [/QUAN.*(JEAN|JEANS)/, "QJ"],
+                [/QUAN.*KAKI/, "QK"], [/JOGGER/, "QJG"], [/QUAN.*NGAN|SHORT/, "QN"],
+                [/VAY/, "VAY"], [/DAM/, "DAM"], [/MAT KINH/, "MK"], [/DAY NI(T|CH)/, "DN"],
+                [/NON/, "NON"], [/VO/, "VO"]
+            ];
+            const matched = rules.find(([pattern]) => pattern.test(text));
+            if (matched) return matched[1];
+            const initials = text.split(/[^A-Z0-9]+/).filter(Boolean).map(word => word[0]).join("");
+            return (initials || "SP").slice(0, 4);
+        }
+
+        function getColorSkuCode(color) {
+            const text = normalizeSkuText(color);
+            const colors = {
+                "DEN": "DEN", "TRANG": "TRANG", "XAM": "XAM", "DO": "DO", "VANG": "VANG",
+                "CAM": "CAM", "HONG": "HONG", "TIM": "TIM", "NAU": "NAU", "BE": "BE",
+                "XANH DUONG": "XANHD", "XANH LA": "XANHL", "XANH DAM": "XANHDAM", "XANH NAVY": "NAVY"
+            };
+            return colors[text] || text.replace(/[^A-Z0-9]+/g, "").slice(0, 7) || "MD";
+        }
+
+        function getSizeSkuCode(size) {
+            return normalizeSkuText(size) === "FREE SIZE" ? "FS" : normalizeSkuText(size).replace(/[^A-Z0-9]+/g, "").slice(0, 4);
+        }
+
+        function updateProductSizeOptions() {
+            const select = document.getElementById("f_size");
+            if (!select) return;
+            const current = select.value;
+            const name = document.getElementById("f_name")?.value || "";
+            const type = document.getElementById("f_type")?.value || "";
+            select.innerHTML = buildProductSizeOptions(current, name, type);
+            if (Array.from(select.options).some(option => option.value === current)) select.value = current;
+            updateGeneratedProductCodes();
+        }
+
+        function getNextProductId() {
+            const max = productsData.reduce((value, product) => {
+                const match = String(product.productId || product.sku || "").match(/^SP-(\d+)$/i);
+                return Math.max(value, match ? Number(match[1]) : 0);
+            }, 0);
+            return `SP-${String(max + 1).padStart(3, "0")}`;
+        }
+
+        function updateGeneratedProductCodes() {
+            if (crudContext.action !== "add") return;
+            const name = document.getElementById("f_name")?.value.trim() || "";
+            const type = document.getElementById("f_type")?.value.trim() || "";
+            const color = document.getElementById("f_color")?.value.trim() || "";
+            const size = document.getElementById("f_size")?.value.trim() || "";
+            const existing = productsData.find(product =>
+                String(product.name || "").trim().toLowerCase() === name.toLowerCase() &&
+                String(product.type || "").trim().toLowerCase() === type.toLowerCase());
+            const productId = existing?.productId || existing?.sku || getNextProductId();
+            const sequence = (String(productId).match(/\d+$/)?.[0] || "001").padStart(3, "0");
+            const base = `${getProductSkuCode(name)}-${sequence}-${getColorSkuCode(color)}-${getSizeSkuCode(size || "FS")}`.slice(0, 20).replace(/-+$/, "");
+            let sku = base;
+            let suffix = 2;
+            while (productsData.some(product => String(product.sku).toUpperCase() === sku.toUpperCase())) {
+                const tail = `-${suffix++}`;
+                sku = base.slice(0, 20 - tail.length).replace(/-+$/, "") + tail;
+            }
+            document.getElementById("f_product_id").value = productId;
+            document.getElementById("f_sku").value = sku;
         }
 
         // Mở form thêm sản phẩm mới.
@@ -747,19 +897,24 @@
             document.getElementById("crudModalTitle").textContent = "Thêm Sản Phẩm Mới";
             document.getElementById("crudModalFields").innerHTML = `
                     <label>Mã sản phẩm</label>
-                    <input id="f_sku" class="input" value="${generateNextCode(productsData, 'sku', 'SP')}" readonly>
+                    <input id="f_product_id" class="input" value="${getNextProductId()}" readonly>
+                    <label>Mã SKU</label>
+                    <input id="f_sku" class="input" value="" readonly>
                     <label>Tên sản phẩm</label>
-                    <input id="f_name" class="input" placeholder="Nhập tên sản phẩm">
+                    <input id="f_name" class="input" placeholder="Nhập tên sản phẩm" oninput="updateProductSizeOptions()">
                     <label>Loại sản phẩm</label>
-                    <select id="f_type" class="input">${buildProductTypeOptions()}</select>
+                    <select id="f_type" class="input" onchange="updateProductSizeOptions()">${buildProductTypeOptions()}</select>
                     <label>Màu sắc</label>
-                    <select id="f_color" class="input">${buildProductColorOptions()}</select>
+                    <select id="f_color" class="input" onchange="updateGeneratedProductCodes()">${buildProductColorOptions()}</select>
+                    <label>Size</label>
+                    <select id="f_size" class="input" onchange="updateGeneratedProductCodes()">${buildProductSizeOptions()}</select>
                     <label>Giá bán</label>
                     <input id="f_price" class="input" type="number" placeholder="Nhập giá niêm yết">
                     <label>Số lượng tồn</label>
                     <input id="f_stock" class="input" type="number" placeholder="Nhập số lượng">
                     ${buildProductImageField()}
                 `;
+            updateGeneratedProductCodes();
             document.getElementById("crudModalBg").classList.add("open");
         }
 
@@ -771,13 +926,17 @@
             document.getElementById("crudModalTitle").textContent = "Cập Nhật Sản Phẩm";
             document.getElementById("crudModalFields").innerHTML = `
                     <label>Mã sản phẩm</label>
-                    <input id="f_sku" class="input" value="${p.sku}" readonly>
+                    <input id="f_product_id" class="input" value="${escapeHtml(p.productId || p.sku)}" readonly>
+                    <label>Mã SKU</label>
+                    <input id="f_sku" class="input" value="${escapeHtml(p.sku)}" readonly>
                     <label>Tên sản phẩm</label>
                     <input id="f_name" class="input" value="${p.name}" placeholder="Tên sản phẩm">
                     <label>Loại sản phẩm</label>
                     <select id="f_type" class="input">${buildProductTypeOptions(p.type || "")}</select>
                     <label>Màu sắc</label>
                     <select id="f_color" class="input">${buildProductColorOptions(p.color || "Mặc định")}</select>
+                    <label>Size</label>
+                    <select id="f_size" class="input">${buildProductSizeOptions(p.size || "Free size", p.name, p.type)}</select>
                     <label>Giá bán</label>
                     <input id="f_price" class="input" type="number" value="${p.price}" placeholder="Giá bán">
                     <label>Số lượng tồn</label>
@@ -805,7 +964,6 @@
                             <i data-lucide="trash-2" style="width:16px"></i> Xóa ảnh
                         </button>
                     </div>
-                    <small>PNG, JPG hoặc WEBP, tối đa 2 MB.</small>
                 </div>`;
         }
 
@@ -951,7 +1109,6 @@
         function getPartnerFormMeta(category) {
             const meta = {
                 "Khách hàng": {
-                    note: "Hạng thẻ sẽ tự nâng theo tổng chi tiêu: Bạc mặc định, Vàng trên 5 triệu, Kim Cương trên 15 triệu.",
                     idLabel: "Mã khách hàng",
                     idPlaceholder: "VD: KH-001",
                     nameLabel: "Tên khách hàng",
@@ -966,7 +1123,6 @@
                     rolePlaceholder: "Hệ thống tự tính"
                 },
                 "Nhà cung cấp": {
-                    note: "Thông tin dành riêng cho xưởng may, công ty hoặc đầu mối cung ứng.",
                     idLabel: "Mã nhà cung cấp",
                     idPlaceholder: "VD: NCC-001",
                     nameLabel: "Tên nhà cung cấp / xưởng",
@@ -979,7 +1135,6 @@
                     addressPlaceholder: "Nhập địa chỉ xưởng / công ty"
                 },
                 "Nhân viên": {
-                    note: "Thông tin dành riêng cho nhân sự cửa hàng và phân quyền nội bộ.",
                     idLabel: "Mã nhân viên",
                     idPlaceholder: "VD: NV-001",
                     nameLabel: "Họ tên nhân viên",
@@ -1023,7 +1178,6 @@
                         <option value="Nhà cung cấp" ${category === 'Nhà cung cấp' ? 'selected' : ''}>Nhà cung cấp (Xưởng may)</option>
                         <option value="Nhân viên" ${category === 'Nhân viên' ? 'selected' : ''}>Nhân viên</option>
                     </select>
-                    <p class="partner-form-note">${meta.note}</p>
                     <label>${meta.idLabel}</label>
                     <input id="p_id" class="input" value="${idValue}" placeholder="${meta.idPlaceholder}" readonly>
                     <label>${meta.nameLabel}</label>
@@ -1140,7 +1294,6 @@
                 <input id="km_end" class="input" type="date" value="${data.endDate || ""}">
                 <label>Điều kiện khuyến mãi</label>
                 <input id="km_min_order" class="input" type="number" min="0" value="${data.minOrder || 0}" placeholder="Giá trị đơn tối thiểu">
-                <p class="partner-form-note">Điều kiện hiện tại: đơn hàng phải đạt giá trị tối thiểu mới được áp mã.</p>
             `;
         }
 
@@ -1240,14 +1393,16 @@
         async function saveCrudData() {
             if (crudContext.target === 'product') {
                 const sku = document.getElementById("f_sku").value.trim();
+                const productId = document.getElementById("f_product_id").value.trim();
                 const name = document.getElementById("f_name").value.trim();
                 const type = document.getElementById("f_type").value.trim();
                 const color = document.getElementById("f_color").value.trim();
+                const size = document.getElementById("f_size").value.trim();
                 const price = Number(document.getElementById("f_price").value) || 0;
                 const stock = Number(document.getElementById("f_stock").value) || 0;
 
-                if (!sku || !name || !type || !color) {
-                    alert("Vui lòng điền đủ Mã sản phẩm, Tên sản phẩm, Loại sản phẩm và Màu sắc!");
+                if (!productId || !sku || !name || !type || !color || !size) {
+                    alert("Vui lòng điền đủ Mã sản phẩm, Tên sản phẩm, Loại sản phẩm, Màu sắc và Size!");
                     return;
                 }
 
@@ -1265,7 +1420,7 @@
                     const response = await fetch(`${API_BASE_URL}/api/san-pham`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ sku, name, type, color, price, stock, image: pendingProductImage })
+                        body: JSON.stringify({ productId, sku, name, type, color, size, price, stock, image: pendingProductImage })
                     });
                     if (!response.ok) throw new Error(await response.text());
                     await loadAppState();
@@ -1715,18 +1870,22 @@
 
         // Chuyển một dòng Excel/CSV thành sản phẩm và kiểm tra SKU, giá, tồn kho.
         function buildProductFromImportRow(row, index, existingProducts = productsData) {
-            const sku = getRowValue(row, ["sku", "masp", "masanpham", "ma", "mã", "mã sản phẩm"]);
+            const productId = getRowValue(row, ["masp", "productid", "mã sp", "mã sản phẩm"]);
+            const sku = getRowValue(row, ["masku", "sku", "mã sku"]);
             const name = getRowValue(row, ["ten", "tensp", "tensanpham", "name", "tên", "tên sản phẩm"]);
             const type = getRowValue(row, ["loai", "loaisanpham", "category", "type", "loại", "loại sản phẩm"]);
             const color = getRowValue(row, ["mau", "mausac", "color", "màu", "màu sắc"]) || "Mặc định";
+            const size = getRowValue(row, ["size", "kichco", "kích cỡ", "kíchco"]);
             const priceRaw = getRowValue(row, ["gia", "giaban", "price", "giá", "giá bán"]);
             const stockRaw = getRowValue(row, ["ton", "tonkho", "soluong", "stock", "qty", "tồn", "tồn kho", "số lượng"]);
             const price = Number(String(priceRaw).replace(/[^\d.-]/g, ""));
             const stock = Number(String(stockRaw).replace(/[^\d.-]/g, ""));
             const errors = [];
 
+            if (!/^SP-\d{3,}$/i.test(productId)) errors.push("Mã SP phải có dạng SP-023");
             if (!name) errors.push("thiếu tên sản phẩm");
             if (!type) errors.push("thiếu loại sản phẩm");
+            if (!size) errors.push("thiếu size");
             if (!priceRaw || !Number.isFinite(price) || price <= 0) errors.push("giá bán phải lớn hơn 0");
             if (!stockRaw || !Number.isInteger(stock) || stock < 0) errors.push("tồn kho phải là số nguyên không âm");
 
@@ -1734,10 +1893,12 @@
 
             return {
                 product: {
-                    sku: (sku || generateNextCode(existingProducts, "sku", "SP")).toUpperCase(),
+                    productId: productId.toUpperCase(),
+                    sku: sku ? sku.toUpperCase() : null,
                     name,
                     type,
                     color,
+                    size,
                     price,
                     stock
                 }
@@ -1768,9 +1929,18 @@
                     errors.push(result.errors);
                     return;
                 }
-                const duplicate = knownProducts.some(item => item.sku.toLowerCase() === result.product.sku.toLowerCase());
-                if (duplicate) {
-                    errors.push(`Dòng ${index + 2}: mã sản phẩm ${result.product.sku} đã tồn tại`);
+                const duplicateSku = result.product.sku && knownProducts.some(item =>
+                    String(item.sku || "").toLowerCase() === result.product.sku.toLowerCase());
+                const duplicateVariant = knownProducts.some(item =>
+                    String(item.productId || "").toLowerCase() === result.product.productId.toLowerCase() &&
+                    String(item.color || "").trim().toLowerCase() === result.product.color.trim().toLowerCase() &&
+                    String(item.size || "").trim().toLowerCase() === result.product.size.trim().toLowerCase());
+                if (duplicateSku) {
+                    errors.push(`Dòng ${index + 2}: Mã SKU ${result.product.sku} đã tồn tại`);
+                    return;
+                }
+                if (duplicateVariant) {
+                    errors.push(`Dòng ${index + 2}: biến thể ${result.product.productId} - ${result.product.color} - ${result.product.size} đã tồn tại`);
                     return;
                 }
                 imported.push(result.product);
@@ -2476,6 +2646,8 @@
                 <div class="receipt-row receipt-total"><span>TỔNG THANH TOÁN:</span><span>${moneyPlain(receipt.total)} VNĐ</span></div>
                 <div class="receipt-line"></div>
                 <div class="receipt-row"><span>Phương thức:</span><strong>${escapeHtml(receipt.paymentMethod)}</strong></div>
+                ${receipt.cardLast4 ? `<div class="receipt-row"><span>Thông tin thẻ:</span><span>${escapeHtml(receipt.cardBrand)} •••• ${escapeHtml(receipt.cardLast4)}</span></div>` : ""}
+                ${receipt.cardTransactionId ? `<div class="receipt-row"><span>Mã giao dịch:</span><span>${escapeHtml(receipt.cardTransactionId)}</span></div>` : ""}
                 <div class="receipt-row"><span>Tiền khách trả:</span><span>${moneyPlain(receipt.paid)}</span></div>
                 <div class="receipt-row"><span>Điểm tích lũy cộng thêm:</span><span>+${receipt.earnedPoints} điểm</span></div>
                 <div class="receipt-line"></div>
@@ -2856,6 +3028,106 @@
             toast("Đã xác nhận thanh toán QR");
         }
 
+        function formatCardNumberInput(input) {
+            const digits = input.value.replace(/\D/g, "").slice(0, 19);
+            input.value = digits.replace(/(.{4})/g, "$1 ").trim();
+            document.getElementById("cardPaymentError").textContent = "";
+        }
+
+        function isValidCardNumber(number) {
+            return /^\d{13,19}$/.test(number);
+        }
+
+        function initializeCardExpiryOptions() {
+            const yearSelect = document.getElementById("cardExpiryYear");
+            if (!yearSelect || yearSelect.options.length > 1) return;
+            const currentYear = new Date().getFullYear();
+            for (let year = currentYear; year <= currentYear + 15; year += 1) {
+                yearSelect.add(new Option(String(year), String(year)));
+            }
+        }
+
+        function isValidCardExpiry(month, year) {
+            month = Number(month);
+            year = Number(year);
+            if (month < 1 || month > 12 || !year) return false;
+            const expiry = new Date(year, month, 1);
+            const currentMonth = new Date();
+            currentMonth.setDate(1);
+            currentMonth.setHours(0, 0, 0, 0);
+            return expiry > currentMonth;
+        }
+
+        function detectCardBrand(number) {
+            if (/^4/.test(number)) return "Visa";
+            if (/^(5[1-5]|2[2-7])/.test(number)) return "Mastercard";
+            if (/^35/.test(number)) return "JCB";
+            if (/^3[47]/.test(number)) return "American Express";
+            return "Thẻ ngân hàng";
+        }
+
+        function openCardPaymentModal(receipt) {
+            pendingCardReceipt = receipt;
+            document.getElementById("cardPaymentAmount").textContent = money(receipt.total);
+            document.getElementById("cardNumber").value = "";
+            initializeCardExpiryOptions();
+            document.getElementById("cardExpiryMonth").value = "";
+            document.getElementById("cardExpiryYear").value = "";
+            document.getElementById("cardCvv").value = "";
+            document.getElementById("cardPaymentError").textContent = "";
+            document.getElementById("cardPaymentModalBg").classList.add("open");
+            document.getElementById("cardNumber").focus();
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function cancelCardPayment() {
+            pendingCardReceipt = null;
+            document.getElementById("cardNumber").value = "";
+            document.getElementById("cardExpiryMonth").value = "";
+            document.getElementById("cardExpiryYear").value = "";
+            document.getElementById("cardCvv").value = "";
+            document.getElementById("cardPaymentModalBg").classList.remove("open");
+            toast("Đã hủy thanh toán thẻ");
+        }
+
+        async function confirmCardPayment() {
+            if (!pendingCardReceipt) return;
+            const cardNumber = document.getElementById("cardNumber").value.replace(/\D/g, "");
+            const expiryMonth = document.getElementById("cardExpiryMonth").value;
+            const expiryYear = document.getElementById("cardExpiryYear").value;
+            const cvv = document.getElementById("cardCvv").value.trim();
+            const error = document.getElementById("cardPaymentError");
+
+            if (!isValidCardNumber(cardNumber)) {
+                error.textContent = "Số thẻ không hợp lệ.";
+                document.getElementById("cardNumber").focus();
+                return;
+            }
+            if (!isValidCardExpiry(expiryMonth, expiryYear)) {
+                error.textContent = "Ngày hết hạn không hợp lệ hoặc thẻ đã hết hạn.";
+                document.getElementById("cardExpiryMonth").focus();
+                return;
+            }
+            if (!/^\d{3,4}$/.test(cvv)) {
+                error.textContent = "CVV phải gồm 3 hoặc 4 chữ số.";
+                document.getElementById("cardCvv").focus();
+                return;
+            }
+
+            const receipt = pendingCardReceipt;
+            receipt.cardBrand = detectCardBrand(cardNumber);
+            receipt.cardLast4 = cardNumber.slice(-4);
+            receipt.cardTransactionId = `CARD-${Date.now().toString(36).toUpperCase()}`;
+            pendingCardReceipt = null;
+
+            document.getElementById("cardNumber").value = "";
+            document.getElementById("cardExpiryMonth").value = "";
+            document.getElementById("cardExpiryYear").value = "";
+            document.getElementById("cardCvv").value = "";
+            document.getElementById("cardPaymentModalBg").classList.remove("open");
+            await completeCheckout(receipt);
+        }
+
         // Hoàn tất thanh toán: tạo COD hoặc ghi nhận doanh thu, trừ kho, tích điểm, mở hóa đơn.
         async function completeCheckout(receipt) {
             const receiverName = document.getElementById("codReceiverName")?.value.trim() || "";
@@ -2994,6 +3266,10 @@
             const receipt = buildReceiptSnapshot(paymentMethod, deliveryMode);
             if (!isCod && paymentMethod === "Quét mã QR") {
                 openQrPaymentModal(receipt);
+                return;
+            }
+            if (!isCod && paymentMethod === "Thẻ") {
+                openCardPaymentModal(receipt);
                 return;
             }
             completeCheckout(receipt);

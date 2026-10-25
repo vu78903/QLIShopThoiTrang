@@ -56,8 +56,8 @@ app.MapPost("/api/dang-nhap", async (LoginRequestDto input, StoreRepository stor
 
 app.MapPost("/api/san-pham", async (ProductUpsertDto input, StoreRepository store, ProductImageStorage images) =>
 {
-    if (string.IsNullOrWhiteSpace(input.Sku) || string.IsNullOrWhiteSpace(input.Name) || string.IsNullOrWhiteSpace(input.Type))
-        return Results.BadRequest("SKU, ten san pham va loai san pham la bat buoc.");
+    if (string.IsNullOrWhiteSpace(input.Name) || string.IsNullOrWhiteSpace(input.Type))
+        return Results.BadRequest("Ten san pham va loai san pham la bat buoc.");
     if (input.Price <= 0)
         return Results.BadRequest("Gia ban phai lon hon 0.");
     if (input.Stock < 0)
@@ -65,9 +65,10 @@ app.MapPost("/api/san-pham", async (ProductUpsertDto input, StoreRepository stor
 
     try
     {
-        var oldImage = await store.GetProductImageAsync(input.Sku.Trim().ToUpperInvariant());
-        var savedImage = await images.SaveAsync(input.Sku, input.Image);
-        var savedProduct = input with { Image = savedImage };
+        var identified = await store.ResolveProductIdentityAsync(input);
+        var oldImage = await store.GetProductImageAsync(identified.Sku!);
+        var savedImage = await images.SaveAsync(identified.Sku!, identified.Image);
+        var savedProduct = identified with { Image = savedImage };
         await store.SaveProductAsync(savedProduct);
         if (!string.Equals(oldImage, savedImage, StringComparison.OrdinalIgnoreCase))
             await images.DeleteManagedFileAsync(oldImage);
@@ -104,7 +105,8 @@ app.MapDelete("/api/san-pham/{sku}", async (string sku, StoreRepository store, P
     {
         var image = await store.GetProductImageAsync(sku);
         if (!await store.DeleteProductAsync(sku)) return Results.NotFound();
-        await images.DeleteManagedFileAsync(image);
+        if (!await store.IsProductImageInUseAsync(image))
+            await images.DeleteManagedFileAsync(image);
         return Results.NoContent();
     }
     catch (InvalidOperationException ex)

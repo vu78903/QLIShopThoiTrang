@@ -1,0 +1,152 @@
+[
+  {
+    "type": "screenshot",
+    "id": "E01",
+    "file": "E01-dang-nhap.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/dang-nhap.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E02",
+    "file": "E02-mat-khau-duoc-an.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/dang-nhap.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E03",
+    "file": "E03-dang-nhap-bo-trong.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/dang-nhap.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E04",
+    "file": "E04-pos-ban-hang.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/ban-hang.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E05",
+    "file": "E05-chon-san-pham-tu-kho.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/ban-hang.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E06",
+    "file": "E06-lich-su-hoa-don.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/ban-hang.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E23",
+    "file": "E23-thanh-toan-mo-hoa-don.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/ban-hang.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E07",
+    "file": "E07-tim-kiem-san-pham.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/san-pham.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E08",
+    "file": "E08-them-san-pham-va-sku.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/san-pham.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E09",
+    "file": "E09-loai-san-pham.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/loai-san-pham.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E10",
+    "file": "E10-doi-tac-khach-hang.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/doi-tac.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E11",
+    "file": "E11-doi-tac-nha-cung-cap.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/doi-tac.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E12",
+    "file": "E12-ton-kho-va-phieu-nhap.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/ton-kho.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E13",
+    "file": "E13-tao-phieu-nhap.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/ton-kho.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E14",
+    "file": "E14-khuyen-mai.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/khuyen-mai.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E15",
+    "file": "E15-them-voucher.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/khuyen-mai.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E16",
+    "file": "E16-giao-hang.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/giao-hang.html#delivery"
+  },
+  {
+    "type": "screenshot",
+    "id": "E17",
+    "file": "E17-doi-soat-cod.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/giao-hang.html#cod"
+  },
+  {
+    "type": "screenshot",
+    "id": "E18",
+    "file": "E18-doi-tra.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/doi-tra.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E19",
+    "file": "E19-tra-cuu-doi-tra.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/doi-tra.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E20",
+    "file": "E20-bao-cao-thong-ke.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/bao-cao.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E21",
+    "file": "E21-phieu-ket-ca.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/bao-cao.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E22",
+    "file": "E22-cai-dat-chi-thong-bao.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/bao-cao.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E24",
+    "file": "E24-truy-cap-san-pham-khong-phien.png",
+    "url": "file:///C:/Users/Anh%20Vu/OneDrive/Desktop/KLCN/QLIShopThoiTrang/winform/qlicuahang/Views/san-pham.html"
+  },
+  {
+    "type": "screenshot",
+    "id": "E25",
+    "file": "E25-api-health.png",
+    "url": "http://127.0.0.1:5000/api/health"
+  }
+]

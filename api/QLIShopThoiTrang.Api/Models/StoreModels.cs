@@ -11,6 +11,7 @@ public sealed record AppStateDto(
     List<CodOrderDto> CodOrders);
 
 public sealed record ProductDto(
+    string ProductId,
     string Sku,
     string Name,
     string Type,
@@ -22,12 +23,14 @@ public sealed record ProductDto(
     string? Image);
 
 public sealed record ProductUpsertDto(
-    string Sku,
+    string? ProductId,
+    string? Sku,
     string Name,
     string Type,
     decimal Price,
     int Stock,
     string? Color = null,
+    string? Size = null,
     string? Image = null);
 
 public sealed record ProductTypeDto(string Id, string Name);

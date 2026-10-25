@@ -86,24 +86,96 @@ test("chuyển qua lại các form chính bằng menu", async ({ page }) => {
   }
 });
 
-test("thêm loại sản phẩm và sản phẩm mới", async ({ page }) => {
-  await openPage(page, "loai-san-pham.html");
+test("thêm sản phẩm tự sinh MaSP và MaSKU theo biến thể", async ({ page }) => {
+  const state = structuredClone(seededState);
+  state.productsData[0] = {
+    productId: "SP-001", sku: "AOTHUN-001-DEN-M", name: "Áo thun test",
+    type: "Áo", color: "Đen", size: "M", price: 100000, stock: 20
+  };
+  await page.route("http://127.0.0.1:5000/api/**", async route => {
+    const request = route.request();
+    if (request.url().endsWith("/api/app-state")) return route.fulfill({ json: state });
+    if (request.url().endsWith("/api/san-pham") && request.method() === "POST") {
+      const savedProduct = request.postDataJSON();
+      state.productsData.push(savedProduct);
+      return route.fulfill({ json: savedProduct });
+    }
+    return route.fulfill({ status: 200, json: {} });
+  });
+  await openPage(page, "san-pham.html", state);
 
-  await page.getByRole("button", { name: /Thêm loại/i }).click({ force: true });
-  await page.locator("#lt_name").fill("Áo");
-  await page.getByRole("button", { name: /Lưu dữ liệu/i }).click({ force: true });
-  await expect(page.locator("#productTypeBody")).toContainText("Áo");
-
-  await page.locator(".nav-btn[data-view='products']").click({ force: true });
   await page.getByRole("button", { name: /Thêm Sản phẩm/i }).click({ force: true });
-  await page.locator("#f_name").fill("Áo Polo Test");
+  await page.locator("#f_name").fill("Quần jean ống suông");
   await page.locator("#f_type").selectOption("Áo");
-  await page.locator("#f_price").fill("199000");
-  await page.locator("#f_stock").fill("15");
-  await page.getByRole("button", { name: /Lưu dữ liệu/i }).click({ force: true });
+  await expect(page.locator("#f_size option")).toHaveText(["Chọn size sản phẩm", "28", "30", "32", "34", "36"]);
+  await page.locator("#f_name").fill("Áo Hoodie");
+  await page.locator("#f_type").selectOption("Áo");
+  await page.locator("#f_color").selectOption("Đen");
+  await page.locator("#f_size").selectOption("L");
+  await expect(page.locator("#f_product_id")).toHaveValue("SP-002");
+  await expect(page.locator("#f_sku")).toHaveValue("HD-002-DEN-L");
+});
 
-  await expect(page.locator("#view-products tbody")).toContainText("Áo Polo Test");
-  await expect(page.locator("#view-products tbody")).toContainText("199.000");
+test("tìm sản phẩm theo MaSP, MaSKU và tên không dấu", async ({ page }) => {
+  const state = structuredClone(seededState);
+  state.productsData = [
+    { productId: "SP-001", sku: "AT-001-DEN-M", name: "Áo thun basic", type: "Áo", color: "Đen", size: "M", price: 199000, stock: 10 },
+    { productId: "SP-002", sku: "QJ-002-XANH-32", name: "Quần jean ống suông", type: "Quần", color: "Xanh", size: "32", price: 499000, stock: 10 },
+    { productId: "SP-003", sku: "HD-003-DO-L", name: "Áo hoodie", type: "Áo", color: "Đỏ", size: "L", price: 599000, stock: 10 }
+  ];
+  await page.route("http://127.0.0.1:5000/api/**", route => route.fulfill({ json: state }));
+  await openPage(page, "san-pham.html", state);
+
+  const search = page.locator("#productSearchInput");
+  const rows = page.locator("#view-products tbody tr");
+  await expect(rows).toHaveCount(3);
+
+  await search.fill("sp-002");
+  await page.waitForTimeout(350);
+  expect(await rows.count()).toBe(1);
+  await expect(rows.first()).toContainText("Quần jean ống suông");
+
+  await search.fill("hd 003 do");
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first()).toContainText("HD-003-DO-L");
+
+  await search.fill("ao thun basic");
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first()).toContainText("Áo thun basic");
+
+  await search.fill("không tồn tại");
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first()).toContainText("Không tìm thấy sản phẩm");
+  await expect(page.locator("#productSearchSummary")).toHaveText("Tìm thấy 0/3 SKU");
+
+  await page.locator("#productSearchClear").click();
+  await expect(rows).toHaveCount(3);
+});
+
+test("đọc file CSV demo theo MaSP và tự sinh MaSKU khi import", async ({ page }) => {
+  const state = structuredClone(seededState);
+  let importedRows = null;
+  await page.route("http://127.0.0.1:5000/api/**", async route => {
+    const request = route.request();
+    if (request.url().endsWith("/api/app-state")) return route.fulfill({ json: state });
+    if (request.url().endsWith("/api/san-pham/import") && request.method() === "POST") {
+      importedRows = request.postDataJSON();
+      return route.fulfill({ json: { count: importedRows.length } });
+    }
+    return route.fulfill({ status: 200, json: {} });
+  });
+  await openPage(page, "san-pham.html", state);
+
+  const demoFile = path.join(process.cwd(), "..", "..", "database", "Demo_Import_SanPham.csv");
+  await page.locator("#productImportFile").setInputFiles(demoFile);
+  await expect.poll(() => importedRows?.length || 0).toBe(12);
+  expect(importedRows[0]).toMatchObject({
+    productId: "SP-023",
+    sku: null,
+    name: "Áo thun thể thao",
+    color: "Đen",
+    size: "M"
+  });
 });
 
 test("thêm khách hàng và voucher", async ({ page }) => {

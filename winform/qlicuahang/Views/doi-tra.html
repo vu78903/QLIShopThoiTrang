@@ -6,7 +6,7 @@
     <title>Đổi trả sản phẩm - Y-Fashion ERP</title>
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
-    <link rel="stylesheet" href="../css/giao-dien.css?v=20261017-3">
+    <link rel="stylesheet" href="../css/giao-dien.css?v=20261023-3">
 </head>
 <body data-view="returns">
     <div class="shell">
@@ -39,16 +39,14 @@
                     <div class="page-head">
                         <div>
                             <h1>Đổi trả sản phẩm</h1>
-                            <p>Tiếp nhận và xử lý đổi trả từ hóa đơn đã thanh toán</p>
                         </div>
                     </div>
 
                     <div class="return-workspace">
                         <section class="card pad return-search-card">
-                            <div class="section-heading"><i data-lucide="receipt-text"></i><div><strong>Tra cứu hóa đơn</strong><small>Mã hóa đơn hoặc số điện thoại mua hàng</small></div></div>
+                            <div class="section-heading"><div><strong>Tra cứu hóa đơn</strong></div></div>
                             <div class="input-wrap">
-                                <i data-lucide="search"></i>
-                                <input id="returnSearchInput" class="input icon" autocomplete="off" placeholder="Nhập mã hóa đơn hoặc số điện thoại..." oninput="scheduleReturnSearch()">
+                                <input id="returnSearchInput" class="input" autocomplete="off" placeholder="Nhập mã hóa đơn hoặc số điện thoại..." oninput="scheduleReturnSearch()">
                             </div>
                             <div class="table-wrap return-search-results">
                                 <table class="data-table">
@@ -117,7 +115,7 @@
                     </div>
 
                     <section class="card pad return-history-card">
-                        <div class="section-heading"><i data-lucide="history"></i><div><strong>Phiếu đổi trả đã tạo</strong><small>Mở lại hoặc in lại phiếu đã lưu</small></div></div>
+                        <div class="section-heading"><div><strong>Phiếu đổi trả đã tạo</strong></div></div>
                         <div class="table-wrap">
                             <table class="data-table">
                                 <thead><tr><th>Số phiếu</th><th>Ngày lập</th><th>Hóa đơn</th><th>Khách hàng</th><th>Hình thức</th><th>Sản phẩm</th><th>Số lượng</th><th class="money-heading">Hoàn/Thu thêm</th><th></th></tr></thead>
@@ -147,6 +145,6 @@
     </div>
 
     <div id="toast" role="status" aria-live="polite"><i data-lucide="check-circle" style="width:18px;color:#6ee7b7"></i><span id="toastText">Đã cập nhật thành công</span></div>
-    <script src="../js/ung-dung.js?v=20261020-2"></script>
+    <script src="../js/ung-dung.js?v=20261023-3"></script>
 </body>
 </html>

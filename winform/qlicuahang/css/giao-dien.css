@@ -332,6 +332,14 @@
             flex-wrap: wrap;
         }
 
+        /* Form dùng nhãn chữ rõ ràng; ẩn icon trang trí để giao diện gọn hơn. */
+        main .btn:not(.icon-button) > i,
+        main .btn:not(.icon-button) > svg,
+        .modal .btn:not(.icon-button) > i,
+        .modal .btn:not(.icon-button) > svg {
+            display: none;
+        }
+
         .input-wrap {
             position: relative;
             flex: 1;
@@ -1321,6 +1329,16 @@
             padding: 22px 24px 4px;
         }
 
+        #crudModalBg .modal {
+            display: flex;
+            max-height: calc(100vh - 40px);
+            flex-direction: column;
+        }
+
+        #crudModalFields {
+            overflow-y: auto;
+        }
+
             #crudModalFields label {
                 margin-bottom: -4px;
                 font-size: 12px !important;
@@ -1344,13 +1362,6 @@
 
         .empty {
             color: var(--muted);
-        }
-
-        .partner-form-note {
-            margin: -4px 0 4px;
-            color: var(--muted);
-            font-size: 13px;
-            line-height: 1.45;
         }
 
         .payment-options {
@@ -1578,13 +1589,47 @@
             text-align: right;
         }
 
-        .qr-note {
-            padding: 12px;
-            border-radius: 10px;
-            background: #eff6ff;
-            color: #1d4ed8;
-            line-height: 1.5;
+        .card-payment-modal { width: min(560px, calc(100vw - 32px)); }
+
+        .card-payment-summary {
+            margin: 20px 24px 0;
+            padding: 15px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            border: 1px solid var(--line);
+            background: var(--surface);
         }
+
+        .card-payment-summary span { color: var(--muted); }
+        .card-payment-summary strong { font-size: 22px; color: var(--primary); }
+
+        .card-form {
+            padding: 20px 24px 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .card-number-field { grid-column: 1 / -1; }
+        .card-field { display: grid; gap: 7px; }
+        .card-field span { color: #40566d; font-size: 13px; font-weight: 700; }
+
+        .card-security-note {
+            margin: 4px 24px 0;
+            padding: 11px 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            background: #eaf5ef;
+            color: #17603a;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .card-security-note svg { width: 18px; min-width: 18px; }
+        .form-error { min-height: 20px; margin: 10px 24px 0; color: #b42318; font-size: 13px; font-weight: 650; }
 
         .pos-customer-bar {
             display: grid;

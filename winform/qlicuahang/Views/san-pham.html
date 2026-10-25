@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
-    <link rel="stylesheet" href="../css/giao-dien.css?v=20261016-5">
+    <link rel="stylesheet" href="../css/giao-dien.css?v=20261023-3">
 </head>
 <body data-view="products">
     <div class="shell">
@@ -49,7 +49,6 @@
                     <div class="page-head">
                         <div>
                             <h1>Danh mục & Sản phẩm</h1>
-                            <p>Quản lý danh sách mặt hàng thời trang Yody</p>
                         </div>
                         <div class="actions">
                             <button class="btn btn-secondary" onclick="openProductImport()"><i data-lucide="file-up" style="width:16px"></i> Nhập Excel/CSV</button>
@@ -59,15 +58,30 @@
                         </div>
                     </div>
                     <div class="card pad">
+                        <div class="filterbar" style="margin-bottom:14px">
+                            <div class="input-wrap" style="max-width:520px">
+                                <input id="productSearchInput" class="input" type="search"
+                                       placeholder="Tìm theo Mã SP, Mã SKU hoặc tên sản phẩm..."
+                                       aria-label="Tìm sản phẩm theo Mã SP, Mã SKU hoặc tên"
+                                       oninput="scheduleProductSearch()">
+                            </div>
+                            <button id="productSearchClear" class="btn btn-secondary" type="button"
+                                    onclick="clearProductSearch()" style="display:none">
+                                <i data-lucide="x" style="width:16px"></i> Xóa tìm kiếm
+                            </button>
+                            <span id="productSearchSummary" style="color:#64748b;font-size:13px"></span>
+                        </div>
                         <div class="table-wrap">
                             <table class="data-table">
                                 <thead>
                                     <tr>
                                         <th>Hình ảnh</th>
+                                        <th>Mã SP</th>
                                         <th>Mã SKU</th>
                                         <th>Tên sản phẩm</th>
                                         <th>Loại sản phẩm</th>
                                         <th>Màu sắc</th>
+                                        <th>Size</th>
                                         <th>Giá bán</th>
                                         <th>Tồn kho</th>
                                         <th>Thao tác</th>
@@ -138,9 +152,6 @@
                     <div class="qr-info-row"><span>Số hóa đơn</span><strong id="qrInvoiceId">-</strong></div>
                     <div class="qr-info-row"><span>Số tiền</span><strong id="qrAmount">0 ₫</strong></div>
                     <div class="qr-info-row"><span>Nội dung</span><strong id="qrContent">-</strong></div>
-                    <div class="qr-note">
-                        Khách quét mã để thanh toán đúng số tiền. Sau khi kiểm tra giao dịch thành công, nhân viên bấm xác nhận để xuất hóa đơn.
-                    </div>
                 </div>
             </div>
             <div class="modal-actions">
@@ -156,8 +167,7 @@
             <h2>Chọn sản phẩm từ kho</h2>
             <div style="padding:18px 24px 8px">
                 <div class="input-wrap">
-                    <i data-lucide="search"></i>
-                    <input id="stockPickerSearch" class="input icon" placeholder="Tìm theo SKU hoặc tên sản phẩm..." oninput="renderStockPicker()">
+                    <input id="stockPickerSearch" class="input" placeholder="Tìm theo SKU hoặc tên sản phẩm..." oninput="renderStockPicker()">
                 </div>
             </div>
             <div style="padding:0 24px 20px; max-height:55vh; overflow:auto;">
@@ -186,6 +196,6 @@
         <span id="toastText">Đã cập nhật thành công</span>
     </div>
 
-    <script src="../js/ung-dung.js?v=20261020-2"></script>
+    <script src="../js/ung-dung.js?v=20261023-3"></script>
 </body>
 </html>

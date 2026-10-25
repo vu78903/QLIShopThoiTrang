@@ -1,6 +1,7 @@
 using Npgsql;
 using QLIShopThoiTrang.Api.Models;
 using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace QLIShopThoiTrang.Api.Data;
@@ -168,63 +169,208 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
 
     public async Task SaveProductAsync(ProductUpsertDto input)
     {
-        var sku = input.Sku.Trim().ToUpperInvariant();
-        if (!Regex.IsMatch(sku, @"^SP-\d{3,}$"))
+        var sku = (input.Sku ?? string.Empty).Trim().ToUpperInvariant();
+        var productId = (input.ProductId ?? string.Empty).Trim().ToUpperInvariant();
+        if (!Regex.IsMatch(productId, @"^SP-\d{3,}$"))
             throw new InvalidOperationException("Mã sản phẩm phải có dạng SP-001.");
+        if (!Regex.IsMatch(sku, @"^[A-Z0-9][A-Z0-9-]{2,19}$"))
+            throw new InvalidOperationException("Mã SKU chỉ được gồm chữ, số, dấu gạch ngang và tối đa 20 ký tự.");
 
         await using var connection = db.CreateConnection();
         await connection.OpenAsync();
         await using var tx = (NpgsqlTransaction)await connection.BeginTransactionAsync();
         var type = input.Type.Trim();
         var color = string.IsNullOrWhiteSpace(input.Color) ? "Mặc định" : input.Color.Trim();
+        var size = string.IsNullOrWhiteSpace(input.Size) ? "Free size" : input.Size.Trim();
         var maLoai = await ScalarStringAsync(connection, tx,
             "SELECT MaLoai FROM LoaiSanPham WHERE TrangThai=TRUE AND (TenLoai=@type OR MaLoai=@type) LIMIT 1",
             ("@type", type));
         if (maLoai is null) throw new InvalidOperationException("Loại sản phẩm không tồn tại.");
 
+        var duplicateVariant = await ScalarLongAsync(connection, tx, """
+            SELECT COUNT(*) FROM SanPham
+            WHERE MaSP=@productId AND lower(trim(MauSac))=lower(trim(@color))
+              AND lower(trim(KichCo))=lower(trim(@size)) AND MaSKU<>@sku
+            """, ("@productId", productId), ("@color", color), ("@size", size), ("@sku", sku));
+        if (duplicateVariant > 0)
+            throw new InvalidOperationException("Sản phẩm đã có biến thể màu và size này.");
+
         await ExecuteAsync(connection, tx, """
             INSERT INTO SanPham(MaSP,MaSKU,MaLoai,TenSanPham,SoLuong,KichCo,MauSac,TrangThai,DonGia,SoLuongTonKho,HinhAnh)
-            VALUES(@sku,@sku,@type,@name,@stock,'Free size',@color,TRUE,@price,@stock,@image)
+            VALUES(@productId,@sku,@type,@name,@stock,@size,@color,TRUE,@price,@stock,@image)
             ON CONFLICT (MaSKU) DO UPDATE SET
-                MaLoai=EXCLUDED.MaLoai,TenSanPham=EXCLUDED.TenSanPham,DonGia=EXCLUDED.DonGia,
+                MaSP=EXCLUDED.MaSP,MaLoai=EXCLUDED.MaLoai,TenSanPham=EXCLUDED.TenSanPham,DonGia=EXCLUDED.DonGia,
                 SoLuong=EXCLUDED.SoLuong,SoLuongTonKho=EXCLUDED.SoLuongTonKho,
-                MauSac=EXCLUDED.MauSac,HinhAnh=EXCLUDED.HinhAnh,TrangThai=TRUE;
+                KichCo=EXCLUDED.KichCo,MauSac=EXCLUDED.MauSac,HinhAnh=EXCLUDED.HinhAnh,TrangThai=TRUE;
             """,
-            ("@sku", sku), ("@type", maLoai), ("@name", input.Name.Trim()),
+            ("@sku", sku), ("@productId", productId), ("@type", maLoai), ("@name", input.Name.Trim()),
             ("@price", input.Price), ("@stock", input.Stock), ("@color", color),
+            ("@size", size),
             ("@image", DbValue(input.Image)));
         await tx.CommitAsync();
+    }
+
+    public async Task<ProductUpsertDto> ResolveProductIdentityAsync(ProductUpsertDto input)
+    {
+        await using var connection = db.CreateConnection();
+        await connection.OpenAsync();
+
+        var productId = (input.ProductId ?? string.Empty).Trim().ToUpperInvariant();
+        if (string.IsNullOrWhiteSpace(productId))
+        {
+            await using var existing = NewCommand(connection, null, """
+                SELECT sp.MaSP
+                FROM SanPham sp JOIN LoaiSanPham l ON l.MaLoai=sp.MaLoai
+                WHERE lower(trim(sp.TenSanPham))=lower(trim(@name))
+                  AND (l.TenLoai=@type OR l.MaLoai=@type)
+                ORDER BY sp.MaSP LIMIT 1
+                """, ("@name", input.Name.Trim()), ("@type", input.Type.Trim()));
+            productId = Convert.ToString(await existing.ExecuteScalarAsync()) ?? string.Empty;
+        }
+        if (string.IsNullOrWhiteSpace(productId))
+        {
+            await using var next = NewCommand(connection, null, """
+                SELECT COALESCE(MAX(NULLIF(SUBSTRING(MaSP FROM 4),'')::bigint),0)+1
+                FROM SanPham WHERE MaSP LIKE 'SP-%'
+                """);
+            productId = $"SP-{Convert.ToInt64(await next.ExecuteScalarAsync()):000}";
+        }
+
+        var sku = (input.Sku ?? string.Empty).Trim().ToUpperInvariant();
+        if (string.IsNullOrWhiteSpace(sku))
+        {
+            var sequence = Regex.Match(productId, @"\d+$").Value;
+            var namePart = ProductSkuCode(input.Name);
+            var colorPart = ColorSkuCode(input.Color ?? "Mặc định");
+            var sizePart = SizeSkuCode(input.Size ?? "Free size");
+            sku = $"{namePart}-{sequence}-{colorPart}-{sizePart}";
+            if (sku.Length > 20) sku = sku[..20].TrimEnd('-');
+
+            var baseSku = sku;
+            var suffix = 2;
+            while (await ProductSkuExistsAsync(connection, sku))
+            {
+                var tail = $"-{suffix++}";
+                sku = baseSku[..Math.Min(baseSku.Length, 20 - tail.Length)].TrimEnd('-') + tail;
+            }
+        }
+        return input with { ProductId = productId, Sku = sku };
+    }
+
+    private static async Task<bool> ProductSkuExistsAsync(NpgsqlConnection connection, string sku)
+    {
+        await using var command = NewCommand(connection, null,
+            "SELECT COUNT(*) FROM SanPham WHERE MaSKU=@sku", ("@sku", sku));
+        return Convert.ToInt64(await command.ExecuteScalarAsync()) > 0;
+    }
+
+    private static string ToSkuPart(string value, int maxLength)
+    {
+        var normalized = value.Normalize(NormalizationForm.FormD);
+        var ascii = new string(normalized.Where(ch =>
+            CharUnicodeInfo.GetUnicodeCategory(ch) != UnicodeCategory.NonSpacingMark).ToArray())
+            .Normalize(NormalizationForm.FormC)
+            .ToUpperInvariant()
+            .Replace('Đ', 'D');
+        var part = Regex.Replace(ascii, @"[^A-Z0-9]+", string.Empty);
+        if (string.IsNullOrWhiteSpace(part)) part = "SP";
+        return part[..Math.Min(part.Length, maxLength)];
+    }
+
+    private static string ProductSkuCode(string name)
+    {
+        var text = ToAscii(name);
+        if (Regex.IsMatch(text, @"QUAN.*JEANS?")) return "QJ";
+        if (Regex.IsMatch(text, @"QUAN.*KAKI")) return "QK";
+        (string Pattern, string Code)[] rules =
+        [
+            ("HOODIE", "HD"), ("AO THUN", "AT"), ("SO MI", "ASM"), ("POLO", "AP"),
+            ("AO KHOAC", "AK"), ("VEST", "AV"), ("JOGGER", "QJG"), ("QUAN NGAN", "QN"), ("SHORT", "QN"),
+            ("VAY", "VAY"), ("DAM", "DAM"), ("MAT KINH", "MK"), ("DAY NIT", "DN"), ("DAY NICH", "DN"),
+            ("NON", "NON"), ("VO", "VO")
+        ];
+        foreach (var (pattern, code) in rules)
+            if (text.Contains(pattern, StringComparison.Ordinal)) return code;
+        var initials = string.Concat(Regex.Split(text, @"[^A-Z0-9]+")
+            .Where(word => word.Length > 0).Select(word => word[0]));
+        return string.IsNullOrWhiteSpace(initials) ? "SP" : initials[..Math.Min(initials.Length, 4)];
+    }
+
+    private static string ColorSkuCode(string color)
+    {
+        var text = ToAscii(color);
+        var colors = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["DEN"]="DEN", ["TRANG"]="TRANG", ["XAM"]="XAM", ["DO"]="DO", ["VANG"]="VANG",
+            ["CAM"]="CAM", ["HONG"]="HONG", ["TIM"]="TIM", ["NAU"]="NAU", ["BE"]="BE",
+            ["XANH DUONG"]="XANHD", ["XANH LA"]="XANHL", ["XANH DAM"]="XANHDAM", ["XANH NAVY"]="NAVY"
+        };
+        return colors.GetValueOrDefault(text) ?? ToSkuPart(text, 7);
+    }
+
+    private static string SizeSkuCode(string size) =>
+        ToAscii(size) == "FREE SIZE" ? "FS" : ToSkuPart(size, 4);
+
+    private static string ToAscii(string value)
+    {
+        var normalized = value.Normalize(NormalizationForm.FormD);
+        return new string(normalized.Where(ch => CharUnicodeInfo.GetUnicodeCategory(ch) != UnicodeCategory.NonSpacingMark).ToArray())
+            .Normalize(NormalizationForm.FormC).ToUpperInvariant().Replace('Đ', 'D').Trim();
     }
 
     // Nhập cả file trong một transaction: chỉ cần một dòng lỗi thì không sản phẩm nào được ghi.
     public async Task ImportProductsAsync(IReadOnlyList<ProductUpsertDto> inputs)
     {
-        var normalized = new List<ProductUpsertDto>(inputs.Count);
         var fileSkus = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        for (var index = 0; index < inputs.Count; index++)
-        {
-            var input = inputs[index];
-            var sku = (input.Sku ?? string.Empty).Trim().ToUpperInvariant();
-            if (!Regex.IsMatch(sku, @"^SP-\d{3,}$"))
-                throw new InvalidOperationException($"Dòng {index + 2}: mã sản phẩm phải có dạng SP-001.");
-            if (!fileSkus.Add(sku))
-                throw new InvalidOperationException($"Dòng {index + 2}: mã sản phẩm {sku} bị lặp trong file.");
-            if (string.IsNullOrWhiteSpace(input.Name) || string.IsNullOrWhiteSpace(input.Type))
-                throw new InvalidOperationException($"Dòng {index + 2}: tên và loại sản phẩm là bắt buộc.");
-            if (input.Price <= 0 || input.Stock < 0)
-                throw new InvalidOperationException($"Dòng {index + 2}: giá hoặc tồn kho không hợp lệ.");
-            normalized.Add(input with { Sku = sku });
-        }
+        var fileVariants = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         await using var connection = db.CreateConnection();
         await connection.OpenAsync();
         await using var tx = (NpgsqlTransaction)await connection.BeginTransactionAsync();
-        foreach (var input in normalized)
+        for (var index = 0; index < inputs.Count; index++)
         {
+            var input = inputs[index];
+            var productId = (input.ProductId ?? string.Empty).Trim().ToUpperInvariant();
+            if (!Regex.IsMatch(productId, @"^SP-\d{3,}$"))
+                throw new InvalidOperationException($"Dòng {index + 2}: Mã SP phải có dạng SP-023.");
+            if (string.IsNullOrWhiteSpace(input.Name) || string.IsNullOrWhiteSpace(input.Type))
+                throw new InvalidOperationException($"Dòng {index + 2}: tên và loại sản phẩm là bắt buộc.");
+            if (input.Price <= 0 || input.Stock < 0)
+                throw new InvalidOperationException($"Dòng {index + 2}: giá hoặc tồn kho không hợp lệ.");
+
+            var color = string.IsNullOrWhiteSpace(input.Color) ? "Mặc định" : input.Color.Trim();
+            var size = string.IsNullOrWhiteSpace(input.Size) ? "Free size" : input.Size.Trim();
+            if (!fileVariants.Add($"{productId}|{color}|{size}"))
+                throw new InvalidOperationException($"Dòng {index + 2}: biến thể {productId} - {color} - {size} bị lặp trong file.");
+
+            var sku = (input.Sku ?? string.Empty).Trim().ToUpperInvariant();
+            if (string.IsNullOrWhiteSpace(sku))
+            {
+                var sequence = Regex.Match(productId, @"\d+$").Value;
+                sku = $"{ProductSkuCode(input.Name)}-{sequence}-{ColorSkuCode(color)}-{SizeSkuCode(size)}";
+                if (sku.Length > 20) sku = sku[..20].TrimEnd('-');
+                var baseSku = sku;
+                var suffix = 2;
+                while (fileSkus.Contains(sku) || await ProductSkuExistsAsync(connection, sku))
+                {
+                    var tail = $"-{suffix++}";
+                    sku = baseSku[..Math.Min(baseSku.Length, 20 - tail.Length)].TrimEnd('-') + tail;
+                }
+            }
+            if (!Regex.IsMatch(sku, @"^[A-Z0-9][A-Z0-9-]{2,19}$"))
+                throw new InvalidOperationException($"Dòng {index + 2}: Mã SKU không hợp lệ.");
+            if (!fileSkus.Add(sku))
+                throw new InvalidOperationException($"Dòng {index + 2}: Mã SKU {sku} bị lặp trong file.");
             if (await ScalarLongAsync(connection, tx,
                     "SELECT COUNT(*) FROM SanPham WHERE MaSKU=@sku",
-                    ("@sku", input.Sku)) > 0)
-                throw new InvalidOperationException($"Mã sản phẩm {input.Sku} đã tồn tại trong cơ sở dữ liệu.");
+                    ("@sku", sku)) > 0)
+                throw new InvalidOperationException($"Dòng {index + 2}: Mã SKU {sku} đã tồn tại trong cơ sở dữ liệu.");
+            if (await ScalarLongAsync(connection, tx, """
+                    SELECT COUNT(*) FROM SanPham
+                    WHERE MaSP=@productId AND lower(trim(MauSac))=lower(trim(@color))
+                      AND lower(trim(KichCo))=lower(trim(@size))
+                    """, ("@productId", productId), ("@color", color), ("@size", size)) > 0)
+                throw new InvalidOperationException($"Dòng {index + 2}: biến thể {productId} - {color} - {size} đã tồn tại.");
 
             var type = input.Type.Trim();
             var maLoai = await ScalarStringAsync(connection, tx,
@@ -244,10 +390,10 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
 
             await ExecuteAsync(connection, tx, """
                 INSERT INTO SanPham(MaSP,MaSKU,MaLoai,TenSanPham,SoLuong,KichCo,MauSac,TrangThai,DonGia,SoLuongTonKho,HinhAnh)
-                VALUES(@sku,@sku,@type,@name,@stock,'Free size',@color,TRUE,@price,@stock,NULL)
+                VALUES(@productId,@sku,@type,@name,@stock,@size,@color,TRUE,@price,@stock,NULL)
                 """,
-                ("@sku", input.Sku), ("@type", maLoai), ("@name", input.Name.Trim()),
-                ("@stock", input.Stock), ("@color", string.IsNullOrWhiteSpace(input.Color) ? "Mặc định" : input.Color.Trim()),
+                ("@productId", productId), ("@sku", sku), ("@type", maLoai), ("@name", input.Name.Trim()),
+                ("@stock", input.Stock), ("@color", color), ("@size", size),
                 ("@price", input.Price));
         }
         await tx.CommitAsync();
@@ -261,6 +407,17 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
             "SELECT HinhAnh FROM SanPham WHERE MaSKU=@sku", ("@sku", sku));
         var value = await command.ExecuteScalarAsync();
         return value is null or DBNull ? null : Convert.ToString(value);
+    }
+
+    // Chỉ xóa file Storage khi không còn biến thể màu/size nào dùng chung URL ảnh đó.
+    public async Task<bool> IsProductImageInUseAsync(string? image)
+    {
+        if (string.IsNullOrWhiteSpace(image)) return false;
+        await using var connection = db.CreateConnection();
+        await connection.OpenAsync();
+        await using var command = NewCommand(connection, null,
+            "SELECT EXISTS(SELECT 1 FROM SanPham WHERE HinhAnh=@image)", ("@image", image));
+        return Convert.ToBoolean(await command.ExecuteScalarAsync());
     }
 
     // Xóa thật sản phẩm chưa phát sinh chứng từ; sản phẩm đã có lịch sử phải được giữ lại.
@@ -937,7 +1094,7 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
     {
         var items = new List<ProductDto>();
         await using var command = NewCommand(connection, null, """
-            SELECT sp.MaSKU,sp.TenSanPham,l.TenLoai,sp.MauSac,sp.KichCo,sp.DonViTinh,
+            SELECT sp.MaSP,sp.MaSKU,sp.TenSanPham,l.TenLoai,sp.MauSac,sp.KichCo,sp.DonViTinh,
                    sp.DonGia,sp.SoLuongTonKho,sp.HinhAnh
             FROM SanPham sp JOIN LoaiSanPham l ON l.MaLoai=sp.MaLoai
             WHERE sp.TrangThai=TRUE AND l.TrangThai=TRUE ORDER BY sp.MaSKU
@@ -945,8 +1102,8 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
         await using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
             items.Add(new(reader.GetString(0), reader.GetString(1), reader.GetString(2), reader.GetString(3),
-                reader.GetString(4), reader.GetString(5), reader.GetDecimal(6), reader.GetInt32(7),
-                reader.IsDBNull(8) ? null : reader.GetString(8)));
+                reader.GetString(4), reader.GetString(5), reader.GetString(6), reader.GetDecimal(7), reader.GetInt32(8),
+                reader.IsDBNull(9) ? null : reader.GetString(9)));
         return items;
     }
 

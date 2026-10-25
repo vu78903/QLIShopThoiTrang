@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
-    <link rel="stylesheet" href="../css/giao-dien.css?v=20261020-2">
+    <link rel="stylesheet" href="../css/giao-dien.css?v=20261023-3">
 </head>
 <body data-view="pos">
     <div class="shell">
@@ -49,7 +49,6 @@
                     <div class="page-head">
                         <div>
                             <h1>POS Bán hàng</h1>
-                            <p>Quét sản phẩm, chọn khách hàng khi cần và thanh toán trên cùng một màn hình</p>
                         </div>
                         <div class="actions">
                             <button class="btn btn-secondary" type="button" onclick="openInvoiceHistory()"><i data-lucide="history" style="width:16px"></i> Xem lại hóa đơn</button>
@@ -67,12 +66,11 @@
                     </section>
                     <div class="pos-grid">
                         <section class="card pad sale-products" id="saleProductArea">
-                            <div class="section-heading"><i data-lucide="scan-barcode"></i><div><strong>Sản phẩm trong đơn</strong><small>Quét mã hoặc chọn sản phẩm đang có trong kho</small></div></div>
+                            <div class="section-heading"><div><strong>Sản phẩm trong đơn</strong></div></div>
                             <fieldset class="sale-fieldset" id="saleProductFieldset">
                             <div class="tools">
                                 <div class="input-wrap">
-                                    <i data-lucide="scan-line"></i>
-                                    <input id="skuSearch" class="input icon" placeholder="Quét mã vạch hoặc gõ mã sản phẩm... (F2)">
+                                    <input id="skuSearch" class="input" placeholder="Quét mã vạch hoặc gõ mã sản phẩm... (F2)">
                                 </div>
                                 <button class="btn btn-primary" type="button" onclick="openStockPicker()"><i data-lucide="package-search" style="width:16px"></i> Chọn từ kho</button>
                             </div>
@@ -108,19 +106,18 @@
 
                         <!-- CỘT HÓA ĐƠN -->
                         <aside class="card pad checkout-panel">
-                            <div class="bill-heading"><i data-lucide="wallet-cards"></i><strong>Thanh toán</strong></div>
+                            <div class="bill-heading"><strong>Thanh toán</strong></div>
                             <label class="delivery-toggle-row">
-                                <span><i data-lucide="truck"></i><strong>Giao tận nơi</strong><small>Bật khi khách cần cửa hàng giao sản phẩm</small></span>
+                                <span><strong>Giao tận nơi</strong><small>Bật khi khách cần cửa hàng giao sản phẩm</small></span>
                                 <input id="deliveryToggle" type="checkbox" onchange="toggleShip()">
                             </label>
                             <div class="ship-fields" id="shipFields">
                                 <div class="ship-inner">
                                     <div class="delivery-mode-options" aria-label="Loại giao hàng">
-                                        <label><input type="radio" name="deliveryMode" value="DELIVERY" checked onchange="updateDeliveryMode()"><i data-lucide="package-check"></i><span><strong>Giao hàng</strong><small>Khách thanh toán trước</small></span></label>
-                                        <label><input type="radio" name="deliveryMode" value="COD" onchange="updateDeliveryMode()"><i data-lucide="hand-coins"></i><span><strong>Giao hàng COD</strong><small>Shipper thu tiền khi giao</small></span></label>
+                                        <label><input type="radio" name="deliveryMode" value="DELIVERY" checked onchange="updateDeliveryMode()"><span><strong>Giao hàng</strong><small>Khách thanh toán trước</small></span></label>
+                                        <label><input type="radio" name="deliveryMode" value="COD" onchange="updateDeliveryMode()"><span><strong>Giao hàng COD</strong><small>Shipper thu tiền khi giao</small></span></label>
                                     </div>
                                     <div id="deliveryCustomerSummary" class="delivery-customer-summary hidden">
-                                        <i data-lucide="user-check"></i>
                                         <div><small>Người nhận theo khách hàng đã chọn</small><strong id="deliveryCustomerName"></strong><span id="deliveryCustomerPhone"></span></div>
                                     </div>
                                     <div id="deliveryManualCustomerFields" class="delivery-manual-fields">
@@ -153,9 +150,9 @@
                                 <div id="paymentSection">
                                     <label class="bill-label">Phương thức thanh toán</label>
                                     <div class="payment-options">
-                                        <label><input type="radio" name="paymentMethod" value="Tiền mặt" checked onchange="handlePaymentChange()"><i data-lucide="banknote"></i><span>Tiền mặt</span></label>
-                                        <label><input type="radio" name="paymentMethod" value="Quét mã QR" onchange="handlePaymentChange()"><i data-lucide="qr-code"></i><span>QR</span></label>
-                                        <label><input type="radio" name="paymentMethod" value="Thẻ" onchange="handlePaymentChange()"><i data-lucide="credit-card"></i><span>Thẻ</span></label>
+                                        <label><input type="radio" name="paymentMethod" value="Tiền mặt" checked onchange="handlePaymentChange()"><span>Tiền mặt</span></label>
+                                        <label><input type="radio" name="paymentMethod" value="Quét mã QR" onchange="handlePaymentChange()"><span>QR</span></label>
+                                        <label><input type="radio" name="paymentMethod" value="Thẻ" onchange="handlePaymentChange()"><span>Thẻ</span></label>
                                     </div>
                                 </div>
                                 <div id="cashSection">
@@ -187,14 +184,12 @@
             <div class="modal-title-row">
                 <div>
                     <h2>Lịch sử hóa đơn</h2>
-                    <p>Xem chi tiết và in lại hóa đơn đã lưu trong cơ sở dữ liệu.</p>
                 </div>
                 <button class="icon-button" type="button" title="Đóng" onclick="closeInvoiceHistory()"><i data-lucide="x"></i></button>
             </div>
             <div class="invoice-search-row">
                 <div class="input-wrap">
-                    <i data-lucide="search"></i>
-                    <input id="invoiceHistorySearch" class="input icon" inputmode="numeric" placeholder="Nhập số điện thoại để tìm hóa đơn" oninput="scheduleInvoiceHistorySearch()">
+                    <input id="invoiceHistorySearch" class="input" inputmode="numeric" placeholder="Nhập số điện thoại để tìm hóa đơn" oninput="scheduleInvoiceHistorySearch()">
                 </div>
                         
             </div>
@@ -262,14 +257,59 @@
                     <div class="qr-info-row"><span>Số hóa đơn</span><strong id="qrInvoiceId">-</strong></div>
                     <div class="qr-info-row"><span>Số tiền</span><strong id="qrAmount">0 ₫</strong></div>
                     <div class="qr-info-row"><span>Nội dung</span><strong id="qrContent">-</strong></div>
-                    <div class="qr-note">
-                        Khách quét mã để thanh toán đúng số tiền. Sau khi kiểm tra giao dịch thành công, nhân viên bấm xác nhận để xuất hóa đơn.
-                    </div>
                 </div>
             </div>
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="cancelQrPayment()">Hủy</button>
                 <button class="btn btn-primary" onclick="confirmQrPayment()"><i data-lucide="check-circle" style="width:16px"></i> Xác nhận đã thanh toán</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-bg" id="cardPaymentModalBg" role="dialog" aria-modal="true" aria-labelledby="cardPaymentTitle">
+        <div class="modal card-payment-modal">
+            <div class="modal-title-row">
+                <div>
+                    <h2 id="cardPaymentTitle">Thanh toán bằng thẻ</h2>
+                </div>
+                <button class="icon-button" type="button" title="Đóng" onclick="cancelCardPayment()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="card-payment-summary">
+                <span>Số tiền thanh toán</span>
+                <strong id="cardPaymentAmount">0 ₫</strong>
+            </div>
+            <div class="card-form">
+                <label class="card-field card-number-field">
+                    <span>Số thẻ</span>
+                    <input id="cardNumber" class="input" type="text" inputmode="numeric" autocomplete="off"
+                           maxlength="23" placeholder="1234 5678 9012 3456" oninput="formatCardNumberInput(this)">
+                </label>
+                <label class="card-field">
+                    <span>Tháng hết hạn</span>
+                    <select id="cardExpiryMonth" class="select">
+                        <option value="">Tháng</option>
+                        <option value="1">01</option><option value="2">02</option><option value="3">03</option>
+                        <option value="4">04</option><option value="5">05</option><option value="6">06</option>
+                        <option value="7">07</option><option value="8">08</option><option value="9">09</option>
+                        <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                    </select>
+                </label>
+                <label class="card-field">
+                    <span>Năm hết hạn</span>
+                    <select id="cardExpiryYear" class="select"><option value="">Năm</option></select>
+                </label>
+                <label class="card-field">
+                    <span>CVV</span>
+                    <input id="cardCvv" class="input" type="password" inputmode="numeric" autocomplete="off"
+                           maxlength="4" placeholder="•••" oninput="this.value=this.value.replace(/\D/g,'')">
+                </label>
+            </div>
+            <div class="form-error" id="cardPaymentError" role="alert" aria-live="polite"></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" type="button" onclick="cancelCardPayment()">Hủy</button>
+                <button class="btn btn-primary" id="confirmCardPaymentButton" type="button" onclick="confirmCardPayment()">
+                    <i data-lucide="credit-card" style="width:16px"></i> Xác nhận thanh toán
+                </button>
             </div>
         </div>
     </div>
@@ -280,8 +320,7 @@
             <h2>Chọn sản phẩm từ kho</h2>
             <div style="padding:18px 24px 8px">
                 <div class="input-wrap">
-                    <i data-lucide="search"></i>
-                    <input id="stockPickerSearch" class="input icon" placeholder="Tìm theo SKU hoặc tên sản phẩm..." oninput="renderStockPicker()">
+                    <input id="stockPickerSearch" class="input" placeholder="Tìm theo SKU hoặc tên sản phẩm..." oninput="renderStockPicker()">
                 </div>
             </div>
             <div style="padding:0 24px 20px; max-height:55vh; overflow:auto;">
@@ -325,6 +364,6 @@
         <span id="toastText">Đã cập nhật thành công</span>
     </div>
 
-    <script src="../js/ung-dung.js?v=20261020-3"></script>
+    <script src="../js/ung-dung.js?v=20261023-3"></script>
 </body>
 </html>

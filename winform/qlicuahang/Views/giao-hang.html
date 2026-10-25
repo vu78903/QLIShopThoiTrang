@@ -6,7 +6,7 @@
     <title>Giao hàng - Y-Fashion ERP</title>
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
-    <link rel="stylesheet" href="../css/giao-dien.css?v=20261020-2">
+    <link rel="stylesheet" href="../css/giao-dien.css?v=20261023-3">
 </head>
 <body data-view="delivery">
     <div class="shell">
@@ -39,7 +39,6 @@
                     <div class="page-head">
                         <div>
                             <h1>Giao hàng</h1>
-                            <p>Theo dõi toàn bộ đơn giao đã thanh toán và đơn shipper cần thu tiền.</p>
                         </div>
                         <button class="btn btn-primary" type="button" onclick="refreshShipments()"><i data-lucide="refresh-cw"></i> Tải đơn mới</button>
                     </div>
@@ -60,7 +59,7 @@
                             <div class="shipment-kpi"><span class="kpi-icon green"><i data-lucide="truck"></i></span><div><small>Đang giao</small><strong id="deliveryMovingCount">0</strong></div></div>
                         </div>
                         <section class="card shipment-card">
-                            <div class="shipment-card-head"><div><strong>Đơn đã thanh toán</strong><small>Shipper giao hàng và không thu thêm tiền</small></div><span class="paid-pill"><i data-lucide="badge-check"></i> Đã thanh toán</span></div>
+                            <div class="shipment-card-head"><div><strong>Đơn đã thanh toán</strong></div><span class="paid-pill"><i data-lucide="badge-check"></i> Đã thanh toán</span></div>
                             <div class="table-wrap">
                                 <table class="data-table shipment-table">
                                     <thead><tr><th>Mã đơn</th><th>Người nhận</th><th>Địa chỉ giao</th><th>Ghi chú cho shipper</th><th class="money-heading">Phí giao</th><th class="money-heading">Cần thu</th><th>Trạng thái</th><th>Thao tác tiếp theo</th></tr></thead>
@@ -77,7 +76,7 @@
                             <div class="shipment-kpi"><span class="kpi-icon red"><i data-lucide="hand-coins"></i></span><div><small>Tổng tiền cần thu</small><strong id="codCollectTotal">0 ₫</strong></div></div>
                         </div>
                         <section class="card shipment-card">
-                            <div class="shipment-card-head"><div><strong>Đơn giao hàng COD</strong><small>Shipper thu đúng số tiền hiển thị khi giao</small></div><span class="cod-pill"><i data-lucide="circle-dollar-sign"></i> Chưa thanh toán</span></div>
+                            <div class="shipment-card-head"><div><strong>Đơn giao hàng COD</strong></div><span class="cod-pill"><i data-lucide="circle-dollar-sign"></i> Chưa thanh toán</span></div>
                             <div class="table-wrap">
                                 <table class="data-table shipment-table">
                                     <thead><tr><th>Mã đơn</th><th>Người nhận</th><th>Địa chỉ giao</th><th>Ghi chú cho shipper</th><th class="money-heading">Phí giao</th><th class="money-heading">Shipper cần thu</th><th>Trạng thái</th><th>Thao tác tiếp theo</th></tr></thead>
@@ -92,6 +91,6 @@
     </div>
 
     <div id="toast" role="status" aria-live="polite"><i data-lucide="check-circle"></i><span id="toastText">Đã cập nhật</span></div>
-    <script src="../js/ung-dung.js?v=20261020-2"></script>
+    <script src="../js/ung-dung.js?v=20261023-3"></script>
 </body>
 </html>

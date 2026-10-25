@@ -79,3 +79,26 @@ test("dùng lại khách đã nhập và chỉ yêu cầu địa chỉ cùng ghi
   await expect(page.locator("#deliveryAddressDetail")).toBeVisible();
   await expect(page.locator("#deliveryNote")).toBeVisible();
 });
+
+test("thanh toán thẻ chỉ hoàn tất khi thông tin hợp lệ", async ({ page }) => {
+  await mockApi(page);
+  await page.goto(pathToFileURL(path.join(root, "ban-hang.html")).href);
+
+  await page.locator("#skuSearch").fill("SP-001");
+  await page.locator("#skuSearch").press("Enter");
+  await expect(page.locator("#cartBody")).toContainText("Áo polo");
+
+  await page.locator('input[name="paymentMethod"][value="Thẻ"]').check({ force: true });
+  await page.locator('button[onclick="checkout()"]').click();
+  await expect(page.locator("#cardPaymentModalBg")).toHaveClass(/open/);
+
+  await page.locator("#cardNumber").fill("1234 5678 9012 3456");
+  await page.locator("#cardExpiryMonth").selectOption("12");
+  await page.locator("#cardExpiryYear").selectOption("2030");
+  await page.locator("#cardCvv").fill("123");
+  await page.locator("#confirmCardPaymentButton").click();
+  await expect(page.locator("#receiptModalBg")).toHaveClass(/open/);
+  await expect(page.locator("#receiptContent")).toContainText("Thẻ ngân hàng •••• 3456");
+  await expect(page.locator("#receiptContent")).toContainText("CARD-");
+  await expect(page.locator("#receiptContent")).not.toContainText("4242 4242 4242 4242");
+});

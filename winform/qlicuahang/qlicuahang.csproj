@@ -29,6 +29,9 @@
     <None Update="js\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="assets\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <!-- Build và chép API cạnh WinForms để ứng dụng có thể tự khởi động API. -->
