@@ -6,6 +6,13 @@ using System.Text.RegularExpressions;
 
 namespace QLIShopThoiTrang.Api.Data;
 
+public enum ProductDeleteResult
+{
+    NotFound,
+    Deleted,
+    Deactivated
+}
+
 // Chứa toàn bộ câu lệnh đọc và ghi dữ liệu cho các form WinForms.
 public sealed class StoreRepository(SqlServerConnectionFactory db)
 {
@@ -420,12 +427,21 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
         return Convert.ToBoolean(await command.ExecuteScalarAsync());
     }
 
-    // Xóa thật sản phẩm chưa phát sinh chứng từ; sản phẩm đã có lịch sử phải được giữ lại.
-    public async Task<bool> DeleteProductAsync(string sku)
+    // Xóa thật sản phẩm chưa phát sinh chứng từ; nếu đã có lịch sử thì chỉ tắt sản phẩm.
+    public async Task<ProductDeleteResult> DeleteProductAsync(string sku)
     {
         await using var connection = db.CreateConnection();
         await connection.OpenAsync();
         await using var tx = (NpgsqlTransaction)await connection.BeginTransactionAsync();
+
+        var exists = await ScalarLongAsync(connection, tx,
+            "SELECT COUNT(*) FROM SanPham WHERE MaSKU=@sku", ("@sku", sku));
+        if (exists == 0)
+        {
+            await tx.RollbackAsync();
+            return ProductDeleteResult.NotFound;
+        }
+
         var references = await ScalarLongAsync(connection, tx, """
             SELECT
                 (SELECT COUNT(*) FROM ChiTietHoaDon WHERE MaSKU=@sku) +
@@ -435,11 +451,17 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
                 (SELECT COUNT(*) FROM BienBanXuLyHangLoi WHERE MaSKU=@sku)
             """, ("@sku", sku));
         if (references > 0)
-            throw new InvalidOperationException("Sản phẩm đã có chứng từ phát sinh nên không thể xóa khỏi lịch sử.");
+        {
+            await ExecuteAsync(connection, tx,
+                "UPDATE SanPham SET TrangThai=FALSE WHERE MaSKU=@sku", ("@sku", sku));
+            await tx.CommitAsync();
+            return ProductDeleteResult.Deactivated;
+        }
+
         var affected = await ExecuteAsync(connection, tx,
             "DELETE FROM SanPham WHERE MaSKU=@sku", ("@sku", sku));
         await tx.CommitAsync();
-        return affected > 0;
+        return affected > 0 ? ProductDeleteResult.Deleted : ProductDeleteResult.NotFound;
     }
 
     public async Task SaveProductTypeAsync(ProductTypeUpsertDto input) =>

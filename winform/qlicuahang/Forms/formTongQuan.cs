@@ -12,6 +12,8 @@ namespace qlicuahang
         // Màn hình chính dùng WebView2 để chạy giao diện POS viết bằng HTML/CSS/JS.
         private WebView2? webView;
 
+        public bool YeuCauDangXuat { get; private set; }
+
         public formTongQuan()
         {
             InitializeComponent();
@@ -34,22 +36,21 @@ namespace qlicuahang
 
                 webView.CoreWebView2.WebMessageReceived += (s, args) =>
                 {
-                    // JavaScript gửi "logout" lên đây khi người dùng bấm đăng xuất.
-                    string message = args.TryGetWebMessageAsString();
-                    if (message == "logout")
+                    try
                     {
-                        this.Hide();
-
-                        formDangNhap login = new formDangNhap();
-                        if (login.ShowDialog() == DialogResult.OK)
+                        // Đóng form chính để Program mở lại form đăng nhập bằng một vòng đời mới.
+                        string message = args.TryGetWebMessageAsString();
+                        if (message == "logout" && !YeuCauDangXuat)
                         {
-                            CapNhatGiaoDienTheoQuyen();
-                            this.Show();
+                            YeuCauDangXuat = true;
+                            formDangNhap.XoaPhienDangNhap();
+                            BeginInvoke(Close);
                         }
-                        else
-                        {
-                            Application.Exit();
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Không thể đăng xuất: " + ex.Message, "Lỗi đăng xuất",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 };
 

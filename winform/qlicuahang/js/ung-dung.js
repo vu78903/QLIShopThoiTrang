@@ -738,6 +738,18 @@
             return today >= start && today <= end && subtotal >= (Number(promo.minOrder) || 0);
         }
 
+        // Trạng thái trên danh sách chỉ dựa vào hạn kết thúc, không phụ thuộc giá trị đơn hàng.
+        function getPromotionStatus(promo) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const end = parseLocalDate(promo.endDate);
+            if (!end) return { active: false, label: "Đã hết thời hạn" };
+            end.setHours(23, 59, 59, 999);
+            return today <= end
+                ? { active: true, label: "Đang trong thời hạn" }
+                : { active: false, label: "Đã hết thời hạn" };
+        }
+
         // Vẽ danh sách voucher/khuyến mãi của cửa hàng.
         function renderPromotions() {
             const tbody = document.getElementById("promotionBody");
@@ -749,7 +761,7 @@
             }
 
             tbody.innerHTML = promotionsData.map((promo, idx) => {
-                const active = isPromotionActive(promo, 0);
+                const status = getPromotionStatus(promo);
                 return `
                     <tr>
                         <td><strong>${escapeHtml(promo.code)}</strong></td>
@@ -757,7 +769,7 @@
                         <td>${promo.startDate}</td>
                         <td>${promo.endDate}</td>
                         <td>Đơn từ ${money(Number(promo.minOrder) || 0)}</td>
-                        <td><span class="badge ${active ? "green" : "amber"}">${active ? "Đang trong thời gian" : "Chưa/đã hết hạn"}</span></td>
+                        <td><span class="badge ${status.active ? "green" : "amber"}">${status.label}</span></td>
                         <td>
                             <button class="icon-button" title="Chỉnh sửa" onclick="openEditPromotion(${idx})"><i data-lucide="pencil" style="width:16px"></i></button>
                             <button class="icon-button" title="Xóa" onclick="deletePromotion(${idx})"><i data-lucide="trash-2" style="width:16px;color:#ef4444"></i></button>
@@ -1010,19 +1022,19 @@
             if (window.lucide) lucide.createIcons();
         }
 
-        // Xóa sản phẩm khỏi danh sách và đồng bộ xuống database.
+        // Xóa thật khi chưa có chứng từ; nếu đã phát sinh thì API sẽ tắt sản phẩm để giữ lịch sử.
         async function deleteProduct(idx) {
-            if (await confirmDeletion("Sản phẩm sẽ bị xóa khỏi cơ sở dữ liệu nếu chưa phát sinh chứng từ. Bạn có chắc muốn xóa?", "Xóa sản phẩm?")) {
+            if (await confirmDeletion("Sản phẩm chưa phát sinh chứng từ sẽ bị xóa. Nếu đã có chứng từ, sản phẩm sẽ được chuyển sang trạng thái tắt và ẩn khỏi các form. Bạn có chắc muốn tiếp tục?", "Xóa sản phẩm?")) {
                 const product = productsData[idx];
                 try {
                     const response = await fetch(`${API_BASE_URL}/api/san-pham/${encodeURIComponent(product.sku)}`, { method: "DELETE" });
+                    const result = await response.json().catch(() => null);
                     if (!response.ok) {
-                        const problem = await response.json().catch(() => null);
-                        throw new Error(problem?.message || "Không xóa được sản phẩm.");
+                        throw new Error(result?.message || "Không xóa được sản phẩm.");
                     }
                     await loadAppState();
                     renderAll();
-                    toast("Đã xóa sản phẩm thành công!");
+                    toast(result?.message || "Đã xóa sản phẩm thành công!");
                 } catch (error) {
                     console.error(error);
                     alert(error.message || "Không xóa được sản phẩm trong cơ sở dữ liệu.");

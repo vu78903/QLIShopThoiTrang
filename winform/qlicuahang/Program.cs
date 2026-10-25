@@ -26,12 +26,23 @@ namespace qlicuahang
                     return;
                 }
 
-                // Mở form đăng nhập trước. Đăng nhập đúng thì mới cho vào màn hình chính.
-                using formDangNhap login = new();
-                DialogResult loginResult = login.ShowDialog();
-                File.AppendAllText(logPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} Dong form dang nhap: {loginResult}.{Environment.NewLine}");
-                if (loginResult == DialogResult.OK)
-                    Application.Run(new formTongQuan());
+                // Mỗi lần đăng xuất sẽ đóng form chính và quay lại một form đăng nhập mới.
+                while (true)
+                {
+                    formDangNhap.XoaPhienDangNhap();
+                    using formDangNhap login = new();
+                    DialogResult loginResult = login.ShowDialog();
+                    File.AppendAllText(logPath,
+                        $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} Dong form dang nhap: {loginResult}.{Environment.NewLine}");
+                    if (loginResult != DialogResult.OK) break;
+
+                    using formTongQuan mainForm = new();
+                    Application.Run(mainForm);
+                    if (!mainForm.YeuCauDangXuat) break;
+
+                    File.AppendAllText(logPath,
+                        $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} Dang xuat, quay lai form dang nhap.{Environment.NewLine}");
+                }
             }
             catch (Exception ex)
             {

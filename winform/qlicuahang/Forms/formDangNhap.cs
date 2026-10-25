@@ -11,6 +11,13 @@ public partial class formDangNhap : Form
     public static string TenHienThi = "";
     public static string MaNhanVien = "";
 
+    public static void XoaPhienDangNhap()
+    {
+        VaiTro = "";
+        TenHienThi = "";
+        MaNhanVien = "";
+    }
+
     private readonly WebView2 webView = new() { Dock = DockStyle.Fill };
     private bool dangXuLy;
 

@@ -104,10 +104,17 @@ app.MapDelete("/api/san-pham/{sku}", async (string sku, StoreRepository store, P
     try
     {
         var image = await store.GetProductImageAsync(sku);
-        if (!await store.DeleteProductAsync(sku)) return Results.NotFound();
-        if (!await store.IsProductImageInUseAsync(image))
+        var result = await store.DeleteProductAsync(sku);
+        if (result == ProductDeleteResult.NotFound) return Results.NotFound();
+        if (result == ProductDeleteResult.Deleted && !await store.IsProductImageInUseAsync(image))
             await images.DeleteManagedFileAsync(image);
-        return Results.NoContent();
+        return Results.Ok(new
+        {
+            mode = result == ProductDeleteResult.Deactivated ? "deactivated" : "deleted",
+            message = result == ProductDeleteResult.Deactivated
+                ? "Sản phẩm đã phát sinh chứng từ nên được chuyển sang trạng thái tắt."
+                : "Đã xóa sản phẩm thành công."
+        });
     }
     catch (InvalidOperationException ex)
     {
