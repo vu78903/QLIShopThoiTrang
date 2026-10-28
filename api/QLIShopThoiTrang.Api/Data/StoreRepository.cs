@@ -23,6 +23,33 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
         return $"{connection.DataSource}/{connection.Database}";
     }
 
+    public async Task<bool> InvoiceExistsAsync(string invoiceId)
+    {
+        await using var connection = db.CreateConnection();
+        await connection.OpenAsync();
+        return await ScalarLongAsync(connection, null,
+            "SELECT COUNT(*) FROM HoaDon WHERE SoHD=@id", ("@id", invoiceId)) > 0;
+    }
+
+    public async Task ValidatePayableInvoiceAsync(InvoiceCreateDto input)
+    {
+        await using var connection = db.CreateConnection();
+        await connection.OpenAsync();
+        if (string.IsNullOrWhiteSpace(input.EmployeeId) || await ScalarLongAsync(connection, null,
+                "SELECT COUNT(*) FROM NhanVien WHERE MaNV=@id AND TrangThai=TRUE",
+                ("@id", input.EmployeeId?.Trim())) == 0)
+            throw new InvalidOperationException("Nhan vien lap hoa don khong ton tai hoac da ngung hoat dong.");
+
+        foreach (var item in input.Items)
+        {
+            var stock = await ScalarLongAsync(connection, null,
+                "SELECT COALESCE(MAX(SoLuongTonKho),-1) FROM SanPham WHERE MaSKU=@sku AND TrangThai=TRUE",
+                ("@sku", item.Sku));
+            if (stock < item.Qty)
+                throw new InvalidOperationException($"San pham {item.Sku} khong du ton kho de tao thanh toan.");
+        }
+    }
+
     public async Task<AppStateDto> GetAppStateAsync()
     {
         await using var connection = db.CreateConnection();
@@ -35,7 +62,8 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
             await QueryImportRequestsAsync(connection),
             await QuerySalesHistoryAsync(connection),
             await QueryDeliveryOrdersAsync(connection),
-            await QueryCodOrdersAsync(connection));
+            await QueryCodOrdersAsync(connection),
+            await QueryCancelledOrdersAsync(connection));
     }
 
     public async Task<List<ProductTypeDto>> GetProductTypesAsync()
@@ -187,12 +215,23 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
         await connection.OpenAsync();
         await using var tx = (NpgsqlTransaction)await connection.BeginTransactionAsync();
         var type = input.Type.Trim();
+        var audience = NormalizeProductAudience(input.Audience);
+        var supplier = (input.SupplierId ?? string.Empty).Trim().ToUpperInvariant();
+        if (string.IsNullOrWhiteSpace(supplier) || await ScalarLongAsync(connection, tx,
+                "SELECT COUNT(*) FROM NhaSanXuat WHERE MaNSX=@supplier AND TrangThai=TRUE",
+                ("@supplier", supplier)) == 0)
+            throw new InvalidOperationException("Nhà cung cấp không tồn tại hoặc đã ngừng hoạt động.");
         var color = string.IsNullOrWhiteSpace(input.Color) ? "Mặc định" : input.Color.Trim();
         var size = string.IsNullOrWhiteSpace(input.Size) ? "Free size" : input.Size.Trim();
         var maLoai = await ScalarStringAsync(connection, tx,
             "SELECT MaLoai FROM LoaiSanPham WHERE TrangThai=TRUE AND (TenLoai=@type OR MaLoai=@type) LIMIT 1",
             ("@type", type));
         if (maLoai is null) throw new InvalidOperationException("Loại sản phẩm không tồn tại.");
+        var typeName = await ScalarStringAsync(connection, tx,
+            "SELECT TenLoai FROM LoaiSanPham WHERE MaLoai=@type", ("@type", maLoai)) ?? type;
+        var expectedSupplier = ExpectedSupplierId(typeName, audience);
+        if (!supplier.Equals(expectedSupplier, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException($"Loại {typeName} phải thuộc {SupplierLabel(expectedSupplier)}.");
 
         var duplicateVariant = await ScalarLongAsync(connection, tx, """
             SELECT COUNT(*) FROM SanPham
@@ -202,17 +241,23 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
         if (duplicateVariant > 0)
             throw new InvalidOperationException("Sản phẩm đã có biến thể màu và size này.");
 
+        // Danh mục và nhà cung cấp thuộc cấp MaSP, nên sửa một SKU sẽ đồng bộ toàn bộ màu/size.
+        await ExecuteAsync(connection, tx,
+            "UPDATE SanPham SET DanhMuc=@audience,MaNSX=@supplier WHERE MaSP=@productId",
+            ("@audience", audience), ("@supplier", supplier), ("@productId", productId));
+
         await ExecuteAsync(connection, tx, """
-            INSERT INTO SanPham(MaSP,MaSKU,MaLoai,TenSanPham,SoLuong,KichCo,MauSac,TrangThai,DonGia,SoLuongTonKho,HinhAnh)
-            VALUES(@productId,@sku,@type,@name,@stock,@size,@color,TRUE,@price,@stock,@image)
+            INSERT INTO SanPham(MaSP,MaSKU,MaLoai,TenSanPham,DanhMuc,MaNSX,SoLuong,KichCo,MauSac,TrangThai,DonGia,SoLuongTonKho,HinhAnh)
+            VALUES(@productId,@sku,@type,@name,@audience,@supplier,@stock,@size,@color,TRUE,@price,@stock,@image)
             ON CONFLICT (MaSKU) DO UPDATE SET
                 MaSP=EXCLUDED.MaSP,MaLoai=EXCLUDED.MaLoai,TenSanPham=EXCLUDED.TenSanPham,DonGia=EXCLUDED.DonGia,
                 SoLuong=EXCLUDED.SoLuong,SoLuongTonKho=EXCLUDED.SoLuongTonKho,
-                KichCo=EXCLUDED.KichCo,MauSac=EXCLUDED.MauSac,HinhAnh=EXCLUDED.HinhAnh,TrangThai=TRUE;
+                KichCo=EXCLUDED.KichCo,MauSac=EXCLUDED.MauSac,DanhMuc=EXCLUDED.DanhMuc,MaNSX=EXCLUDED.MaNSX,
+                HinhAnh=EXCLUDED.HinhAnh,TrangThai=TRUE;
             """,
             ("@sku", sku), ("@productId", productId), ("@type", maLoai), ("@name", input.Name.Trim()),
             ("@price", input.Price), ("@stock", input.Stock), ("@color", color),
-            ("@size", size),
+            ("@size", size), ("@audience", audience), ("@supplier", supplier),
             ("@image", DbValue(input.Image)));
         await tx.CommitAsync();
     }
@@ -230,8 +275,12 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
                 FROM SanPham sp JOIN LoaiSanPham l ON l.MaLoai=sp.MaLoai
                 WHERE lower(trim(sp.TenSanPham))=lower(trim(@name))
                   AND (l.TenLoai=@type OR l.MaLoai=@type)
+                  AND sp.DanhMuc=@audience
+                  AND sp.MaNSX=@supplier
                 ORDER BY sp.MaSP LIMIT 1
-                """, ("@name", input.Name.Trim()), ("@type", input.Type.Trim()));
+                """, ("@name", input.Name.Trim()), ("@type", input.Type.Trim()),
+                ("@audience", NormalizeProductAudience(input.Audience)),
+                ("@supplier", (input.SupplierId ?? string.Empty).Trim().ToUpperInvariant()));
             productId = Convert.ToString(await existing.ExecuteScalarAsync()) ?? string.Empty;
         }
         if (string.IsNullOrWhiteSpace(productId))
@@ -263,6 +312,43 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
         }
         return input with { ProductId = productId, Sku = sku };
     }
+
+    private static string NormalizeProductAudience(string? value)
+    {
+        var audience = ToAscii(value ?? string.Empty).Replace(' ', '_');
+        return audience switch
+        {
+            "NAM" => "NAM",
+            "NU" => "NU",
+            "PHU_KIEN" or "PHUKIEN" => "PHU_KIEN",
+            _ => throw new InvalidOperationException("Danh mục phải là Nam, Nữ hoặc Phụ kiện.")
+        };
+    }
+
+    private static string ExpectedSupplierId(string typeName, string audience)
+    {
+        var type = ToAscii(typeName);
+        if (type.Contains("QUAN TAY") || type.Contains("SO MI") || type.Contains("VEST")) return "NCC-004";
+        if (type.Contains("AO THUN") || type.Contains("BABY TEE")) return "NCC-001";
+        if (type.Contains("DO LOT") || type == "NON" || type == "VO" || type.Contains("PHU KIEN")) return "NCC-002";
+        return audience switch
+        {
+            "NAM" => "NCC-003",
+            "NU" => "NCC-005",
+            "PHU_KIEN" => "NCC-002",
+            _ => throw new InvalidOperationException("Không xác định được nhà cung cấp phù hợp.")
+        };
+    }
+
+    private static string SupplierLabel(string supplierId) => supplierId switch
+    {
+        "NCC-001" => "Chợ An Đông",
+        "NCC-002" => "Xưởng may Thành Công",
+        "NCC-003" => "Xưởng may Dony",
+        "NCC-004" => "Tổng Công ty May Việt Tiến",
+        "NCC-005" => "Tổng Công ty May Nhà Bè",
+        _ => supplierId
+    };
 
     private static async Task<bool> ProductSkuExistsAsync(NpgsqlConnection connection, string sku)
     {
@@ -330,6 +416,8 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
     {
         var fileSkus = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var fileVariants = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var fileAudiences = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var fileSuppliers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         await using var connection = db.CreateConnection();
         await connection.OpenAsync();
@@ -342,6 +430,18 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
                 throw new InvalidOperationException($"Dòng {index + 2}: Mã SP phải có dạng SP-023.");
             if (string.IsNullOrWhiteSpace(input.Name) || string.IsNullOrWhiteSpace(input.Type))
                 throw new InvalidOperationException($"Dòng {index + 2}: tên và loại sản phẩm là bắt buộc.");
+            var audience = NormalizeProductAudience(input.Audience);
+            var supplier = (input.SupplierId ?? string.Empty).Trim().ToUpperInvariant();
+            if (string.IsNullOrWhiteSpace(supplier) || await ScalarLongAsync(connection, tx,
+                    "SELECT COUNT(*) FROM NhaSanXuat WHERE MaNSX=@supplier AND TrangThai=TRUE",
+                    ("@supplier", supplier)) == 0)
+                throw new InvalidOperationException($"Dòng {index + 2}: nhà cung cấp không tồn tại hoặc đã ngừng hoạt động.");
+            if (fileAudiences.TryGetValue(productId, out var knownAudience) && knownAudience != audience)
+                throw new InvalidOperationException($"Dòng {index + 2}: các biến thể cùng Mã SP phải cùng danh mục.");
+            fileAudiences[productId] = audience;
+            if (fileSuppliers.TryGetValue(productId, out var knownSupplier) && knownSupplier != supplier)
+                throw new InvalidOperationException($"Dòng {index + 2}: các biến thể cùng Mã SP phải cùng nhà cung cấp.");
+            fileSuppliers[productId] = supplier;
             if (input.Price <= 0 || input.Stock < 0)
                 throw new InvalidOperationException($"Dòng {index + 2}: giá hoặc tồn kho không hợp lệ.");
 
@@ -379,6 +479,17 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
                     """, ("@productId", productId), ("@color", color), ("@size", size)) > 0)
                 throw new InvalidOperationException($"Dòng {index + 2}: biến thể {productId} - {color} - {size} đã tồn tại.");
 
+            var otherAudience = await ScalarStringAsync(connection, tx, """
+                SELECT danhmuc FROM SanPham WHERE MaSP=@productId AND danhmuc IS NOT NULL LIMIT 1
+                """, ("@productId", productId));
+            if (otherAudience is not null && !otherAudience.Equals(audience, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException($"Dòng {index + 2}: các biến thể cùng Mã SP phải cùng danh mục.");
+            var otherSupplier = await ScalarStringAsync(connection, tx,
+                "SELECT MaNSX FROM SanPham WHERE MaSP=@productId AND MaNSX IS NOT NULL LIMIT 1",
+                ("@productId", productId));
+            if (otherSupplier is not null && !otherSupplier.Equals(supplier, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException($"Dòng {index + 2}: các biến thể cùng Mã SP phải cùng nhà cung cấp.");
+
             var type = input.Type.Trim();
             var maLoai = await ScalarStringAsync(connection, tx,
                 "SELECT MaLoai FROM LoaiSanPham WHERE TrangThai=TRUE AND (TenLoai=@type OR MaLoai=@type) LIMIT 1",
@@ -394,14 +505,17 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
                     "INSERT INTO LoaiSanPham(MaLoai,TenLoai,MoTa,TrangThai) VALUES(@id,@name,'Loại tạo từ file import',TRUE)",
                     ("@id", maLoai), ("@name", type));
             }
+            var expectedSupplier = ExpectedSupplierId(type, audience);
+            if (!supplier.Equals(expectedSupplier, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException($"Dòng {index + 2}: loại {type} phải thuộc {SupplierLabel(expectedSupplier)}.");
 
             await ExecuteAsync(connection, tx, """
-                INSERT INTO SanPham(MaSP,MaSKU,MaLoai,TenSanPham,SoLuong,KichCo,MauSac,TrangThai,DonGia,SoLuongTonKho,HinhAnh)
-                VALUES(@productId,@sku,@type,@name,@stock,@size,@color,TRUE,@price,@stock,NULL)
+                INSERT INTO SanPham(MaSP,MaSKU,MaLoai,TenSanPham,DanhMuc,MaNSX,SoLuong,KichCo,MauSac,TrangThai,DonGia,SoLuongTonKho,HinhAnh)
+                VALUES(@productId,@sku,@type,@name,@audience,@supplier,@stock,@size,@color,TRUE,@price,@stock,NULL)
                 """,
                 ("@productId", productId), ("@sku", sku), ("@type", maLoai), ("@name", input.Name.Trim()),
                 ("@stock", input.Stock), ("@color", color), ("@size", size),
-                ("@price", input.Price));
+                ("@price", input.Price), ("@audience", audience), ("@supplier", supplier));
         }
         await tx.CommitAsync();
     }
@@ -532,7 +646,27 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
     public async Task SavePromotionAsync(PromotionUpsertDto input)
     {
         var code = input.Code.Trim().ToUpperInvariant();
-        await ExecuteStandaloneAsync("""
+        var products = (input.Products ?? [])
+            .Where(item => !string.IsNullOrWhiteSpace(item.Sku))
+            .GroupBy(item => item.Sku.Trim().ToUpperInvariant(), StringComparer.OrdinalIgnoreCase)
+            .Select(group => new PromotionProductUpsertDto(group.Key, group.Last().Percent))
+            .ToList();
+        if (products.Any(item => item.Percent <= 0 || item.Percent > 100))
+            throw new InvalidOperationException("Phần trăm giảm của sản phẩm phải từ 1 đến 100.");
+        var startDate = ParseDate(input.StartDate);
+        var endDate = ParseDate(input.EndDate);
+        if (products.Count == 0)
+        {
+            startDate = startDate.Date;
+            endDate = endDate.Date.AddDays(1).AddMilliseconds(-1);
+        }
+        if (endDate <= startDate)
+            throw new InvalidOperationException("Thời gian kết thúc phải sau thời gian bắt đầu.");
+
+        await using var connection = db.CreateConnection();
+        await connection.OpenAsync();
+        await using var tx = (NpgsqlTransaction)await connection.BeginTransactionAsync();
+        await ExecuteAsync(connection, tx, """
             INSERT INTO KhuyenMai(MaKM,TenChuongTrinh,LoaiKM,GiaTriGiam,GiaTriDonHangToiThieu,NgayBatDau,NgayKetThuc)
             VALUES(@code,@code,'Phần trăm',@percent,@minOrder,@startDate,@endDate)
             ON CONFLICT (MaKM) DO UPDATE SET TenChuongTrinh=EXCLUDED.TenChuongTrinh,
@@ -541,37 +675,91 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
                 NgayBatDau=EXCLUDED.NgayBatDau,NgayKetThuc=EXCLUDED.NgayKetThuc,TrangThai=TRUE;
             """,
             ("@code", code), ("@percent", input.Percent), ("@minOrder", input.MinOrder),
-            ("@startDate", ParseDate(input.StartDate)), ("@endDate", ParseDate(input.EndDate)));
+            ("@startDate", startDate), ("@endDate", endDate));
+
+        await ExecuteAsync(connection, tx, "DELETE FROM KhuyenMaiSanPham WHERE MaKM=@code", ("@code", code));
+        foreach (var item in products)
+        {
+            if (await ScalarLongAsync(connection, tx,
+                "SELECT COUNT(*) FROM SanPham WHERE MaSKU=@sku AND TrangThai=TRUE",
+                ("@sku", item.Sku)) == 0)
+                throw new InvalidOperationException($"Mã SKU {item.Sku} không tồn tại hoặc đã ngừng kinh doanh.");
+            await ExecuteAsync(connection, tx, """
+                INSERT INTO KhuyenMaiSanPham(MaKM,MaSKU,PhanTramGiam)
+                VALUES(@code,@sku,@percent)
+                """, ("@code", code), ("@sku", item.Sku), ("@percent", item.Percent));
+        }
+        await tx.CommitAsync();
     }
 
     public async Task<bool> DeactivatePromotionAsync(string code) =>
         await ExecuteStandaloneAsync("UPDATE KhuyenMai SET TrangThai=FALSE WHERE MaKM=@code", ("@code", code)) > 0;
+
+    public async Task<List<CurrentPromotionProductDto>> GetCurrentPromotionProductsAsync()
+    {
+        var items = new List<CurrentPromotionProductDto>();
+        await using var connection = db.CreateConnection();
+        await connection.OpenAsync();
+        await using var command = NewCommand(connection, null, """
+            SELECT MaKhuyenMai,MaSanPham,MaSKU,TenSanPham,MauSac,KichCo,GiaGoc,PhanTramGiam,GiaKhuyenMai,
+                   NgayBatDau,NgayKetThuc,HinhAnh
+            FROM SanPhamKhuyenMai_HienTai
+            ORDER BY TenSanPham,MaSKU
+            """);
+        await using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+            items.Add(new CurrentPromotionProductDto(reader.GetString(0), reader.GetString(1), reader.GetString(2),
+                reader.GetString(3), reader.GetString(4), reader.GetString(5), reader.GetDecimal(6),
+                reader.GetDecimal(7), reader.GetDecimal(8), reader.GetDateTime(9).ToString("yyyy-MM-ddTHH:mm"),
+                reader.GetDateTime(10).ToString("yyyy-MM-ddTHH:mm"), reader.IsDBNull(11) ? null : reader.GetString(11)));
+        return items;
+    }
 
     public async Task<string> CreateImportRequestAsync(ImportRequestCreateDto input)
     {
         await using var connection = db.CreateConnection();
         await connection.OpenAsync();
         await using var tx = (NpgsqlTransaction)await connection.BeginTransactionAsync();
-        var sku = input.Sku.Trim().ToUpperInvariant();
-        var price = await ScalarDecimalAsync(connection, tx,
-            "SELECT DonGia FROM SanPham WHERE MaSKU=@sku AND TrangThai=TRUE", ("@sku", sku));
-        if (price is null) throw new InvalidOperationException("Mã sản phẩm không tồn tại.");
         var supplier = input.SupplierId.Trim();
         if (await ScalarLongAsync(connection, tx,
             "SELECT COUNT(*) FROM NhaSanXuat WHERE MaNSX=@id AND TrangThai=TRUE", ("@id", supplier)) == 0)
             throw new InvalidOperationException("Nhà cung cấp không tồn tại.");
+        if (input.Items is null || input.Items.Count == 0)
+            throw new InvalidOperationException("Phiếu nhập kho phải có ít nhất một sản phẩm.");
+
+        var lines = new List<(string Sku, int Qty, decimal UnitCost, decimal Total)>();
+        var usedSkus = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var item in input.Items)
+        {
+            var sku = (item.Sku ?? string.Empty).Trim().ToUpperInvariant();
+            if (string.IsNullOrWhiteSpace(sku) || !usedSkus.Add(sku))
+                throw new InvalidOperationException("Mỗi SKU chỉ được xuất hiện một lần trên phiếu nhập kho.");
+            if (item.Qty <= 0 || item.UnitCost <= 0)
+                throw new InvalidOperationException("Số lượng và giá gốc phải lớn hơn 0.");
+            if (await ScalarLongAsync(connection, tx, """
+                    SELECT COUNT(*) FROM SanPham
+                    WHERE MaSKU=@sku AND MaNSX=@supplier AND TrangThai=TRUE
+                    """, ("@sku", sku), ("@supplier", supplier)) == 0)
+                throw new InvalidOperationException($"SKU {sku} không thuộc nhà cung cấp đã chọn.");
+            lines.Add((sku, item.Qty, item.UnitCost, item.Qty * item.UnitCost));
+        }
 
         var employee = string.IsNullOrWhiteSpace(input.EmployeeId) ? "NV-003" : input.EmployeeId.Trim();
         var id = "PN-" + DateTime.Now.ToString("yyMMddHHmmssfff", CultureInfo.InvariantCulture);
-        var total = price.Value * input.Qty;
+        var totalQty = lines.Sum(x => x.Qty);
+        var total = lines.Sum(x => x.Total);
         await ExecuteAsync(connection, tx, """
             INSERT INTO PhieuNhapKho(SoPhieuNK,NgayLap,SoPO,NguoiGiao,TongSoLuong,TongTien,MaNSX,MaNV,TrangThai)
             VALUES(@id,CURRENT_TIMESTAMP,NULL,NULL,@qty,@total,@supplier,@employee,'CHO_DUYET');
-            INSERT INTO ChiTietNhapKho(SoPhieuNK,MaSKU,SoLuong,DonGia,ThanhTien,GhiChu)
-            VALUES(@id,@sku,@qty,@price,@total,@note);
             """,
-            ("@id", id), ("@qty", input.Qty), ("@total", total), ("@supplier", supplier),
-            ("@employee", employee), ("@sku", sku), ("@price", price.Value), ("@note", DbValue(input.Note)));
+            ("@id", id), ("@qty", totalQty), ("@total", total), ("@supplier", supplier),
+            ("@employee", employee));
+        foreach (var line in lines)
+            await ExecuteAsync(connection, tx, """
+                INSERT INTO ChiTietNhapKho(SoPhieuNK,MaSKU,SoLuong,DonGia,ThanhTien,GhiChu)
+                VALUES(@id,@sku,@qty,@price,@total,@note)
+                """, ("@id", id), ("@sku", line.Sku), ("@qty", line.Qty),
+                ("@price", line.UnitCost), ("@total", line.Total), ("@note", DbValue(input.Note)));
         await tx.CommitAsync();
         return id;
     }
@@ -1116,16 +1304,19 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
     {
         var items = new List<ProductDto>();
         await using var command = NewCommand(connection, null, """
-            SELECT sp.MaSP,sp.MaSKU,sp.TenSanPham,l.TenLoai,sp.MauSac,sp.KichCo,sp.DonViTinh,
-                   sp.DonGia,sp.SoLuongTonKho,sp.HinhAnh
+            SELECT sp.MaSP,sp.MaSKU,sp.TenSanPham,l.TenLoai,sp.DanhMuc,sp.MaNSX,n.TenNSX,
+                   sp.MauSac,sp.KichCo,sp.DonViTinh,sp.DonGia,sp.SoLuongTonKho,sp.HinhAnh
             FROM SanPham sp JOIN LoaiSanPham l ON l.MaLoai=sp.MaLoai
+            LEFT JOIN NhaSanXuat n ON n.MaNSX=sp.MaNSX
             WHERE sp.TrangThai=TRUE AND l.TrangThai=TRUE ORDER BY sp.MaSKU
             """);
         await using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
             items.Add(new(reader.GetString(0), reader.GetString(1), reader.GetString(2), reader.GetString(3),
-                reader.GetString(4), reader.GetString(5), reader.GetString(6), reader.GetDecimal(7), reader.GetInt32(8),
-                reader.IsDBNull(9) ? null : reader.GetString(9)));
+                reader.IsDBNull(4) ? null : reader.GetString(4), reader.IsDBNull(5) ? null : reader.GetString(5),
+                reader.IsDBNull(6) ? null : reader.GetString(6), reader.GetString(7), reader.GetString(8),
+                reader.GetString(9), reader.GetDecimal(10), reader.GetInt32(11),
+                reader.IsDBNull(12) ? null : reader.GetString(12)));
         return items;
     }
 
@@ -1152,30 +1343,62 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
 
     private static async Task<List<PromotionDto>> QueryPromotionsAsync(NpgsqlConnection connection)
     {
-        var items = new List<PromotionDto>();
-        await using var command = NewCommand(connection, null,
-            "SELECT MaKM,GiaTriGiam,GiaTriDonHangToiThieu,NgayBatDau,NgayKetThuc FROM KhuyenMai WHERE TrangThai=TRUE ORDER BY MaKM");
-        await using var reader = await command.ExecuteReaderAsync();
-        while (await reader.ReadAsync()) items.Add(new(reader.GetString(0),reader.GetDecimal(1),reader.GetDecimal(2),
-            reader.GetDateTime(3).ToString("yyyy-MM-dd"),reader.GetDateTime(4).ToString("yyyy-MM-dd")));
-        return items;
+        var headers = new List<(string Code, decimal Percent, decimal MinOrder, DateTime StartDate, DateTime EndDate)>();
+        await using (var command = NewCommand(connection, null,
+            "SELECT MaKM,GiaTriGiam,GiaTriDonHangToiThieu,NgayBatDau,NgayKetThuc FROM KhuyenMai WHERE TrangThai=TRUE ORDER BY MaKM"))
+        await using (var reader = await command.ExecuteReaderAsync())
+            while (await reader.ReadAsync()) headers.Add((reader.GetString(0), reader.GetDecimal(1), reader.GetDecimal(2),
+                reader.GetDateTime(3), reader.GetDateTime(4)));
+
+        var productRows = new List<(string Code, PromotionProductDto Product)>();
+        await using (var command = NewCommand(connection, null, """
+            SELECT ksp.MaKM,sp.MaSKU,sp.MaSP,sp.TenSanPham,sp.MauSac,sp.KichCo,sp.DonGia,ksp.PhanTramGiam
+            FROM KhuyenMaiSanPham ksp
+            JOIN SanPham sp ON sp.MaSKU=ksp.MaSKU AND sp.TrangThai=TRUE
+            ORDER BY ksp.MaKM,sp.MaSKU
+            """))
+        await using (var reader = await command.ExecuteReaderAsync())
+            while (await reader.ReadAsync())
+            {
+                var originalPrice = reader.GetDecimal(6);
+                var percent = reader.GetDecimal(7);
+                var salePrice = Math.Round(originalPrice * (100m - percent) / 100m, 0, MidpointRounding.AwayFromZero);
+                productRows.Add((reader.GetString(0), new PromotionProductDto(reader.GetString(1), reader.GetString(2),
+                    reader.GetString(3), reader.GetString(4), reader.GetString(5), originalPrice, percent, salePrice)));
+            }
+
+        return headers.Select(header => new PromotionDto(header.Code, header.Percent, header.MinOrder,
+            header.StartDate.ToString("yyyy-MM-ddTHH:mm"), header.EndDate.ToString("yyyy-MM-ddTHH:mm"),
+            productRows.Where(row => row.Code == header.Code).Select(row => row.Product).ToList())).ToList();
     }
 
     private static async Task<List<ImportRequestDto>> QueryImportRequestsAsync(NpgsqlConnection connection)
     {
-        var items = new List<ImportRequestDto>();
+        var rows = new List<(string Id, string SupplierId, string SupplierName, int TotalQty,
+            decimal TotalAmount, string CreatedBy, DateTime CreatedAt, string Status, string Note,
+            string Sku, string ProductName, int Qty, decimal UnitCost, decimal Total)>();
         await using var command = NewCommand(connection, null, """
-            SELECT p.SoPhieuNK,p.MaNSX,n.TenNSX,c.MaSKU,s.TenSanPham,c.SoLuong,nv.HoTen,p.NgayLap,p.TrangThai,COALESCE(c.GhiChu,'')
+            SELECT p.SoPhieuNK,p.MaNSX,n.TenNSX,p.TongSoLuong,p.TongTien,nv.HoTen,p.NgayLap,p.TrangThai,
+                   COALESCE(c.GhiChu,''),c.MaSKU,s.TenSanPham,c.SoLuong,c.DonGia,c.ThanhTien
             FROM PhieuNhapKho p
             JOIN NhaSanXuat n ON n.MaNSX=p.MaNSX JOIN NhanVien nv ON nv.MaNV=p.MaNV
             JOIN ChiTietNhapKho c ON c.SoPhieuNK=p.SoPhieuNK JOIN SanPham s ON s.MaSKU=c.MaSKU
-            ORDER BY p.NgayLap DESC
+            ORDER BY p.NgayLap DESC,c.MaSKU
             """);
         await using var reader = await command.ExecuteReaderAsync();
-        while (await reader.ReadAsync()) items.Add(new(reader.GetString(0),reader.GetString(1),reader.GetString(2),
-            reader.GetString(3),reader.GetString(4),reader.GetInt32(5),reader.GetString(6),
-            reader.GetDateTime(7).ToString("dd/MM/yyyy HH:mm"),MapImportStatus(reader.GetString(8)),reader.GetString(9)));
-        return items;
+        while (await reader.ReadAsync()) rows.Add((reader.GetString(0), reader.GetString(1), reader.GetString(2),
+            reader.GetInt32(3), reader.GetDecimal(4), reader.GetString(5), reader.GetDateTime(6),
+            reader.GetString(7), reader.GetString(8), reader.GetString(9), reader.GetString(10),
+            reader.GetInt32(11), reader.GetDecimal(12), reader.GetDecimal(13)));
+
+        return rows.GroupBy(x => x.Id).Select(group =>
+        {
+            var first = group.First();
+            return new ImportRequestDto(first.Id, first.SupplierId, first.SupplierName,
+                group.Select(x => new ImportRequestItemDto(x.Sku, x.ProductName, x.Qty, x.UnitCost, x.Total)).ToList(),
+                first.TotalQty, first.TotalAmount, first.CreatedBy,
+                first.CreatedAt.ToString("dd/MM/yyyy HH:mm"), MapImportStatus(first.Status), first.Note);
+        }).ToList();
     }
 
     // Nạp lại doanh thu 30 ngày gần nhất để báo cáo không mất khi đóng chương trình.
@@ -1238,15 +1461,83 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
         return result;
     }
 
+    // Đơn hủy được giữ lại để đối soát nhưng không còn xuất hiện trong luồng giao hàng đang xử lý.
+    private static async Task<List<DeliveryOrderDto>> QueryCancelledOrdersAsync(NpgsqlConnection connection)
+    {
+        var rows = await QueryCancelledShipmentRowsAsync(connection);
+        var result = new List<DeliveryOrderDto>();
+        foreach (var row in rows)
+        {
+            var details = await QueryInvoiceItemsAsync(connection, row.Id);
+            if (details.Count == 0)
+                details = await QueryWebOrderSnapshotItemsAsync(connection, row.Id);
+            var customer = new InvoiceCustomerDto(row.Name, row.Phone);
+            var receipt = new ReceiptStateDto(row.Id, customer, details, row.Subtotal, row.Discount, row.Vat,
+                row.Total, row.Payment, row.Total, (int)Math.Floor(row.Total / 10000m),
+                string.Equals(row.Payment, "COD", StringComparison.OrdinalIgnoreCase));
+            result.Add(new(row.Id, row.Name, row.Phone, row.Address, row.Note, row.ShippingFee,
+                row.Status, row.Source, receipt));
+        }
+        return result;
+    }
+
+    private static async Task<List<ShipmentRow>> QueryCancelledShipmentRowsAsync(NpgsqlConnection connection)
+    {
+        var rows = new List<ShipmentRow>();
+        await using (var command = NewCommand(connection, null, """
+            SELECT h.SoHD,COALESCE(NULLIF(h.TenNguoiNhan,''),k.HoTen,'Khách giao hàng'),
+                   COALESCE(h.SoDienThoai_KH,''),COALESCE(h.DiaChiGiao,''),COALESCE(h.GhiChuGiaoHang,''),
+                   COALESCE(NULLIF(h.TrangThaiGiaoHang,''),'Đã hủy'),h.TongCong,h.ChietKhau,h.ThueVAT,
+                   h.KhachPhaiTra,h.PhuongThucThanhToan,COALESCE(h.PhiShip,0),
+                   COALESCE(NULLIF(h.NguonDon,''),CASE WHEN h.SoHD LIKE 'WEB%' THEN 'WEB' ELSE 'POS' END)
+            FROM HoaDon h LEFT JOIN KhachHang k ON k.MaKH=h.MaKH
+            WHERE UPPER(h.LoaiHoaDon) IN ('COD','WEB_COD','GIAO_HANG','WEB_DA_THANH_TOAN','WEB_THANH_TOAN','ONLINE')
+              AND (COALESCE(h.TrangThaiGiaoHang,'') ILIKE '%hủy%'
+                   OR COALESCE(h.TrangThaiGiaoHang,'') ILIKE '%huy%'
+                   OR UPPER(TRIM(COALESCE(h.TrangThaiGiaoHang,''))) IN ('HUY','DA_HUY','CANCELLED','CANCELED'))
+            ORDER BY h.NgayLap DESC
+            """))
+        await using (var reader = await command.ExecuteReaderAsync())
+            while (await reader.ReadAsync())
+                rows.Add(new(reader.GetString(0), reader.GetString(1), reader.GetString(2), reader.GetString(3),
+                    reader.GetString(4), reader.GetString(5), reader.GetDecimal(6), reader.GetDecimal(7), reader.GetDecimal(8),
+                    reader.GetDecimal(9), reader.GetString(10), reader.GetDecimal(11), reader.GetString(12)));
+
+        // Website giữ snapshot để tra cứu. Nếu hóa đơn gốc không còn thì đó là đơn đã bị hủy/xóa khỏi luồng giao.
+        await using var existsCommand = NewCommand(connection, null, "SELECT to_regclass('webstore.order_snapshot') IS NOT NULL");
+        if (Convert.ToBoolean(await existsCommand.ExecuteScalarAsync()))
+        {
+            await using var snapshotCommand = NewCommand(connection, null, """
+                SELECT s.sohd,s.recipient,s.phone,s.address,s.note,'Đã hủy',s.total,0,0,s.total,'COD',0,'WEB'
+                FROM webstore.order_snapshot s
+                LEFT JOIN public.hoadon h ON h.sohd=s.sohd
+                WHERE h.sohd IS NULL
+                ORDER BY s.ngaylap DESC
+                """);
+            await using var snapshotReader = await snapshotCommand.ExecuteReaderAsync();
+            while (await snapshotReader.ReadAsync())
+                rows.Add(new(snapshotReader.GetString(0), snapshotReader.GetString(1), snapshotReader.GetString(2), snapshotReader.GetString(3),
+                    snapshotReader.GetString(4), snapshotReader.GetString(5), snapshotReader.GetDecimal(6), snapshotReader.GetDecimal(7), snapshotReader.GetDecimal(8),
+                    snapshotReader.GetDecimal(9), snapshotReader.GetString(10), snapshotReader.GetDecimal(11), snapshotReader.GetString(12)));
+        }
+        return rows;
+    }
+
     private sealed record ShipmentRow(string Id, string Name, string Phone, string Address, string Note, string Status,
         decimal Subtotal, decimal Discount, decimal Vat, decimal Total, string Payment, decimal ShippingFee, string Source);
 
-    private static async Task<List<ShipmentRow>> QueryShipmentRowsAsync(NpgsqlConnection connection, bool cod)
+    private static async Task<List<ShipmentRow>> QueryShipmentRowsAsync(NpgsqlConnection connection, bool? cod, bool cancelled = false)
     {
         var rows = new List<ShipmentRow>();
-        var types = cod
-            ? "('COD','WEB_COD')"
-            : "('GIAO_HANG','WEB_DA_THANH_TOAN','WEB_THANH_TOAN')";
+        var types = cod switch
+        {
+            true => "('COD','WEB_COD')",
+            false => "('GIAO_HANG','WEB_DA_THANH_TOAN','WEB_THANH_TOAN')",
+            _ => "('COD','WEB_COD','GIAO_HANG','WEB_DA_THANH_TOAN','WEB_THANH_TOAN','ONLINE')"
+        };
+        var cancellationFilter = cancelled
+            ? "AND (COALESCE(h.TrangThaiGiaoHang,'') ILIKE '%hủy%' OR COALESCE(h.TrangThaiGiaoHang,'') ILIKE '%huy%' OR UPPER(TRIM(COALESCE(h.TrangThaiGiaoHang,''))) IN ('HUY','DA_HUY','CANCELLED','CANCELED'))"
+            : "AND NOT (COALESCE(h.TrangThaiGiaoHang,'') ILIKE '%hủy%' OR COALESCE(h.TrangThaiGiaoHang,'') ILIKE '%huy%' OR UPPER(TRIM(COALESCE(h.TrangThaiGiaoHang,''))) IN ('HUY','DA_HUY','CANCELLED','CANCELED'))";
         await using var command = NewCommand(connection, null, $"""
             SELECT h.SoHD,COALESCE(NULLIF(h.TenNguoiNhan,''),k.HoTen,'Khách giao hàng'),
                    COALESCE(h.SoDienThoai_KH,''),COALESCE(h.DiaChiGiao,''),COALESCE(h.GhiChuGiaoHang,''),
@@ -1256,6 +1547,7 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
             FROM HoaDon h LEFT JOIN KhachHang k ON k.MaKH=h.MaKH
             WHERE UPPER(h.LoaiHoaDon) IN {types}
               AND COALESCE(h.TrangThaiGiaoHang,'')<>'Hàng giao thành công'
+              {cancellationFilter}
             ORDER BY h.NgayLap DESC
             """);
         await using var reader = await command.ExecuteReaderAsync();
@@ -1294,6 +1586,21 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
         return items;
     }
 
+    private static async Task<List<InvoiceItemDto>> QueryWebOrderSnapshotItemsAsync(NpgsqlConnection connection, string invoiceId)
+    {
+        var items = new List<InvoiceItemDto>();
+        await using var existsCommand = NewCommand(connection, null, "SELECT to_regclass('webstore.order_line_snapshot') IS NOT NULL");
+        if (!Convert.ToBoolean(await existsCommand.ExecuteScalarAsync())) return items;
+        await using var command = NewCommand(connection, null, """
+            SELECT masku,name,quantity,price,quantity*price
+            FROM webstore.order_line_snapshot WHERE sohd=@id ORDER BY masku
+            """, ("@id", invoiceId));
+        await using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+            items.Add(new(reader.GetString(0), reader.GetString(1), reader.GetInt32(2), reader.GetDecimal(3), reader.GetDecimal(4)));
+        return items;
+    }
+
     private async Task<int> ExecuteStandaloneAsync(string sql, params (string Name, object? Value)[] parameters)
     {
         await using var connection = db.CreateConnection();
@@ -1318,24 +1625,24 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
         return await command.ExecuteNonQueryAsync();
     }
 
-    private static async Task<object?> ScalarAsync(NpgsqlConnection connection, NpgsqlTransaction tx, string sql,
+    private static async Task<object?> ScalarAsync(NpgsqlConnection connection, NpgsqlTransaction? tx, string sql,
         params (string Name, object? Value)[] parameters)
     {
         await using var command = NewCommand(connection, tx, sql, parameters);
         return await command.ExecuteScalarAsync();
     }
 
-    private static async Task<string?> ScalarStringAsync(NpgsqlConnection c, NpgsqlTransaction tx, string sql,
+    private static async Task<string?> ScalarStringAsync(NpgsqlConnection c, NpgsqlTransaction? tx, string sql,
         params (string Name, object? Value)[] p)
     {
         var value = await ScalarAsync(c, tx, sql, p);
         return value is null or DBNull ? null : Convert.ToString(value, CultureInfo.InvariantCulture);
     }
 
-    private static async Task<long> ScalarLongAsync(NpgsqlConnection c, NpgsqlTransaction tx, string sql,
+    private static async Task<long> ScalarLongAsync(NpgsqlConnection c, NpgsqlTransaction? tx, string sql,
         params (string Name, object? Value)[] p) => Convert.ToInt64(await ScalarAsync(c, tx, sql, p), CultureInfo.InvariantCulture);
 
-    private static async Task<decimal?> ScalarDecimalAsync(NpgsqlConnection c, NpgsqlTransaction tx, string sql,
+    private static async Task<decimal?> ScalarDecimalAsync(NpgsqlConnection c, NpgsqlTransaction? tx, string sql,
         params (string Name, object? Value)[] p)
     {
         var value = await ScalarAsync(c, tx, sql, p);
@@ -1349,7 +1656,7 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
     ];
 
     private static object? DbValue(string? value) => string.IsNullOrWhiteSpace(value) ? DBNull.Value : value.Trim();
-    private static DateTime ParseDate(string value) => DateTime.Parse(value, CultureInfo.InvariantCulture).Date;
+    private static DateTime ParseDate(string value) => DateTime.Parse(value, CultureInfo.InvariantCulture);
     private static string MapImportStatus(string status) => status switch
     {
         "DA_DUYET" or "DA_NHAP" => "Đã duyệt",

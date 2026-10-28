@@ -8,13 +8,17 @@ public sealed record AppStateDto(
     List<ImportRequestDto> ImportRequests,
     List<SaleHistoryDto> SalesHistory,
     List<DeliveryOrderDto> DeliveryOrders,
-    List<CodOrderDto> CodOrders);
+    List<CodOrderDto> CodOrders,
+    List<DeliveryOrderDto> CancelledOrders);
 
 public sealed record ProductDto(
     string ProductId,
     string Sku,
     string Name,
     string Type,
+    string? Audience,
+    string? SupplierId,
+    string? SupplierName,
     string Color,
     string Size,
     string Unit,
@@ -27,6 +31,8 @@ public sealed record ProductUpsertDto(
     string? Sku,
     string Name,
     string Type,
+    string? Audience,
+    string? SupplierId,
     decimal Price,
     int Stock,
     string? Color = null,
@@ -46,23 +52,66 @@ public sealed record PartnerDto(
     int? Points,
     decimal? TotalSpent);
 
-public sealed record PromotionDto(string Code, decimal Percent, decimal MinOrder, string StartDate, string EndDate);
+public sealed record PromotionProductDto(
+    string Sku,
+    string ProductId,
+    string ProductName,
+    string Color,
+    string Size,
+    decimal OriginalPrice,
+    decimal Percent,
+    decimal SalePrice);
+
+public sealed record CurrentPromotionProductDto(
+    string MaKhuyenMai,
+    string MaSanPham,
+    string MaSku,
+    string TenSanPham,
+    string MauSac,
+    string KichCo,
+    decimal GiaGoc,
+    decimal PhanTramGiam,
+    decimal GiaKhuyenMai,
+    string NgayBatDau,
+    string NgayKetThuc,
+    string? HinhAnh);
+
+public sealed record PromotionDto(
+    string Code,
+    decimal Percent,
+    decimal MinOrder,
+    string StartDate,
+    string EndDate,
+    List<PromotionProductDto> Products);
 
 public sealed record ImportRequestDto(
     string Id,
     string SupplierId,
     string SupplierName,
-    string Sku,
-    string ProductName,
-    int Qty,
+    List<ImportRequestItemDto> Items,
+    int TotalQty,
+    decimal TotalAmount,
     string CreatedBy,
     string CreatedAt,
     string Status,
     string Note);
 
+public sealed record ImportRequestItemDto(
+    string Sku,
+    string ProductName,
+    int Qty,
+    decimal UnitCost,
+    decimal Total);
+
 public sealed record ProductTypeUpsertDto(string Id, string Name, string? Description, bool Active = true);
 
-public sealed record ImportRequestCreateDto(string SupplierId, string Sku, int Qty, string? Note, string? EmployeeId);
+public sealed record ImportRequestItemCreateDto(string Sku, int Qty, decimal UnitCost);
+
+public sealed record ImportRequestCreateDto(
+    string SupplierId,
+    List<ImportRequestItemCreateDto> Items,
+    string? Note,
+    string? EmployeeId);
 
 public sealed record PartnerUpsertDto(
     string Category,
@@ -73,7 +122,15 @@ public sealed record PartnerUpsertDto(
     string? Address,
     string? Role);
 
-public sealed record PromotionUpsertDto(string Code, decimal Percent, decimal MinOrder, string StartDate, string EndDate);
+public sealed record PromotionProductUpsertDto(string Sku, decimal Percent);
+
+public sealed record PromotionUpsertDto(
+    string Code,
+    decimal Percent,
+    decimal MinOrder,
+    string StartDate,
+    string EndDate,
+    List<PromotionProductUpsertDto>? Products = null);
 
 public sealed record InvoiceItemDto(string Sku, string Name, int Qty, decimal Price, decimal Total);
 
@@ -101,6 +158,13 @@ public sealed record InvoiceCreateDto(
     string? DeliveryNote = null);
 
 public sealed record CodStatusUpdateDto(string Status, string? EmployeeId);
+
+public sealed record QrPaymentSessionDto(
+    long OrderCode, string InvoiceId, decimal Amount, string Description, string BankBin,
+    string AccountNumber, string AccountName, string PaymentLinkId, string CheckoutUrl, string Status);
+
+public sealed record QrPaymentStatusDto(
+    long OrderCode, string Status, decimal Amount, decimal AmountPaid, bool Paid);
 
 public sealed record SaleItemDto(string Sku, string Name, int Qty, decimal Total);
 

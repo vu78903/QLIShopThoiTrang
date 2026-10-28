@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
-    <link rel="stylesheet" href="../css/giao-dien.css?v=20261023-3">
+    <link rel="stylesheet" href="../css/giao-dien.css?v=20261028-1">
 </head>
 <body data-view="inventory">
     <div class="shell">
@@ -123,6 +123,19 @@
         </div>
     </div>
 
+    <div class="modal-bg" id="importReceiptModalBg" role="dialog" aria-modal="true">
+        <div class="modal return-receipt-modal">
+            <h2>Phiếu nhập kho</h2>
+            <div class="receipt-wrap" id="importPrintArea">
+                <div id="importReceiptContent" class="return-slip"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" type="button" onclick="closeImportReceipt()">Đóng</button>
+                <button class="btn btn-primary" type="button" onclick="printImportReceipt()"><i data-lucide="printer" style="width:16px"></i> In phiếu nhập</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL HÓA ĐƠN / IN BILL -->
     <div class="modal-bg" id="receiptModalBg" role="dialog" aria-modal="true">
         <div class="modal receipt-modal">
@@ -210,6 +223,6 @@
         <span id="toastText">Đã cập nhật thành công</span>
     </div>
 
-    <script src="../js/ung-dung.js?v=20261023-3"></script>
+    <script src="../js/ung-dung.js?v=20261028-1"></script>
 </body>
 </html>

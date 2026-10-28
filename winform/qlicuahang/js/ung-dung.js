@@ -7,6 +7,7 @@
         let promotionsData = [];
         let deliveryOrders = [];
         let codOrders = [];
+        let cancelledOrders = [];
         let importRequests = [];
         let cart = [];
         let salesHistory = [];
@@ -14,6 +15,9 @@
         let appliedPromotion = null;
         let lastReceipt = null;
         let pendingQrReceipt = null;
+        let pendingQrOrderCode = null;
+        let qrPaymentPollTimer = null;
+        let qrPaymentFinalizing = false;
         let pendingCardReceipt = null;
         let pendingProductImage = null;
         let deleteConfirmationResolver = null;
@@ -25,11 +29,14 @@
         let selectedReturnInvoice = null;
         let selectedReturnSku = "";
         let lastReturnReceipt = null;
+        let lastImportReceipt = null;
+        let importLineSequence = 0;
+        let promotionProductDraft = [];
         let deliveryCustomerAutoFilled = false;
         let crudContext = { action: '', target: '', editIndex: -1 };
         let revenueChartInstance = null;
         let topChartInstance = null;
-        const APP_STORAGE_KEY = "y_fashion_erp_state_v1";
+        const APP_STORAGE_KEY = "y_fashion_erp_state_v2";
         const API_BASE_URL = "http://127.0.0.1:5000";
         const VAT_RATE = 8;
         const ADDRESS_OPTIONS = {
@@ -78,12 +85,13 @@
                 const raw = localStorage.getItem(APP_STORAGE_KEY);
                 if (raw) {
                     const data = JSON.parse(raw);
-                    productsData = Array.isArray(data.productsData) ? data.productsData : [];
+                    productsData = normalizeProductAudiences(Array.isArray(data.productsData) ? data.productsData : []);
                     productTypesData = Array.isArray(data.productTypesData) ? data.productTypesData : [];
                     partnersData = Array.isArray(data.partnersData) ? data.partnersData : [];
                     promotionsData = Array.isArray(data.promotionsData) ? data.promotionsData : [];
                     deliveryOrders = Array.isArray(data.deliveryOrders) ? data.deliveryOrders : [];
                     codOrders = Array.isArray(data.codOrders) ? data.codOrders : [];
+                    cancelledOrders = Array.isArray(data.cancelledOrders) ? data.cancelledOrders : [];
                     importRequests = Array.isArray(data.importRequests) ? data.importRequests : [];
                     cart = Array.isArray(data.cart) ? data.cart : [];
                     salesHistory = Array.isArray(data.salesHistory) ? data.salesHistory : [];
@@ -98,7 +106,7 @@
                 const response = await fetch(`${API_BASE_URL}/api/app-state`, { cache: "no-store" });
                 if (!response.ok) throw new Error("API app-state failed");
                 const data = await response.json();
-                productsData = Array.isArray(data.productsData) ? data.productsData : [];
+                productsData = normalizeProductAudiences(Array.isArray(data.productsData) ? data.productsData : []);
                 productTypesData = Array.isArray(data.productTypesData) ? data.productTypesData : [];
                 partnersData = Array.isArray(data.partnersData) ? data.partnersData : [];
                 promotionsData = Array.isArray(data.promotionsData) ? data.promotionsData : [];
@@ -106,6 +114,7 @@
                 salesHistory = Array.isArray(data.salesHistory) ? data.salesHistory : salesHistory;
                 deliveryOrders = Array.isArray(data.deliveryOrders) ? data.deliveryOrders : [];
                 codOrders = Array.isArray(data.codOrders) ? data.codOrders : codOrders;
+                cancelledOrders = Array.isArray(data.cancelledOrders) ? data.cancelledOrders : [];
                 saveAppState();
             } catch (error) {
                 console.warn("Không tải được dữ liệu từ API, dùng dữ liệu localStorage.", error);
@@ -121,6 +130,7 @@
                 promotionsData,
                 deliveryOrders,
                 codOrders,
+                cancelledOrders,
                 importRequests,
                 cart,
                 salesHistory,
@@ -139,24 +149,26 @@
 
             const searchInput = document.getElementById("productSearchInput");
             const searchText = searchInput?.value || "";
-            const filteredProducts = productsData.filter(product => matchesProductSearch(product, searchText));
+            const audience = document.getElementById("productAudienceFilter")?.value || "";
+            const categoryProducts = productsData.filter(product => !audience || getProductAudience(product) === audience);
+            const filteredProducts = categoryProducts.filter(product => matchesProductSearch(product, searchText));
             const summary = document.getElementById("productSearchSummary");
             const clearButton = document.getElementById("productSearchClear");
             const isSearching = Boolean(searchText.trim());
             if (summary) {
                 summary.textContent = isSearching
-                    ? `Tìm thấy ${filteredProducts.length}/${productsData.length} SKU`
-                    : `${productsData.length} SKU`;
+                    ? `Tìm thấy ${filteredProducts.length}/${categoryProducts.length} SKU`
+                    : `${filteredProducts.length} SKU`;
             }
             if (clearButton) clearButton.style.display = isSearching ? "inline-flex" : "none";
 
             if (productsData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:30px; color:#94a3b8;">Chưa có sản phẩm nào. Hãy bấm "+ Thêm Sản phẩm".</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:30px; color:#94a3b8;">Chưa có sản phẩm nào. Hãy bấm "+ Thêm Sản phẩm".</td></tr>`;
                 return;
             }
 
             if (filteredProducts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:30px; color:#94a3b8;">Không tìm thấy sản phẩm theo Mã SP, Mã SKU hoặc tên đã nhập.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:30px; color:#94a3b8;">Không tìm thấy sản phẩm theo Mã SP, Mã SKU hoặc tên đã nhập.</td></tr>`;
                 if (window.lucide) lucide.createIcons();
                 updateInventoryKpi();
                 return;
@@ -171,12 +183,13 @@
                         <td><strong>${escapeHtml(p.sku)}</strong></td>
                         <td>${escapeHtml(p.name)}</td>
                         <td><span class="badge blue">${escapeHtml(p.type || "Chưa phân loại")}</span></td>
+                        <td><span class="badge">${escapeHtml(productAudienceLabel(getProductAudience(p)))}</span></td>
+                        <td>${escapeHtml(p.supplierName || "Chưa chọn")}</td>
                         <td><span class="badge">${escapeHtml(p.color || "Mặc định")}</span></td>
                         <td><span class="badge">${escapeHtml(p.size || "Free size")}</span></td>
                         <td>${new Intl.NumberFormat('vi-VN').format(p.price)} ₫</td>
                         <td><span class="badge ${p.stock <= 0 ? 'red' : (p.stock < 10 ? 'red' : 'green')}">${p.stock}</span></td>
                         <td>
-                            <button class="icon-button" title="${p.stock <= 0 ? 'Hết hàng' : 'Thêm vào giỏ'}" ${p.stock <= 0 ? "disabled" : ""} onclick="addToCartBySku('${p.sku}')"><i data-lucide="shopping-cart" style="width:16px;color:#2563eb"></i></button>
                             <button class="icon-button" title="Chỉnh sửa" onclick="openEditProduct(${idx})"><i data-lucide="pencil" style="width:16px"></i></button>
                             <button class="icon-button" title="Xóa" onclick="deleteProduct(${idx})"><i data-lucide="trash-2" style="width:16px;color:#ef4444"></i></button>
                         </td>
@@ -189,6 +202,24 @@
 
         function normalizeProductSearchText(value) {
             return normalizeSkuText(value).replace(/[^A-Z0-9]+/g, " ").trim();
+        }
+
+        function productAudienceLabel(value) {
+            return { NAM: "Nam", NU: "Nữ", PHU_KIEN: "Phụ kiện" }[String(value || "").toUpperCase()] || "Chưa phân loại";
+        }
+
+        function getProductAudience(product) {
+            return String(product?.audience || productTypeAudience(product?.type || "")).toUpperCase();
+        }
+
+        function normalizeProductAudiences(products) {
+            return products.map(product => ({ ...product, audience: getProductAudience(product) }));
+        }
+
+        function buildProductAudienceOptions(selected = "") {
+            return `<option value="">Chọn danh mục</option>` + [
+                ["NAM", "Nam"], ["NU", "Nữ"], ["PHU_KIEN", "Phụ kiện"]
+            ].map(([value, label]) => `<option value="${value}" ${value === selected ? "selected" : ""}>${label}</option>`).join("");
         }
 
         function matchesProductSearch(product, keyword) {
@@ -252,7 +283,9 @@
             renderProducts();
             renderProductTypes();
             renderPartners();
+            renderDelivery();
             renderCod();
+            renderCancelledOrders();
             renderInventoryTable();
             renderImportRequests();
             renderPromotions();
@@ -263,6 +296,7 @@
         }
 
         let currentPartnerCategory = "Nhà cung cấp"; // Khách mới vẫn chỉ được thêm nhanh ở POS.
+        let currentPromotionCategory = "products";
 
         // Đổi tab Nhà cung cấp / Nhân viên.
         function switchPartnerCategory(category, btn) {
@@ -273,6 +307,23 @@
             document.getElementById("partnerAddButton")?.classList.toggle("hidden", customerTab);
             document.getElementById("partnerImportButton")?.classList.toggle("hidden", customerTab);
             renderPartners();
+        }
+
+        function switchPromotionCategory(category, btn) {
+            currentPromotionCategory = category;
+            document.querySelectorAll(".promotion-tab").forEach(tab => {
+                const active = tab === btn;
+                tab.classList.toggle("active", active);
+                tab.setAttribute("aria-selected", active ? "true" : "false");
+            });
+            document.getElementById("productPromotionPanel")?.classList.toggle("hidden", category !== "products");
+            document.getElementById("voucherPanel")?.classList.toggle("hidden", category !== "vouchers");
+            const addButton = document.getElementById("promotionAddButton");
+            if (addButton) {
+                const showsProducts = category === "products";
+                addButton.textContent = showsProducts ? "Thêm sản phẩm khuyến mãi" : "Thêm voucher";
+                addButton.setAttribute("onclick", showsProducts ? "openAddProductPromotion()" : "openAddPromotion()");
+            }
         }
 
         // Lấy tổng tiền khách đã mua, dùng để xét hạng thành viên.
@@ -447,6 +498,31 @@
             if (window.lucide) lucide.createIcons();
         }
 
+        // Đơn đã hủy chỉ dùng để tra cứu, không có nút chuyển trạng thái hay xóa khỏi lịch sử.
+        function renderCancelledOrders() {
+            const tbody = document.getElementById("cancelledBody");
+            if (!tbody) return;
+            const totalValue = cancelledOrders.reduce((sum, order) => sum + Number(order.receipt?.total || 0), 0);
+            if (document.getElementById("cancelledTotalCount")) document.getElementById("cancelledTotalCount").textContent = cancelledOrders.length;
+            if (document.getElementById("cancelledValueTotal")) document.getElementById("cancelledValueTotal").textContent = money(totalValue);
+            if (document.getElementById("cancelledWebCount")) document.getElementById("cancelledWebCount").textContent = cancelledOrders.filter(order => String(order.source || "").toUpperCase() === "WEB").length;
+            if (cancelledOrders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="table-message">Chưa có đơn hàng đã hủy.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = cancelledOrders.map(order => `
+                <tr>
+                    <td><strong>${escapeHtml(order.id)}</strong></td>
+                    <td>${escapeHtml(order.name)}<small class="cell-note">${escapeHtml(order.phone || "-")}</small></td>
+                    <td>${escapeHtml(order.address || "-")}</td>
+                    <td class="shipment-note">${escapeHtml(order.note || "Không có")}</td>
+                    <td>${escapeHtml(order.receipt?.paymentMethod || "-")}</td>
+                    <td class="money-cell"><strong>${money(order.receipt?.total || 0)}</strong></td>
+                    <td>${escapeHtml(order.source || "POS")}</td>
+                    <td><span class="badge red">${escapeHtml(order.status || "Đã hủy")}</span></td>
+                </tr>`).join("");
+        }
+
         function getNextStatusAction(status) {
             if (status === "Vừa xác nhận đơn") return "Xác nhận shipper lấy hàng";
             if (status === "Shipper đã lấy hàng") return "Bắt đầu vận chuyển";
@@ -454,18 +530,20 @@
             return "Đã hoàn tất";
         }
 
-        // Hai loại đơn dùng chung một form, chỉ đổi bảng đang hiển thị.
+        // Ba loại đơn dùng chung một form, chỉ đổi bảng đang hiển thị.
         function setShipmentTab(mode) {
-            const showCod = mode === "cod";
-            document.getElementById("deliveryPanel")?.classList.toggle("hidden", showCod);
-            document.getElementById("codPanel")?.classList.toggle("hidden", !showCod);
-            document.getElementById("shipmentTabDelivery")?.classList.toggle("active", !showCod);
-            document.getElementById("shipmentTabCod")?.classList.toggle("active", showCod);
-            document.getElementById("shipmentTabDelivery")?.setAttribute("aria-selected", String(!showCod));
-            document.getElementById("shipmentTabCod")?.setAttribute("aria-selected", String(showCod));
-            if (location.hash !== `#${mode}`) history.replaceState(null, "", `#${mode}`);
+            const selected = ["delivery", "cod", "cancelled"].includes(mode) ? mode : "delivery";
+            const tabs = { delivery: "shipmentTabDelivery", cod: "shipmentTabCod", cancelled: "shipmentTabCancelled" };
+            const panels = { delivery: "deliveryPanel", cod: "codPanel", cancelled: "cancelledPanel" };
+            Object.entries(panels).forEach(([key, id]) => document.getElementById(id)?.classList.toggle("hidden", key !== selected));
+            Object.entries(tabs).forEach(([key, id]) => {
+                document.getElementById(id)?.classList.toggle("active", key === selected);
+                document.getElementById(id)?.setAttribute("aria-selected", String(key === selected));
+            });
+            if (location.hash !== `#${selected}`) history.replaceState(null, "", `#${selected}`);
             renderDelivery();
             renderCod();
+            renderCancelledOrders();
         }
 
         async function updateShipmentStatus(order, nextStatus) {
@@ -498,6 +576,7 @@
             await loadAppState();
             renderDelivery();
             renderCod();
+            renderCancelledOrders();
             toast("Đã tải đơn mới nhất từ Supabase");
         }
 
@@ -603,32 +682,43 @@
 
             const canApprove = window.userRole === "storeManager";
             tbody.innerHTML = importRequests.map((request, idx) => {
+                const items = Array.isArray(request.items) ? request.items : [{
+                    sku: request.sku, productName: request.productName, qty: request.qty,
+                    unitCost: request.unitCost || 0, total: request.total || 0
+                }];
                 const badge = request.status === "Đã duyệt" ? "green" : (request.status === "Từ chối" ? "red" : "amber");
-                const action = request.status === "Chờ duyệt" && canApprove
+                const approval = request.status === "Chờ duyệt" && canApprove
                     ? `<button class="btn btn-primary" type="button" onclick="approveImportRequest(${idx})">Duyệt</button>
-                       <button class="btn btn-danger" type="button" onclick="rejectImportRequest(${idx})">Từ chối</button>`
-                    : "-";
+                       <button class="btn btn-danger" type="button" onclick="rejectImportRequest(${idx})">Từ chối</button>` : "";
+                const productSummary = items.slice(0, 2).map(item => `${escapeHtml(item.sku)} - ${escapeHtml(item.productName)}`).join("<br>")
+                    + (items.length > 2 ? `<br><small>+${items.length - 2} sản phẩm khác</small>` : "");
                 return `
                     <tr>
                         <td><strong>${escapeHtml(request.id)}</strong></td>
                         <td>${escapeHtml(request.supplierName || "-")}</td>
-                        <td>${escapeHtml(request.sku)} - ${escapeHtml(request.productName)}</td>
-                        <td>${request.qty}</td>
+                        <td>${productSummary}</td>
+                        <td>${request.totalQty ?? items.reduce((sum, item) => sum + Number(item.qty || 0), 0)}</td>
                         <td>${escapeHtml(request.createdBy || "-")}</td>
                         <td>${escapeHtml(request.createdAt || "-")}</td>
                         <td><span class="badge ${badge}">${escapeHtml(request.status)}</span></td>
                         <td>${escapeHtml(request.note || "-")}</td>
-                        <td><div style="display:flex; gap:8px; flex-wrap:wrap">${action}</div></td>
+                        <td><div style="display:flex; gap:8px; flex-wrap:wrap">
+                            <button class="btn btn-secondary" type="button" onclick="openImportReceipt(${idx})"><i data-lucide="printer" style="width:15px"></i> In</button>
+                            ${approval}
+                        </div></td>
                     </tr>
                 `;
             }).join("");
+            if (window.lucide) lucide.createIcons();
         }
 
         // Tạo option sản phẩm cho phiếu nhập kho.
-        function buildImportProductOptions(selectedSku = "") {
-            if (productsData.length === 0) return `<option value="">Chưa có sản phẩm</option>`;
-            return `<option value="">Chọn sản phẩm cần nhập</option>` + productsData.map(product =>
-                `<option value="${product.sku}" ${selectedSku === product.sku ? "selected" : ""}>${product.sku} - ${product.name} (tồn ${product.stock})</option>`
+        function buildImportProductOptions(supplierId, selectedSku = "") {
+            const supplierProducts = productsData.filter(product => product.supplierId === supplierId);
+            if (!supplierId) return `<option value="">Chọn nhà cung cấp trước</option>`;
+            if (supplierProducts.length === 0) return `<option value="">Nhà cung cấp chưa có sản phẩm</option>`;
+            return `<option value="">Chọn sản phẩm cần nhập</option>` + supplierProducts.map(product =>
+                `<option value="${product.sku}" ${selectedSku === product.sku ? "selected" : ""}>${product.sku} - ${escapeHtml(product.name)} (${escapeHtml(product.color)}/${escapeHtml(product.size)}, tồn ${product.stock})</option>`
             ).join("");
         }
 
@@ -639,6 +729,62 @@
             return `<option value="">Chọn nhà cung cấp</option>` + suppliers.map(supplier =>
                 `<option value="${supplier.id}" ${selectedSupplierId === supplier.id ? "selected" : ""}>${supplier.id} - ${supplier.name}</option>`
             ).join("");
+        }
+
+        function handleImportSupplierChange() {
+            const supplierId = document.getElementById("import_supplier")?.value || "";
+            const body = document.getElementById("import_items_body");
+            if (body) body.innerHTML = "";
+            const addButton = document.getElementById("import_add_line");
+            if (addButton) addButton.disabled = !supplierId;
+            if (supplierId) addImportItemRow();
+            updateImportGrandTotal();
+        }
+
+        function addImportItemRow() {
+            const supplierId = document.getElementById("import_supplier")?.value || "";
+            if (!supplierId) {
+                alert("Vui lòng chọn nhà cung cấp trước!");
+                return;
+            }
+            const body = document.getElementById("import_items_body");
+            if (!body) return;
+            const rowId = ++importLineSequence;
+            body.insertAdjacentHTML("beforeend", `
+                <tr data-import-line="${rowId}">
+                    <td><select class="input import-line-sku" onchange="updateImportLineTotal(${rowId})">${buildImportProductOptions(supplierId)}</select></td>
+                    <td><input class="input import-line-qty" type="number" min="1" step="1" value="1" oninput="updateImportLineTotal(${rowId})"></td>
+                    <td><input class="input import-line-cost" type="number" min="1" step="1000" placeholder="Giá gốc" oninput="updateImportLineTotal(${rowId})"></td>
+                    <td class="import-line-total money-cell">0 ₫</td>
+                    <td><button class="icon-button" type="button" title="Bỏ dòng" onclick="removeImportItemRow(${rowId})"><i data-lucide="trash-2" style="width:16px;color:#ef4444"></i></button></td>
+                </tr>`);
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function removeImportItemRow(rowId) {
+            document.querySelector(`[data-import-line="${rowId}"]`)?.remove();
+            updateImportGrandTotal();
+        }
+
+        function updateImportLineTotal(rowId) {
+            const row = document.querySelector(`[data-import-line="${rowId}"]`);
+            if (!row) return;
+            const qty = Number(row.querySelector(".import-line-qty")?.value) || 0;
+            const unitCost = Number(row.querySelector(".import-line-cost")?.value) || 0;
+            const total = qty * unitCost;
+            const cell = row.querySelector(".import-line-total");
+            if (cell) cell.textContent = money(total);
+            updateImportGrandTotal();
+        }
+
+        function updateImportGrandTotal() {
+            const rows = Array.from(document.querySelectorAll("#import_items_body tr"));
+            const qty = rows.reduce((sum, row) => sum + (Number(row.querySelector(".import-line-qty")?.value) || 0), 0);
+            const amount = rows.reduce((sum, row) => sum +
+                (Number(row.querySelector(".import-line-qty")?.value) || 0) *
+                (Number(row.querySelector(".import-line-cost")?.value) || 0), 0);
+            const summary = document.getElementById("import_grand_total");
+            if (summary) summary.textContent = `${qty} sản phẩm · ${money(amount)}`;
         }
 
         // Mở form tạo phiếu nhập kho. Nhân viên kho chỉ tạo phiếu, chưa tự cộng tồn.
@@ -652,17 +798,27 @@
                 return;
             }
             crudContext = { action: 'add', target: 'importRequest', editIndex: -1 };
+            importLineSequence = 0;
+            const employee = getCurrentEmployee();
+            if (!employee) {
+                alert("Không xác định được nhân viên đang đăng nhập!");
+                return;
+            }
             document.getElementById("crudModalTitle").textContent = "Tạo phiếu nhập kho";
             document.getElementById("crudModalFields").innerHTML = `
+                <div class="import-meta-grid">
+                    <div><label>Ngày và giờ hệ thống</label><input class="input" value="${escapeHtml(new Date().toLocaleString("vi-VN"))}" readonly></div>
+                    <div><label>Nhân viên lập phiếu</label><input class="input" value="${escapeHtml(employee.name)}" readonly></div>
+                </div>
                 <label>Nhà cung cấp</label>
-                <select id="import_supplier" class="input">${buildImportSupplierOptions()}</select>
-                <label>Sản phẩm cần nhập</label>
-                <select id="import_sku" class="input">${buildImportProductOptions()}</select>
-                <label>Số lượng nhập thêm</label>
-                <input id="import_qty" class="input" type="number" min="1" placeholder="Nhập số lượng">
+                <select id="import_supplier" class="input" onchange="handleImportSupplierChange()">${buildImportSupplierOptions()}</select>
+                <div class="import-lines-head"><strong>Danh sách sản phẩm nhập</strong><button id="import_add_line" class="btn btn-secondary" type="button" onclick="addImportItemRow()" disabled>+ Thêm sản phẩm</button></div>
+                <div class="table-wrap import-lines-wrap"><table class="data-table import-lines-table"><thead><tr><th>Sản phẩm</th><th>Số lượng</th><th>Giá gốc</th><th>Thành tiền</th><th></th></tr></thead><tbody id="import_items_body"></tbody></table></div>
+                <div class="import-grand-total"><span>Tổng phiếu</span><strong id="import_grand_total">0 sản phẩm · 0 ₫</strong></div>
                 <label>Ghi chú</label>
-                <input id="import_note" class="input" placeholder="VD: Sắp hết hàng, cần nhập bổ sung">
+                <input id="import_note" class="input" placeholder="Nhập ghi chú phiếu (nếu có)">
             `;
+            document.querySelector("#crudModalBg .modal")?.classList.add("import-entry-modal");
             document.getElementById("crudModalBg").classList.add("open");
         }
 
@@ -674,11 +830,6 @@
             }
             const request = importRequests[idx];
             if (!request || request.status !== "Chờ duyệt") return;
-            const product = productsData.find(item => item.sku === request.sku);
-            if (!product) {
-                toast("Không tìm thấy sản phẩm trong kho");
-                return;
-            }
             try {
                 const response = await fetch(`${API_BASE_URL}/api/phieu-nhap-kho/${encodeURIComponent(request.id)}/duyet`, { method: "POST" });
                 if (!response.ok) throw new Error(await response.text());
@@ -688,11 +839,8 @@
                 return;
             }
 
-            product.stock = (Number(product.stock) || 0) + (Number(request.qty) || 0);
-            request.status = "Đã duyệt";
-            request.approvedAt = new Date().toLocaleString("vi-VN");
-            saveAppState();
-            updateInventoryKpi();
+            await loadAppState();
+            renderAll();
             toast("Đã duyệt phiếu và cập nhật tồn kho");
         }
 
@@ -719,58 +867,107 @@
             toast("Đã từ chối phiếu nhập kho");
         }
 
-        // Chuyển ngày dạng yyyy-mm-dd từ input HTML thành Date để so sánh hạn voucher.
+        function renderImportReceipt(request) {
+            const items = Array.isArray(request.items) ? request.items : [];
+            const rows = items.map((item, index) => `
+                <tr><td>${index + 1}</td><td>${escapeHtml(item.sku)}</td><td>${escapeHtml(item.productName)}</td>
+                <td>${item.qty}</td><td>${money(Number(item.unitCost) || 0)}</td><td>${money(Number(item.total) || 0)}</td></tr>`).join("");
+            return `
+                <div class="return-slip-header">
+                    <div class="return-slip-brand"><div class="receipt-logo">yo<span>dy</span></div></div>
+                    <div><strong>CÔNG TY CỔ PHẦN THỜI TRANG YODY</strong><span>366 Tân Sơn Nhì, P. Tân Sơn Nhì, Q. Tân Phú, TPHCM</span><span>Bộ phận: Kho hàng</span></div>
+                    <div><strong>Mẫu số: BM-NK-01</strong><span>Số phiếu: ${escapeHtml(request.id)}</span><span>Ngày giờ: ${escapeHtml(request.createdAt)}</span></div>
+                </div>
+                <div class="return-slip-title">PHIẾU NHẬP KHO</div>
+                <div class="return-slip-info">
+                    <div>Nhà cung cấp: <strong>${escapeHtml(request.supplierName)}</strong></div><div>Mã NCC: <strong>${escapeHtml(request.supplierId)}</strong></div>
+                    <div>Nhân viên lập phiếu: <strong>${escapeHtml(request.createdBy)}</strong></div><div>Trạng thái: <strong>${escapeHtml(request.status)}</strong></div>
+                    <div class="full">Ghi chú: <strong>${escapeHtml(request.note || "Không có")}</strong></div>
+                </div>
+                <table class="return-slip-table import-slip-table"><thead><tr><th>STT</th><th>Mã SKU</th><th>Tên sản phẩm</th><th>Số lượng</th><th>Giá gốc</th><th>Thành tiền</th></tr></thead><tbody>${rows}</tbody></table>
+                <div class="return-slip-totals">
+                    <div><span>Tổng số lượng:</span><strong>${request.totalQty}</strong></div>
+                    <div><span>Tổng tiền nhập:</span><strong>${money(Number(request.totalAmount) || 0)}</strong></div>
+                </div>
+                <div class="return-slip-signatures import-slip-signatures">
+                    <div><strong>Nhà cung cấp</strong><span>(Ký, ghi rõ họ tên)</span></div>
+                    <div><strong>Nhân viên lập phiếu</strong><span>${escapeHtml(request.createdBy)}</span></div>
+                    <div><strong>Quản lý</strong><span>(Ký, ghi rõ họ tên)</span></div>
+                </div>`;
+        }
+
+        function openImportReceipt(idx) {
+            const request = importRequests[idx];
+            if (!request) return;
+            lastImportReceipt = request;
+            document.getElementById("importReceiptContent").innerHTML = renderImportReceipt(request);
+            document.getElementById("importReceiptModalBg").classList.add("open");
+        }
+
+        function closeImportReceipt() {
+            document.getElementById("importReceiptModalBg")?.classList.remove("open");
+        }
+
+        function printImportReceipt() {
+            if (!lastImportReceipt) return;
+            setPrintMode("printing-import");
+            window.print();
+        }
+
+        // Đọc cả ngày yyyy-mm-dd và ngày giờ yyyy-mm-ddTHH:mm theo giờ địa phương.
         function parseLocalDate(value) {
             if (!value) return null;
-            const [year, month, day] = value.split("-").map(Number);
-            return new Date(year, month - 1, day);
+            const match = String(value).trim().match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+            if (!match) return null;
+            const [, year, month, day, hour = "0", minute = "0", second = "0"] = match;
+            const date = new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second));
+            return Number.isNaN(date.getTime()) ? null : date;
         }
 
         // Kiểm tra mã khuyến mãi còn hạn và đơn hàng đã đủ điều kiện chưa.
         function isPromotionActive(promo, subtotal = 0) {
             const today = new Date();
-            today.setHours(0, 0, 0, 0);
             const start = parseLocalDate(promo.startDate);
             const end = parseLocalDate(promo.endDate);
             if (!start || !end) return false;
-            start.setHours(0, 0, 0, 0);
-            end.setHours(23, 59, 59, 999);
+            const preciseTime = Array.isArray(promo.products) && promo.products.length > 0;
+            if (!preciseTime) start.setHours(0, 0, 0, 0);
+            if (!preciseTime) end.setHours(23, 59, 59, 999);
             return today >= start && today <= end && subtotal >= (Number(promo.minOrder) || 0);
         }
 
         // Trạng thái trên danh sách chỉ dựa vào khoảng thời gian, không phụ thuộc giá trị đơn hàng.
         function getPromotionStatus(promo) {
             const today = new Date();
-            today.setHours(0, 0, 0, 0);
             const start = parseLocalDate(promo.startDate);
             const end = parseLocalDate(promo.endDate);
             if (!start || !end) return { style: "red", label: "Đã hết thời hạn" };
-            start.setHours(0, 0, 0, 0);
-            end.setHours(23, 59, 59, 999);
+            const preciseTime = Array.isArray(promo.products) && promo.products.length > 0;
+            if (!preciseTime) start.setHours(0, 0, 0, 0);
+            if (!preciseTime) end.setHours(23, 59, 59, 999);
             if (today < start) return { style: "blue", label: "Sắp diễn ra" };
             if (today <= end) return { style: "green", label: "Đang trong thời hạn" };
             return { style: "red", label: "Đã hết thời hạn" };
         }
 
-        // Vẽ danh sách voucher/khuyến mãi của cửa hàng.
+        // Tách riêng sản phẩm khuyến mãi và voucher để quản lý độc lập trên cùng trang.
         function renderPromotions() {
-            const tbody = document.getElementById("promotionBody");
-            if (!tbody) return;
+            const productBody = document.getElementById("productPromotionBody");
+            const voucherBody = document.getElementById("voucherBody");
+            if (!productBody || !voucherBody) return;
+            const rows = promotionsData.map((promo, idx) => ({ promo, idx }));
+            const productPromotions = rows.filter(item => Array.isArray(item.promo.products) && item.promo.products.length > 0);
+            const vouchers = rows.filter(item => !Array.isArray(item.promo.products) || item.promo.products.length === 0);
 
-            if (promotionsData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#94a3b8;">Chưa có mã khuyến mãi nào. Bấm "+ Thêm voucher" để tạo.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = promotionsData.map((promo, idx) => {
+            productBody.innerHTML = productPromotions.length ? productPromotions.map(({ promo, idx }) => {
                 const status = getPromotionStatus(promo);
                 return `
                     <tr>
                         <td><strong>${escapeHtml(promo.code)}</strong></td>
                         <td>${promo.percent}%</td>
-                        <td>${promo.startDate}</td>
-                        <td>${promo.endDate}</td>
-                        <td>Đơn từ ${money(Number(promo.minOrder) || 0)}</td>
+                        <td>${formatPromotionDate(promo.startDate, true)}</td>
+                        <td>${formatPromotionDate(promo.endDate, true)}</td>
+                        <td><strong>${promo.products.length}</strong> mã SKU</td>
                         <td><span class="badge ${status.style}">${status.label}</span></td>
                         <td>
                             <button class="icon-button" title="Chỉnh sửa" onclick="openEditPromotion(${idx})"><i data-lucide="pencil" style="width:16px"></i></button>
@@ -778,25 +975,73 @@
                         </td>
                     </tr>
                 `;
-            }).join("");
+            }).join("") : `<tr><td colspan="7" class="promotion-list-empty">Chưa có sản phẩm khuyến mãi.</td></tr>`;
+
+            voucherBody.innerHTML = vouchers.length ? vouchers.map(({ promo, idx }) => {
+                const status = getPromotionStatus(promo);
+                return `
+                    <tr>
+                        <td><strong>${escapeHtml(promo.code)}</strong></td>
+                        <td>${promo.percent}%</td>
+                        <td>${formatPromotionDate(promo.startDate)}</td>
+                        <td>${formatPromotionDate(promo.endDate)}</td>
+                        <td>${money(Number(promo.minOrder) || 0)}</td>
+                        <td><span class="badge ${status.style}">${status.label}</span></td>
+                        <td>
+                            <button class="icon-button" title="Chỉnh sửa" onclick="openEditPromotion(${idx})"><i data-lucide="pencil" style="width:16px"></i></button>
+                            <button class="icon-button" title="Xóa" onclick="deletePromotion(${idx})"><i data-lucide="trash-2" style="width:16px;color:#ef4444"></i></button>
+                        </td>
+                    </tr>`;
+            }).join("") : `<tr><td colspan="7" class="promotion-list-empty">Chưa có voucher.</td></tr>`;
             if (window.lucide) lucide.createIcons();
+        }
+
+        function formatPromotionDate(value, showTime = false) {
+            const date = parseLocalDate(value);
+            if (!date) return "-";
+            return new Intl.DateTimeFormat("vi-VN", showTime
+                ? { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }
+                : { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
         }
 
         // 3. THAO TÁC THÊM - XÓA - SỬA 
         // Nhóm này dùng chung modal để thêm/sửa sản phẩm, đối tác, loại sản phẩm và voucher.
         // Tạo danh sách option loại sản phẩm cho form sản phẩm.
-        function buildProductTypeOptions(selected = "") {
+        function productTypeAudience(typeName) {
+            const name = normalizeSkuText(typeName);
+            if (name === "DAM" || name === "VAY" || name.endsWith(" NU")) return "NU";
+            if (name === "NON" || name === "VO") return "PHU_KIEN";
+            if (name.endsWith(" NAM")) return "NAM";
+            return "";
+        }
+
+        function buildProductTypeOptions(selected = "", audience = "") {
             if (productTypesData.length === 0) {
                 return `<option value="">Chưa có loại sản phẩm</option>`;
             }
-            return `<option value="">Chọn loại sản phẩm</option>` + productTypesData.map(type =>
+            const visibleTypes = productTypesData.filter(type => !audience || productTypeAudience(type.name) === audience);
+            return `<option value="">Chọn loại sản phẩm</option>` + visibleTypes.map(type =>
                 `<option value="${type.name}" ${selected === type.name ? "selected" : ""}>${type.id} - ${type.name}</option>`
             ).join("");
         }
 
+        function updateProductTypeOptionsForAudience() {
+            const audience = document.getElementById("f_audience")?.value || "";
+            const typeSelect = document.getElementById("f_type");
+            if (!typeSelect) return;
+            const current = typeSelect.value;
+            typeSelect.innerHTML = buildProductTypeOptions(current, audience);
+            if (!Array.from(typeSelect.options).some(option => option.value === current)) typeSelect.value = "";
+            updateProductSizeOptions();
+        }
+
         // Dùng danh sách màu cố định để dữ liệu sau này lọc trên website không bị lệch tên.
-        function buildProductColorOptions(selected = "") {
-            const colors = ["Đen", "Trắng", "Xám", "Đỏ", "Xanh dương", "Xanh navy", "Xanh lá", "Xanh đậm", "Vàng", "Cam", "Hồng", "Tím", "Nâu", "Be"];
+        function buildProductColorOptions(selected = "", type = "") {
+            const normalizedType = normalizeSkuText(type);
+            const colors = normalizedType.includes("QUAN JEANS") ? ["Trắng", "Xanh jeans", "Đen"]
+                : normalizedType === "DO LOT NAM" ? ["Trắng", "Đen", "Xám"]
+                : normalizedType === "DO LOT NU" ? ["Trắng", "Đen", "Be"]
+                : ["Trắng", "Đen", "Đỏ"];
             const values = selected && !colors.includes(selected) ? [selected, ...colors] : colors;
             return `<option value="">Chọn màu sản phẩm</option>` + values.map(color =>
                 `<option value="${escapeHtml(color)}" ${selected === color ? "selected" : ""}>${escapeHtml(color)}</option>`
@@ -805,14 +1050,11 @@
 
         function getProductSizes(name = "", type = "") {
             const text = normalizeSkuText(`${name} ${type}`);
-            if (/QUAN.*(JEAN|JEANS|KAKI)|(JEAN|JEANS|KAKI).*QUAN/.test(text)) {
-                return ["28", "30", "32", "34", "36"];
+            if (/QUAN.*(JEAN|JEANS|TAY)|(JEAN|JEANS).*QUAN/.test(text)) {
+                return ["28", "30", "32", "34"];
             }
-            if (/DAY NI(T|CH)/.test(text)) return ["80", "85", "90", "95", "100"];
-            if (/\bVO\b/.test(text)) return ["35-38", "39-42", "43-46"];
-            if (/\bNON\b/.test(text)) return ["S", "M", "L", "XL", "Free size"];
-            if (/PHU KIEN|MAT KINH/.test(text)) return ["Free size"];
-            return ["S", "M", "L", "XL", "XXL"];
+            if (/\bVO\b|\bNON\b|PHU KIEN/.test(text)) return ["Free size"];
+            return ["S", "M", "L", "XL"];
         }
 
         function buildProductSizeOptions(selected = "", name = "", type = "") {
@@ -866,6 +1108,12 @@
             const type = document.getElementById("f_type")?.value || "";
             select.innerHTML = buildProductSizeOptions(current, name, type);
             if (Array.from(select.options).some(option => option.value === current)) select.value = current;
+            const colorSelect = document.getElementById("f_color");
+            if (colorSelect) {
+                const currentColor = colorSelect.value;
+                colorSelect.innerHTML = buildProductColorOptions(currentColor, type);
+                if (Array.from(colorSelect.options).some(option => option.value === currentColor)) colorSelect.value = currentColor;
+            }
             updateGeneratedProductCodes();
         }
 
@@ -881,11 +1129,13 @@
             if (crudContext.action !== "add") return;
             const name = document.getElementById("f_name")?.value.trim() || "";
             const type = document.getElementById("f_type")?.value.trim() || "";
+            const audience = document.getElementById("f_audience")?.value.trim() || "";
             const color = document.getElementById("f_color")?.value.trim() || "";
             const size = document.getElementById("f_size")?.value.trim() || "";
             const existing = productsData.find(product =>
                 String(product.name || "").trim().toLowerCase() === name.toLowerCase() &&
-                String(product.type || "").trim().toLowerCase() === type.toLowerCase());
+                String(product.type || "").trim().toLowerCase() === type.toLowerCase() &&
+                String(product.audience || "") === audience);
             const productId = existing?.productId || existing?.sku || getNextProductId();
             const sequence = (String(productId).match(/\d+$/)?.[0] || "001").padStart(3, "0");
             const base = `${getProductSkuCode(name)}-${sequence}-${getColorSkuCode(color)}-${getSizeSkuCode(size || "FS")}`.slice(0, 20).replace(/-+$/, "");
@@ -916,6 +1166,8 @@
                     <input id="f_sku" class="input" value="" readonly>
                     <label>Tên sản phẩm</label>
                     <input id="f_name" class="input" placeholder="Nhập tên sản phẩm" oninput="updateProductSizeOptions()">
+                    <label>Danh mục</label>
+                    <select id="f_audience" class="input" onchange="updateProductTypeOptionsForAudience()">${buildProductAudienceOptions()}</select>
                     <label>Loại sản phẩm</label>
                     <select id="f_type" class="input" onchange="updateProductSizeOptions()">${buildProductTypeOptions()}</select>
                     <label>Màu sắc</label>
@@ -927,6 +1179,8 @@
                     <label>Số lượng tồn</label>
                     <input id="f_stock" class="input" type="number" placeholder="Nhập số lượng">
                     ${buildProductImageField()}
+                    <label>Nhà cung cấp</label>
+                    <select id="f_supplier" class="input">${buildImportSupplierOptions()}</select>
                 `;
             updateGeneratedProductCodes();
             document.getElementById("crudModalBg").classList.add("open");
@@ -945,10 +1199,12 @@
                     <input id="f_sku" class="input" value="${escapeHtml(p.sku)}" readonly>
                     <label>Tên sản phẩm</label>
                     <input id="f_name" class="input" value="${p.name}" placeholder="Tên sản phẩm">
+                    <label>Danh mục</label>
+                    <select id="f_audience" class="input" onchange="updateProductTypeOptionsForAudience()">${buildProductAudienceOptions(getProductAudience(p))}</select>
                     <label>Loại sản phẩm</label>
-                    <select id="f_type" class="input">${buildProductTypeOptions(p.type || "")}</select>
+                    <select id="f_type" class="input" onchange="updateProductSizeOptions()">${buildProductTypeOptions(p.type || "", getProductAudience(p))}</select>
                     <label>Màu sắc</label>
-                    <select id="f_color" class="input">${buildProductColorOptions(p.color || "Mặc định")}</select>
+                    <select id="f_color" class="input">${buildProductColorOptions(p.color || "Mặc định", p.type || "")}</select>
                     <label>Size</label>
                     <select id="f_size" class="input">${buildProductSizeOptions(p.size || "Free size", p.name, p.type)}</select>
                     <label>Giá bán</label>
@@ -956,6 +1212,8 @@
                     <label>Số lượng tồn</label>
                     <input id="f_stock" class="input" type="number" value="${p.stock}" placeholder="Số lượng tồn">
                     ${buildProductImageField(p.image)}
+                    <label>Nhà cung cấp</label>
+                    <select id="f_supplier" class="input">${buildImportSupplierOptions(p.supplierId || "")}</select>
                 `;
             document.getElementById("crudModalBg").classList.add("open");
         }
@@ -1295,7 +1553,67 @@
             }
         }
 
-        // Dựng form nhập mã khuyến mãi: mã, %, ngày bắt đầu/kết thúc, điều kiện tối thiểu.
+        function getPromotionCatalogProducts() {
+            return productsData.map(product => ({
+                sku: String(product.sku || "").trim(),
+                productId: String(product.productId || "").trim(),
+                productName: product.name || product.sku,
+                color: product.color || "Không màu",
+                size: product.size || "Không size",
+                originalPrice: Number(product.price) || 0
+            })).filter(item => item.sku).sort((a, b) => a.sku.localeCompare(b.sku, "vi"));
+        }
+
+        function addPromotionProduct() {
+            const picker = document.getElementById("km_product_picker");
+            const selectedSkus = Array.from(picker?.selectedOptions || []).map(option => option.value);
+            const catalog = getPromotionCatalogProducts();
+            selectedSkus.forEach(sku => {
+                if (promotionProductDraft.some(item => item.sku === sku)) return;
+                const product = catalog.find(item => item.sku === sku);
+                if (product) promotionProductDraft.push({ ...product });
+            });
+            renderPromotionProductDraft();
+        }
+
+        function removePromotionProduct(index) {
+            promotionProductDraft.splice(index, 1);
+            renderPromotionProductDraft();
+        }
+
+        function renderPromotionSkuOptions() {
+            const picker = document.getElementById("km_product_picker");
+            if (picker) {
+                const selected = new Set(promotionProductDraft.map(item => item.sku));
+                const query = normalizeSkuText(document.getElementById("km_sku_search")?.value || "");
+                picker.innerHTML = getPromotionCatalogProducts()
+                    .filter(item => !selected.has(item.sku))
+                    .filter(item => !query || normalizeSkuText(`${item.sku} ${item.productId} ${item.productName} ${item.color} ${item.size}`).includes(query))
+                    .map(item => `<option value="${escapeHtml(item.sku)}">${escapeHtml(item.sku)} - ${escapeHtml(item.productName)} - ${escapeHtml(item.color)} - ${escapeHtml(item.size)}</option>`)
+                    .join("");
+            }
+        }
+
+        function renderPromotionProductDraft() {
+            const body = document.getElementById("km_product_body");
+            renderPromotionSkuOptions();
+            if (!body) return;
+            const percent = Math.min(100, Math.max(0, Number(document.getElementById("kmsp_percent")?.value) || 0));
+            body.innerHTML = promotionProductDraft.length ? promotionProductDraft.map((item, index) => {
+                const salePrice = Math.round(item.originalPrice * (100 - percent) / 100);
+                return `<tr>
+                    <td><strong>${escapeHtml(item.sku)}</strong><br><span class="muted-text">${escapeHtml(item.productId)} - ${escapeHtml(item.productName)}</span></td>
+                    <td>${escapeHtml(item.color)}</td>
+                    <td>${escapeHtml(item.size)}</td>
+                    <td class="money-cell">${money(item.originalPrice)}</td>
+                    <td class="money-cell"><strong>${money(salePrice)}</strong></td>
+                    <td><button type="button" class="icon-button" title="Bỏ sản phẩm" onclick="removePromotionProduct(${index})"><i data-lucide="x" style="width:16px;color:#ef4444"></i></button></td>
+                </tr>`;
+            }).join("") : `<tr><td colspan="6" class="promotion-empty">Chưa chọn mã SKU khuyến mãi.</td></tr>`;
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // Voucher chỉ giảm trên tổng đơn, không chọn sản phẩm ở form này.
         function buildPromotionModalFields(data = {}) {
             return `
                 <label>Mã khuyến mãi</label>
@@ -1303,28 +1621,87 @@
                 <label>% khuyến mãi</label>
                 <input id="km_percent" class="input" type="number" min="1" max="100" value="${data.percent || ""}" placeholder="VD: 10">
                 <label>Ngày bắt đầu</label>
-                <input id="km_start" class="input" type="date" value="${data.startDate || ""}">
+                <input id="km_start" class="input" type="date" value="${String(data.startDate || "").slice(0, 10)}">
                 <label>Ngày kết thúc</label>
-                <input id="km_end" class="input" type="date" value="${data.endDate || ""}">
+                <input id="km_end" class="input" type="date" value="${String(data.endDate || "").slice(0, 10)}">
                 <label>Điều kiện khuyến mãi</label>
                 <input id="km_min_order" class="input" type="number" min="0" value="${data.minOrder || 0}" placeholder="Giá trị đơn tối thiểu">
             `;
         }
 
+        function buildProductPromotionModalFields(data = {}) {
+            return `
+                <input id="kmsp_code" type="hidden" value="${escapeHtml(data.code || createProductPromotionCode())}">
+                <label>Thời gian bắt đầu khuyến mãi</label>
+                <input id="kmsp_start" class="input" type="datetime-local" value="${String(data.startDate || "").slice(0, 16)}">
+                <label>Thời gian kết thúc khuyến mãi</label>
+                <input id="kmsp_end" class="input" type="datetime-local" value="${String(data.endDate || "").slice(0, 16)}">
+                <label>Phần trăm khuyến mãi</label>
+                <input id="kmsp_percent" class="input" type="number" min="1" max="100" value="${data.percent || ""}" placeholder="VD: 20" oninput="renderPromotionProductDraft()">
+                <div class="promotion-products-section">
+                    <label>Danh sách sản phẩm áp dụng khuyến mãi</label>
+                    <div class="promotion-product-picker">
+                        <input id="km_sku_search" class="input" placeholder="Tìm theo mã SKU, tên, màu hoặc size" oninput="renderPromotionSkuOptions()">
+                        <select id="km_product_picker" class="input" multiple size="7" aria-label="Chọn nhiều mã SKU"></select>
+                        <button type="button" class="btn btn-secondary" onclick="addPromotionProduct()">Thêm các mã SKU đã chọn</button>
+                    </div>
+                    <div class="table-wrap promotion-products-table">
+                        <table class="data-table">
+                            <thead><tr><th>Mã SKU</th><th>Màu sắc</th><th>Kích cỡ</th><th>Giá gốc</th><th>Giá khuyến mãi</th><th></th></tr></thead>
+                            <tbody id="km_product_body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createProductPromotionCode() {
+            const now = new Date();
+            const two = value => String(value).padStart(2, "0");
+            const hundredths = two(Math.floor(now.getMilliseconds() / 10));
+            return `SPKM-${String(now.getFullYear()).slice(-2)}${two(now.getMonth() + 1)}${two(now.getDate())}-${two(now.getHours())}${two(now.getMinutes())}${two(now.getSeconds())}${hundredths}`;
+        }
+
         // Mở form thêm voucher mới.
         function openAddPromotion() {
             crudContext = { action: 'add', target: 'promotion', editIndex: -1 };
-            document.getElementById("crudModalTitle").textContent = "Thêm Voucher / Khuyến Mãi";
+            promotionProductDraft = [];
+            document.getElementById("crudModalTitle").textContent = "Thêm voucher";
             document.getElementById("crudModalFields").innerHTML = buildPromotionModalFields();
             document.getElementById("crudModalBg").classList.add("open");
         }
 
+        function openAddProductPromotion() {
+            crudContext = { action: 'add', target: 'productPromotion', editIndex: -1 };
+            promotionProductDraft = [];
+            document.getElementById("crudModalTitle").textContent = "Thêm sản phẩm khuyến mãi";
+            document.getElementById("crudModalFields").innerHTML = buildProductPromotionModalFields();
+            document.querySelector("#crudModalBg .modal")?.classList.add("promotion-entry-modal");
+            document.getElementById("crudModalBg").classList.add("open");
+            renderPromotionProductDraft();
+        }
+
         // Mở form sửa voucher.
         function openEditPromotion(idx) {
+            if ((promotionsData[idx]?.products || []).length > 0) {
+                openEditProductPromotion(idx);
+                return;
+            }
             crudContext = { action: 'edit', target: 'promotion', editIndex: idx };
-            document.getElementById("crudModalTitle").textContent = "Cập Nhật Voucher / Khuyến Mãi";
+            promotionProductDraft = [];
+            document.getElementById("crudModalTitle").textContent = "Cập nhật voucher";
             document.getElementById("crudModalFields").innerHTML = buildPromotionModalFields(promotionsData[idx]);
             document.getElementById("crudModalBg").classList.add("open");
+        }
+
+        function openEditProductPromotion(idx) {
+            crudContext = { action: 'edit', target: 'productPromotion', editIndex: idx };
+            promotionProductDraft = (promotionsData[idx].products || []).map(item => ({ ...item }));
+            document.getElementById("crudModalTitle").textContent = "Cập nhật sản phẩm khuyến mãi";
+            document.getElementById("crudModalFields").innerHTML = buildProductPromotionModalFields(promotionsData[idx]);
+            document.querySelector("#crudModalBg .modal")?.classList.add("promotion-entry-modal");
+            document.getElementById("crudModalBg").classList.add("open");
+            renderPromotionProductDraft();
         }
 
         // Xóa voucher khỏi danh sách.
@@ -1410,13 +1787,15 @@
                 const productId = document.getElementById("f_product_id").value.trim();
                 const name = document.getElementById("f_name").value.trim();
                 const type = document.getElementById("f_type").value.trim();
+                const audience = document.getElementById("f_audience").value.trim();
                 const color = document.getElementById("f_color").value.trim();
                 const size = document.getElementById("f_size").value.trim();
+                const supplierId = document.getElementById("f_supplier").value.trim();
                 const price = Number(document.getElementById("f_price").value) || 0;
                 const stock = Number(document.getElementById("f_stock").value) || 0;
 
-                if (!productId || !sku || !name || !type || !color || !size) {
-                    alert("Vui lòng điền đủ Mã sản phẩm, Tên sản phẩm, Loại sản phẩm, Màu sắc và Size!");
+                if (!productId || !sku || !name || !type || !audience || !color || !size || !supplierId) {
+                    alert("Vui lòng chọn đủ Danh mục, Loại sản phẩm, Màu sắc, Size và Nhà cung cấp!");
                     return;
                 }
 
@@ -1434,7 +1813,7 @@
                     const response = await fetch(`${API_BASE_URL}/api/san-pham`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ productId, sku, name, type, color, size, price, stock, image: pendingProductImage })
+                        body: JSON.stringify({ productId, sku, name, type, audience, supplierId, color, size, price, stock, image: pendingProductImage })
                     });
                     if (!response.ok) throw new Error(await response.text());
                     await loadAppState();
@@ -1479,25 +1858,40 @@
                 }
             } else if (crudContext.target === 'importRequest') {
                 const supplierId = document.getElementById("import_supplier").value;
-                const sku = document.getElementById("import_sku").value;
-                const qty = Number(document.getElementById("import_qty").value) || 0;
                 const note = document.getElementById("import_note").value.trim();
                 const supplier = partnersData.find(item => item.category === "Nhà cung cấp" && item.id === supplierId);
-                const product = productsData.find(item => item.sku === sku);
 
                 if (!supplier) {
                     alert("Vui lòng chọn nhà cung cấp!");
                     return;
                 }
 
-                if (!product) {
-                    alert("Vui lòng chọn sản phẩm cần nhập!");
+                const rows = Array.from(document.querySelectorAll("#import_items_body tr"));
+                if (rows.length === 0) {
+                    alert("Phiếu nhập kho phải có ít nhất một sản phẩm!");
                     return;
                 }
-
-                if (!Number.isInteger(qty) || qty <= 0) {
-                    alert("Số lượng nhập phải là số nguyên lớn hơn 0!");
-                    return;
+                const items = [];
+                const usedSkus = new Set();
+                for (const row of rows) {
+                    const sku = row.querySelector(".import-line-sku")?.value || "";
+                    const qty = Number(row.querySelector(".import-line-qty")?.value) || 0;
+                    const unitCost = Number(row.querySelector(".import-line-cost")?.value) || 0;
+                    const product = productsData.find(item => item.sku === sku);
+                    if (!product || product.supplierId !== supplierId) {
+                        alert("Tất cả sản phẩm phải thuộc đúng nhà cung cấp đã chọn!");
+                        return;
+                    }
+                    if (usedSkus.has(sku)) {
+                        alert(`SKU ${sku} đang bị chọn lặp trên phiếu!`);
+                        return;
+                    }
+                    if (!Number.isInteger(qty) || qty <= 0 || unitCost <= 0) {
+                        alert("Số lượng phải là số nguyên và giá gốc phải lớn hơn 0!");
+                        return;
+                    }
+                    usedSkus.add(sku);
+                    items.push({ sku, qty, unitCost });
                 }
 
                 let createdId = generateNextCode(importRequests, "id", "PN");
@@ -1505,13 +1899,13 @@
                     const response = await fetch(`${API_BASE_URL}/api/phieu-nhap-kho`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ supplierId, sku, qty, note, employeeId: getCurrentEmployee()?.id || null })
+                        body: JSON.stringify({ supplierId, items, note, employeeId: getCurrentEmployee()?.id || null })
                     });
-                    if (!response.ok) throw new Error(await response.text());
+                    if (!response.ok) throw new Error(await getApiErrorMessage(response, "Không tạo được phiếu nhập kho."));
                     const result = await response.json();
                     createdId = result.id || createdId;
                 } catch (error) {
-                    alert("Không lưu được phiếu nhập kho lên database. Vui lòng kiểm tra API đang chạy.");
+                    alert(error.message || "Không lưu được phiếu nhập kho lên database.");
                     console.error(error);
                     return;
                 }
@@ -1663,7 +2057,7 @@
                     const response = await fetch(`${API_BASE_URL}/api/khuyen-mai`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ code, percent, startDate, endDate, minOrder })
+                        body: JSON.stringify({ code, percent, startDate, endDate, minOrder, products: [] })
                     });
                     if (!response.ok) throw new Error(await response.text());
                     await loadAppState();
@@ -1674,6 +2068,55 @@
                     alert("Không lưu được mã khuyến mãi vào cơ sở dữ liệu.");
                     return;
                 }
+            } else if (crudContext.target === 'productPromotion') {
+                const code = document.getElementById("kmsp_code").value.trim().toUpperCase();
+                const percent = Number(document.getElementById("kmsp_percent").value);
+                const startDate = document.getElementById("kmsp_start").value;
+                const endDate = document.getElementById("kmsp_end").value;
+                if (!code || !startDate || !endDate || !percent) {
+                    alert("Vui lòng nhập thời gian bắt đầu, thời gian kết thúc, phần trăm khuyến mãi và chọn sản phẩm!");
+                    return;
+                }
+                if (percent <= 0 || percent > 100) {
+                    alert("Phần trăm khuyến mãi phải từ 1 đến 100!");
+                    return;
+                }
+                if (parseLocalDate(endDate) <= parseLocalDate(startDate)) {
+                    alert("Thời gian kết thúc phải sau thời gian bắt đầu!");
+                    return;
+                }
+                if (promotionProductDraft.length === 0) {
+                    alert("Vui lòng chọn ít nhất một mã SKU áp dụng khuyến mãi!");
+                    return;
+                }
+                const products = promotionProductDraft.map(item => ({ sku: item.sku, percent }));
+                let saved = false;
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/khuyen-mai`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ code, percent, startDate, endDate, minOrder: 0, products })
+                    });
+                    if (!response.ok) throw new Error(await response.text());
+                    saved = true;
+                } catch (error) {
+                    console.error(error);
+                    alert("Không lưu được sản phẩm khuyến mãi vào Supabase.\nChi tiết: " + (error.message || error));
+                    return;
+                }
+                try {
+                    await loadAppState();
+                    renderAll();
+                    toast(crudContext.action === 'add'
+                        ? "Đã thêm sản phẩm khuyến mãi!"
+                        : "Đã cập nhật sản phẩm khuyến mãi!");
+                } catch (error) {
+                    console.error(error);
+                    alert(saved
+                        ? "Sản phẩm khuyến mãi đã được lưu vào Supabase nhưng giao diện chưa tải lại được.\nChi tiết: " + (error.message || error)
+                        : "Không tải lại được dữ liệu khuyến mãi.");
+                    return;
+                }
             }
             closeCrudModal();
         }
@@ -1681,6 +2124,7 @@
         // Đóng modal thêm/sửa chung.
         function closeCrudModal() {
             document.getElementById("crudModalBg").classList.remove("open");
+            document.querySelector("#crudModalBg .modal")?.classList.remove("import-entry-modal", "promotion-entry-modal");
         }
 
         // Kích hoạt chọn file Excel/CSV để nhập nhiều đối tác cùng lúc.
@@ -1888,6 +2332,13 @@
             const sku = getRowValue(row, ["masku", "sku", "mã sku"]);
             const name = getRowValue(row, ["ten", "tensp", "tensanpham", "name", "tên", "tên sản phẩm"]);
             const type = getRowValue(row, ["loai", "loaisanpham", "category", "type", "loại", "loại sản phẩm"]);
+            const audienceRaw = getRowValue(row, ["danhmuc", "danhmucwebsite", "audience", "đối tượng", "danh mục", "danh mục website"]);
+            const audienceKey = normalizeSkuText(audienceRaw).replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "");
+            const audience = ({ NAM: "NAM", NU: "NU", PHU_KIEN: "PHU_KIEN", PHUKIEN: "PHU_KIEN" })[audienceKey] || "";
+            const supplierRaw = getRowValue(row, ["mancc", "mansx", "supplierid", "nhacungcap", "mã nhà cung cấp", "nhà cung cấp"]);
+            const supplier = partnersData.find(item => item.category === "Nhà cung cấp" &&
+                (item.id.toLowerCase() === supplierRaw.toLowerCase() || item.name.toLowerCase() === supplierRaw.toLowerCase()));
+            const supplierId = supplier?.id || "";
             const color = getRowValue(row, ["mau", "mausac", "color", "màu", "màu sắc"]) || "Mặc định";
             const size = getRowValue(row, ["size", "kichco", "kích cỡ", "kíchco"]);
             const priceRaw = getRowValue(row, ["gia", "giaban", "price", "giá", "giá bán"]);
@@ -1899,6 +2350,8 @@
             if (!/^SP-\d{3,}$/i.test(productId)) errors.push("Mã SP phải có dạng SP-023");
             if (!name) errors.push("thiếu tên sản phẩm");
             if (!type) errors.push("thiếu loại sản phẩm");
+            if (!audience) errors.push("danh mục phải là Nam, Nữ hoặc Phụ kiện");
+            if (!supplierId) errors.push("nhà cung cấp không tồn tại");
             if (!size) errors.push("thiếu size");
             if (!priceRaw || !Number.isFinite(price) || price <= 0) errors.push("giá bán phải lớn hơn 0");
             if (!stockRaw || !Number.isInteger(stock) || stock < 0) errors.push("tồn kho phải là số nguyên không âm");
@@ -1911,6 +2364,8 @@
                     sku: sku ? sku.toUpperCase() : null,
                     name,
                     type,
+                    audience,
+                    supplierId,
                     color,
                     size,
                     price,
@@ -1949,12 +2404,26 @@
                     String(item.productId || "").toLowerCase() === result.product.productId.toLowerCase() &&
                     String(item.color || "").trim().toLowerCase() === result.product.color.trim().toLowerCase() &&
                     String(item.size || "").trim().toLowerCase() === result.product.size.trim().toLowerCase());
+                const differentAudience = knownProducts.some(item =>
+                    String(item.productId || "").toLowerCase() === result.product.productId.toLowerCase() &&
+                    item.audience && item.audience !== result.product.audience);
+                const differentSupplier = knownProducts.some(item =>
+                    String(item.productId || "").toLowerCase() === result.product.productId.toLowerCase() &&
+                    item.supplierId && item.supplierId !== result.product.supplierId);
                 if (duplicateSku) {
                     errors.push(`Dòng ${index + 2}: Mã SKU ${result.product.sku} đã tồn tại`);
                     return;
                 }
                 if (duplicateVariant) {
                     errors.push(`Dòng ${index + 2}: biến thể ${result.product.productId} - ${result.product.color} - ${result.product.size} đã tồn tại`);
+                    return;
+                }
+                if (differentAudience) {
+                    errors.push(`Dòng ${index + 2}: các biến thể cùng Mã SP phải cùng danh mục`);
+                    return;
+                }
+                if (differentSupplier) {
+                    errors.push(`Dòng ${index + 2}: các biến thể cùng Mã SP phải cùng nhà cung cấp`);
                     return;
                 }
                 imported.push(result.product);
@@ -2985,13 +3454,13 @@
 
         // Đánh dấu đang in loại phiếu nào để CSS chỉ in đúng vùng đó.
         function setPrintMode(mode) {
-            document.body.classList.remove("printing-receipt", "printing-shift", "printing-return");
+            document.body.classList.remove("printing-receipt", "printing-shift", "printing-return", "printing-import");
             document.body.classList.add(mode);
         }
 
         // Xóa chế độ in sau khi in xong.
         function clearPrintMode() {
-            document.body.classList.remove("printing-receipt", "printing-shift", "printing-return");
+            document.body.classList.remove("printing-receipt", "printing-shift", "printing-return", "printing-import");
         }
 
         // In riêng hóa đơn thanh toán.
@@ -3002,44 +3471,150 @@
         }
 
         // Tạo link VietQR đúng số tiền và nội dung chuyển khoản của hóa đơn.
-        function buildVietQrUrl(receipt) {
-            const bankBin = "970423";
-            const accountNo = "00006027155";
-            const accountName = "VUONG ANH VU";
-            const amount = Math.round(receipt.total);
-            const addInfo = receipt.id.replace("-", "");
-            return `https://img.vietqr.io/image/${bankBin}-${accountNo}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(addInfo)}&accountName=${encodeURIComponent(accountName)}`;
+        function buildVietQrUrl(session) {
+            return `https://img.vietqr.io/image/${encodeURIComponent(session.bankBin)}-${encodeURIComponent(session.accountNumber)}-compact2.png?amount=${Math.round(session.amount)}&addInfo=${encodeURIComponent(session.description)}&accountName=${encodeURIComponent(session.accountName)}`;
         }
 
-        // Hiện mã QR để khách quét thanh toán.
-        function openQrPaymentModal(receipt) {
+        function buildInvoicePayload(receipt) {
+            const receiverName = receipt.receiverName ?? document.getElementById("codReceiverName")?.value.trim() ?? "";
+            const receiverPhone = receipt.receiverPhone ?? document.getElementById("codReceiverPhone")?.value.trim() ?? "";
+            const receiverAddress = receipt.receiverAddress ?? getDeliveryAddress();
+            const deliveryNote = receipt.deliveryNote ?? document.getElementById("deliveryNote")?.value.trim() ?? "";
+            return {
+                ...receipt,
+                receiverName,
+                receiverPhone,
+                receiverAddress,
+                employeeId: receipt.employeeId,
+                deliveryMode: receipt.deliveryMode,
+                shippingFee: receipt.shippingFee,
+                source: "POS",
+                deliveryNote
+            };
+        }
+
+        function stopQrPaymentPolling() {
+            if (qrPaymentPollTimer) clearTimeout(qrPaymentPollTimer);
+            qrPaymentPollTimer = null;
+        }
+
+        function scheduleQrPaymentCheck(delay = 2500) {
+            stopQrPaymentPolling();
+            if (!pendingQrOrderCode || qrPaymentFinalizing) return;
+            qrPaymentPollTimer = setTimeout(checkQrPaymentStatus, delay);
+        }
+
+        async function checkQrPaymentStatus() {
+            const orderCode = pendingQrOrderCode;
+            if (!orderCode || qrPaymentFinalizing) return;
+            const statusElement = document.getElementById("qrPaymentStatus");
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/thanh-toan-qr/${encodeURIComponent(orderCode)}`, { cache: "no-store" });
+                if (!response.ok) throw new Error(await getApiErrorMessage(response, "Không kiểm tra được giao dịch."));
+                const result = await response.json();
+                if (String(orderCode) !== String(pendingQrOrderCode)) return;
+                if (result.paid) {
+                    qrPaymentFinalizing = true;
+                    stopQrPaymentPolling();
+                    if (statusElement) statusElement.textContent = "Đã nhận tiền. Đang xuất hóa đơn...";
+                    const receipt = pendingQrReceipt;
+                    pendingQrReceipt = null;
+                    pendingQrOrderCode = null;
+                    document.getElementById("qrPaymentModalBg").classList.remove("open");
+                    await completeCheckout(receipt, true);
+                    toast("Đã nhận tiền và xuất hóa đơn thành công!");
+                    qrPaymentFinalizing = false;
+                    return;
+                }
+                const terminalStatuses = ["CANCELLED", "EXPIRED"];
+                if (terminalStatuses.includes(String(result.status).toUpperCase())) {
+                    stopQrPaymentPolling();
+                    if (statusElement) statusElement.textContent = "Phiên thanh toán đã hết hạn hoặc bị hủy.";
+                    return;
+                }
+                if (statusElement) statusElement.textContent = "Đang chờ ngân hàng xác nhận thanh toán...";
+            } catch (error) {
+                console.error(error);
+                if (statusElement) statusElement.textContent = "Mất kết nối tạm thời, hệ thống sẽ tự kiểm tra lại.";
+            }
+            if (String(orderCode) === String(pendingQrOrderCode)) scheduleQrPaymentCheck();
+        }
+
+        // Hiện QR động của payOS và tự động hoàn tất khi ngân hàng báo đã nhận tiền.
+        async function openQrPaymentModal(receipt) {
             pendingQrReceipt = receipt;
+            pendingQrOrderCode = null;
+            qrPaymentFinalizing = false;
             const qrImage = document.getElementById("qrPaymentImage");
             const qrFallback = document.getElementById("qrFallback");
-            qrImage.style.display = "block";
+            const statusElement = document.getElementById("qrPaymentStatus");
+            qrImage.removeAttribute("src");
+            qrImage.style.display = "none";
             qrFallback.style.display = "none";
-            qrImage.src = buildVietQrUrl(receipt);
             document.getElementById("qrInvoiceId").textContent = receipt.id;
             document.getElementById("qrAmount").textContent = money(receipt.total);
-            document.getElementById("qrContent").textContent = receipt.id.replace("-", "");
+            document.getElementById("qrContent").textContent = "Đang tạo...";
+            document.getElementById("qrAccount").textContent = "Đang lấy từ payOS...";
+            if (statusElement) statusElement.textContent = "Đang tạo mã QR cho hóa đơn...";
             document.getElementById("qrPaymentModalBg").classList.add("open");
             if (window.lucide) lucide.createIcons();
+            try {
+                const payload = buildInvoicePayload(receipt);
+                Object.assign(receipt, {
+                    receiverName: payload.receiverName,
+                    receiverPhone: payload.receiverPhone,
+                    receiverAddress: payload.receiverAddress,
+                    deliveryNote: payload.deliveryNote
+                });
+                const response = await fetch(`${API_BASE_URL}/api/thanh-toan-qr`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error(await getApiErrorMessage(response, "Không tạo được mã QR."));
+                const session = await response.json();
+                if (!session.orderCode || !session.bankBin || !session.accountNumber) {
+                    throw new Error("payOS không trả về đủ thông tin tài khoản nhận tiền.");
+                }
+                if (pendingQrReceipt !== receipt) return;
+                pendingQrOrderCode = session.orderCode;
+                qrImage.src = buildVietQrUrl(session);
+                qrImage.style.display = "block";
+                document.getElementById("qrContent").textContent = session.description;
+                document.getElementById("qrAccount").textContent = `${session.accountName} - ${session.accountNumber}`;
+                if (statusElement) statusElement.textContent = "Đang chờ ngân hàng xác nhận thanh toán...";
+                scheduleQrPaymentCheck(1500);
+            } catch (error) {
+                console.error(error);
+                pendingQrReceipt = null;
+                pendingQrOrderCode = null;
+                qrFallback.style.display = "block";
+                qrFallback.textContent = error.message || "Không tạo được mã QR thanh toán.";
+                if (statusElement) statusElement.textContent = "Chưa tạo được phiên thanh toán.";
+            }
         }
 
         // Hủy bước thanh toán QR nếu khách chưa chuyển khoản.
-        function cancelQrPayment() {
+        async function cancelQrPayment() {
+            const orderCode = pendingQrOrderCode;
+            stopQrPaymentPolling();
+            if (orderCode) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/thanh-toan-qr/${encodeURIComponent(orderCode)}`, { method: "DELETE" });
+                    if (!response.ok) throw new Error(await getApiErrorMessage(response, "Không hủy được phiên thanh toán."));
+                } catch (error) {
+                    console.error(error);
+                    const statusElement = document.getElementById("qrPaymentStatus");
+                    if (statusElement) statusElement.textContent = "Không thể hủy ngay. Hệ thống đang kiểm tra giao dịch để tránh bỏ sót tiền đã nhận.";
+                    toast(error.message || "Không hủy được phiên thanh toán QR");
+                    scheduleQrPaymentCheck(500);
+                    return;
+                }
+            }
             pendingQrReceipt = null;
+            pendingQrOrderCode = null;
             document.getElementById("qrPaymentModalBg").classList.remove("open");
             toast("Đã hủy thanh toán QR");
-        }
-
-        // Nhân viên xác nhận đã nhận tiền QR, sau đó mới hoàn tất hóa đơn.
-        function confirmQrPayment() {
-            if (!pendingQrReceipt) return;
-            document.getElementById("qrPaymentModalBg").classList.remove("open");
-            completeCheckout(pendingQrReceipt);
-            pendingQrReceipt = null;
-            toast("Đã xác nhận thanh toán QR");
         }
 
         function formatCardNumberInput(input) {
@@ -3143,33 +3718,24 @@
         }
 
         // Hoàn tất thanh toán: tạo COD hoặc ghi nhận doanh thu, trừ kho, tích điểm, mở hóa đơn.
-        async function completeCheckout(receipt) {
-            const receiverName = document.getElementById("codReceiverName")?.value.trim() || "";
-            const receiverPhone = document.getElementById("codReceiverPhone")?.value.trim() || "";
-            const receiverAddress = getDeliveryAddress();
-            const deliveryNote = document.getElementById("deliveryNote")?.value.trim() || "";
+        async function completeCheckout(receipt, alreadyPersisted = false) {
+            if (!receipt) return;
+            const invoicePayload = buildInvoicePayload(receipt);
+            const { receiverName, receiverPhone, receiverAddress, deliveryNote } = invoicePayload;
             receipt.deliveryNote = deliveryNote;
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/hoa-don`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        ...receipt,
-                        receiverName,
-                        receiverPhone,
-                        receiverAddress,
-                        employeeId: receipt.employeeId,
-                        deliveryMode: receipt.deliveryMode,
-                        shippingFee: receipt.shippingFee,
-                        source: "POS",
-                        deliveryNote
-                    })
-                });
-                if (!response.ok) throw new Error(await response.text());
-            } catch (error) {
-                console.error(error);
-                toast("Không lưu được hóa đơn vào cơ sở dữ liệu");
-                return;
+            if (!alreadyPersisted) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/hoa-don`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(invoicePayload)
+                    });
+                    if (!response.ok) throw new Error(await response.text());
+                } catch (error) {
+                    console.error(error);
+                    toast("Không lưu được hóa đơn vào cơ sở dữ liệu");
+                    return;
+                }
             }
             if (receipt.isCod) {
                 codOrders.push({
@@ -3643,6 +4209,7 @@
             if (view === "delivery") {
                 renderDelivery();
                 renderCod();
+                renderCancelledOrders();
             }
             if (view === "cod") {
                 setShipmentTab("cod");
@@ -3711,7 +4278,8 @@
             });
             showView(document.body.dataset.view || "pos");
             if (document.body.dataset.view === "delivery") {
-                setShipmentTab(location.hash === "#cod" ? "cod" : "delivery");
+                const requestedTab = location.hash.slice(1);
+                setShipmentTab(["delivery", "cod", "cancelled"].includes(requestedTab) ? requestedTab : "delivery");
             }
             if (document.getElementById("customerStep")) resetSaleCustomer();
             if (document.getElementById("returnHistoryBody")) loadReturnHistory();

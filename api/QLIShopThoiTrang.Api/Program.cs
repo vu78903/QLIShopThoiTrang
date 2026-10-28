@@ -1,5 +1,7 @@
 using QLIShopThoiTrang.Api.Data;
 using QLIShopThoiTrang.Api.Models;
+using QLIShopThoiTrang.Api.Services;
+using PayOS.Models.Webhooks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,7 @@ builder.Services.AddSingleton<SqlServerDatabaseInitializer>();
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<ProductImageStorage>();
 builder.Services.AddScoped<StoreRepository>();
+builder.Services.AddScoped<PayOsPaymentService>();
 
 var app = builder.Build();
 
@@ -56,8 +59,9 @@ app.MapPost("/api/dang-nhap", async (LoginRequestDto input, StoreRepository stor
 
 app.MapPost("/api/san-pham", async (ProductUpsertDto input, StoreRepository store, ProductImageStorage images) =>
 {
-    if (string.IsNullOrWhiteSpace(input.Name) || string.IsNullOrWhiteSpace(input.Type))
-        return Results.BadRequest("Ten san pham va loai san pham la bat buoc.");
+    if (string.IsNullOrWhiteSpace(input.Name) || string.IsNullOrWhiteSpace(input.Type) ||
+        string.IsNullOrWhiteSpace(input.SupplierId))
+        return Results.BadRequest("Tên, loại sản phẩm và nhà cung cấp là bắt buộc.");
     if (input.Price <= 0)
         return Results.BadRequest("Gia ban phai lon hon 0.");
     if (input.Stock < 0)
@@ -169,7 +173,10 @@ app.MapDelete("/api/doi-tac/{category}/{id}", async (string category, string id,
 
 app.MapPost("/api/khuyen-mai", async (PromotionUpsertDto input, StoreRepository store) =>
 {
-    if (string.IsNullOrWhiteSpace(input.Code) || input.Percent <= 0 || input.MinOrder < 0)
+    if ((input.Code ?? string.Empty).Trim().Length > 20)
+        return Results.BadRequest("Mã khuyến mãi chỉ được tối đa 20 ký tự.");
+    if (string.IsNullOrWhiteSpace(input.Code) || input.Percent <= 0 || input.Percent > 100 || input.MinOrder < 0 ||
+        input.Products?.Any(item => string.IsNullOrWhiteSpace(item.Sku) || item.Percent <= 0 || item.Percent > 100) == true)
         return Results.BadRequest("Ma khuyen mai, phan tram giam va dieu kien la bat buoc.");
 
     try
@@ -190,10 +197,16 @@ app.MapDelete("/api/khuyen-mai/{code}", async (string code, StoreRepository stor
         : Results.NotFound();
 });
 
+// Website ở máy khác có thể gọi API này hoặc đọc trực tiếp view
+// public.sanphamkhuyenmai_hientai trên Supabase.
+app.MapGet("/api/san-pham-khuyen-mai", async (StoreRepository store) =>
+    Results.Ok(await store.GetCurrentPromotionProductsAsync()));
+
 app.MapPost("/api/phieu-nhap-kho", async (ImportRequestCreateDto input, StoreRepository store) =>
 {
-    if (string.IsNullOrWhiteSpace(input.SupplierId) || string.IsNullOrWhiteSpace(input.Sku) || input.Qty <= 0)
-        return Results.BadRequest("Nha cung cap, SKU va so luong la bat buoc.");
+    if (string.IsNullOrWhiteSpace(input.SupplierId) || input.Items is null || input.Items.Count == 0 ||
+        input.Items.Any(item => string.IsNullOrWhiteSpace(item.Sku) || item.Qty <= 0 || item.UnitCost <= 0))
+        return Results.BadRequest("Nhà cung cấp và danh sách sản phẩm có số lượng, giá gốc hợp lệ là bắt buộc.");
 
     try
     {
@@ -255,6 +268,80 @@ app.MapPost("/api/hoa-don", async (InvoiceCreateDto input, StoreRepository store
     catch (Exception ex)
     {
         return Results.Problem("Không lưu được hóa đơn: " + ex.Message);
+    }
+});
+
+app.MapPost("/api/thanh-toan-qr", async (
+    InvoiceCreateDto input,
+    PayOsPaymentService payments,
+    CancellationToken cancellationToken) =>
+{
+    try
+    {
+        return Results.Ok(await payments.CreateAsync(input, cancellationToken));
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.Conflict(new { message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Khong tao duoc phien thanh toan QR: " + ex.Message);
+    }
+});
+
+app.MapGet("/api/thanh-toan-qr/{orderCode:long}", async (
+    long orderCode,
+    PayOsPaymentService payments,
+    CancellationToken cancellationToken) =>
+{
+    try
+    {
+        return Results.Ok(await payments.GetStatusAsync(orderCode, cancellationToken));
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.NotFound(new { message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Khong kiem tra duoc thanh toan QR: " + ex.Message);
+    }
+});
+
+app.MapDelete("/api/thanh-toan-qr/{orderCode:long}", async (
+    long orderCode,
+    PayOsPaymentService payments,
+    CancellationToken cancellationToken) =>
+{
+    try
+    {
+        await payments.CancelAsync(orderCode, cancellationToken);
+        return Results.NoContent();
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.Conflict(new { message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Khong huy duoc phien thanh toan QR: " + ex.Message);
+    }
+});
+
+app.MapPost("/api/thanh-toan-qr/webhook", async (
+    Webhook webhook,
+    PayOsPaymentService payments,
+    CancellationToken cancellationToken) =>
+{
+    try
+    {
+        await payments.HandleWebhookAsync(webhook, cancellationToken);
+        return Results.Ok(new { success = true });
+    }
+    catch
+    {
+        return Results.BadRequest(new { success = false });
     }
 });
 

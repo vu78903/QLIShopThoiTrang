@@ -198,7 +198,81 @@ test("thêm khách hàng và voucher", async ({ page }) => {
   await page.locator("#km_min_order").fill("0");
   await page.getByRole("button", { name: /Lưu dữ liệu/i }).click({ force: true });
 
-  await expect(page.locator("#promotionBody")).toContainText("TEST10");
+  await expect(page.locator("#voucherBody")).toContainText("TEST10");
+});
+
+test("thêm sản phẩm khuyến mãi nhiều SKU có giờ phút và tải lại không lỗi", async ({ page }) => {
+  const state = structuredClone(emptyState);
+  state.productsData = [
+    { productId: "SP-023", sku: "1-023-DEN-S", name: "Boxer nam thể thao", type: "Đồ lót nam", color: "Đen", size: "S", price: 189000, stock: 10 },
+    { productId: "SP-021", sku: "A-021-DEN-S", name: "Boxer nam cotton", type: "Đồ lót nam", color: "Đen", size: "S", price: 129000, stock: 10 }
+  ];
+  state.promotionsData = [{
+    code: "VOUCHER10", percent: 10, minOrder: 200000,
+    startDate: "2026-10-01T00:00", endDate: "2026-12-31T23:59", products: []
+  }];
+  let savedPayload = null;
+  const dialogMessages = [];
+  const promotionRequests = [];
+  page.on("dialog", dialog => dialogMessages.push(dialog.message()));
+  page.on("request", request => {
+    if (request.url().includes("/api/khuyen-mai")) promotionRequests.push(`${request.method()} ${request.url()}`);
+  });
+  await page.route("http://127.0.0.1:5000/api/**", async route => {
+    const request = route.request();
+    if (request.url().endsWith("/api/app-state")) return route.fulfill({ json: state });
+    if (request.url().endsWith("/api/khuyen-mai") && request.method() === "POST") {
+      savedPayload = request.postDataJSON();
+      state.promotionsData.push({
+        ...savedPayload,
+        products: savedPayload.products.map(item => {
+          const product = state.productsData.find(candidate => candidate.sku === item.sku);
+          return {
+            ...item,
+            productId: product.productId,
+            productName: product.name,
+            color: product.color,
+            size: product.size,
+            originalPrice: product.price,
+            salePrice: Math.round(product.price * (100 - item.percent) / 100)
+          };
+        })
+      });
+      return route.fulfill({ json: savedPayload });
+    }
+    return route.fulfill({ status: 200, json: {} });
+  });
+  await openPage(page, "khuyen-mai.html", state);
+
+  await expect(page.locator("#productPromotionPanel")).toBeVisible();
+  await expect(page.locator("#voucherPanel")).toBeHidden();
+  await page.getByRole("tab", { name: "Voucher" }).click();
+  await expect(page.locator("#voucherPanel")).toBeVisible();
+  await expect(page.locator("#voucherBody")).toContainText("VOUCHER10");
+  await expect(page.locator("#productPromotionPanel")).toBeHidden();
+  await page.getByRole("tab", { name: "Sản phẩm khuyến mãi" }).click();
+  await expect(page.locator("#productPromotionPanel")).toBeVisible();
+  await expect(page.locator("#promotionAddButton")).toHaveText("Thêm sản phẩm khuyến mãi");
+
+  expect(await page.evaluate(() => {
+    const date = parseLocalDate("2026-10-27T13:39");
+    return [date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), date.getMinutes()];
+  })).toEqual([2026, 10, 27, 13, 39]);
+
+  await page.getByRole("button", { name: "Thêm sản phẩm khuyến mãi" }).click();
+  await page.locator("#kmsp_start").fill("2026-10-27T13:39");
+  await page.locator("#kmsp_end").fill("2027-01-13T13:39");
+  await page.locator("#kmsp_percent").fill("25");
+  await page.locator("#km_product_picker").selectOption(["1-023-DEN-S", "A-021-DEN-S"]);
+  await page.getByRole("button", { name: "Thêm các mã SKU đã chọn" }).click();
+  await expect(page.locator("#km_product_body tr")).toHaveCount(2);
+  await page.getByRole("button", { name: "Lưu dữ liệu" }).click();
+
+  await expect.poll(() => promotionRequests).toContain("POST http://127.0.0.1:5000/api/khuyen-mai");
+  await expect.poll(() => savedPayload?.products?.length || 0).toBe(2);
+  await expect(page.locator("#productPromotionBody")).toContainText(savedPayload.code);
+  await expect(page.locator("#productPromotionBody")).toContainText("27/10/2026 13:39");
+  expect(dialogMessages.filter(message => /invalid time value|không lưu được/i.test(message))).toEqual([]);
 });
 
 test("bán hàng tiền mặt và xuất hóa đơn", async ({ page }) => {
@@ -217,6 +291,70 @@ test("bán hàng tiền mặt và xuất hóa đơn", async ({ page }) => {
   await expect(page.locator("#receiptModalBg")).toHaveClass(/open/);
   await expect(page.locator("#receiptContent")).toContainText("HÓA ĐƠN THANH TOÁN");
   await expect(page.locator("#receiptContent")).toContainText("Áo thun test");
+});
+
+test("QR payOS tự động xác nhận, xuất hóa đơn và không lưu trùng", async ({ page }) => {
+  test.setTimeout(60000);
+  const state = structuredClone(seededState);
+  state.partnersData.push({
+    category: "Nhân viên", id: "NV-001", name: "Thu ngân kiểm thử",
+    phone: "0900000001", email: "thungan@test.local", address: "Cửa hàng", role: "Thu ngân"
+  });
+  await page.addInitScript(() => {
+    window.currentEmployee = { id: "NV-001", name: "Thu ngân kiểm thử" };
+  });
+  let createdPayment = null;
+  let paymentChecks = 0;
+  let directInvoicePosts = 0;
+
+  await page.route("http://127.0.0.1:5000/api/**", async route => {
+    const request = route.request();
+    const url = request.url();
+    if (url.endsWith("/api/app-state")) return route.fulfill({ json: state });
+    if (url.endsWith("/api/thanh-toan-qr") && request.method() === "POST") {
+      createdPayment = request.postDataJSON();
+      return route.fulfill({ json: {
+        orderCode: 1790000000000123,
+        invoiceId: createdPayment.id,
+        amount: createdPayment.total,
+        description: "HDTEST001",
+        bankBin: "970422",
+        accountNumber: "0924020138",
+        accountName: "VUONG ANH VU",
+        paymentLinkId: "test-link",
+        checkoutUrl: "https://pay.payos.vn/test",
+        status: "PENDING"
+      }});
+    }
+    if (/\/api\/thanh-toan-qr\/\d+$/.test(url) && request.method() === "GET") {
+      paymentChecks += 1;
+      return route.fulfill({ json: {
+        orderCode: 1790000000000123,
+        status: paymentChecks > 1 ? "PAID" : "PENDING",
+        amount: createdPayment.total,
+        amountPaid: paymentChecks > 1 ? createdPayment.total : 0,
+        paid: paymentChecks > 1
+      }});
+    }
+    if (url.endsWith("/api/hoa-don") && request.method() === "POST") {
+      directInvoicePosts += 1;
+      return route.fulfill({ status: 500, body: "Không được gọi lần hai" });
+    }
+    return route.fulfill({ status: 200, json: {} });
+  });
+
+  await openPage(page, "ban-hang.html", state);
+  await page.locator("#skuSearch").fill("SP-001");
+  await page.evaluate(() => addSkuSearchToCart());
+  await page.locator('input[name="paymentMethod"]').nth(1).check({ force: true });
+  await page.getByRole("button", { name: /THANH TOÁN/i }).click({ force: true });
+
+  await expect(page.locator("#qrAccount")).toContainText("0924020138");
+  await expect.poll(() => paymentChecks, { timeout: 10000 }).toBeGreaterThan(1);
+  await expect(page.locator("#receiptModalBg")).toHaveClass(/open/);
+  expect(createdPayment.paymentMethod).toBeTruthy();
+  expect(directInvoicePosts).toBe(0);
+  await expect(page.locator("#cartBody tr")).toHaveCount(0);
 });
 
 test("COD cập nhật tới giao thành công và được đưa vào báo cáo", async ({ page }) => {

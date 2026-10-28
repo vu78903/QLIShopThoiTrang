@@ -48,27 +48,33 @@
                 <section class="view active" id="view-promotions">
                     <div class="page-head">
                         <div>
-                            <h1>Voucher & Khuyến mãi</h1>
+                            <h1>Quản lý khuyến mãi</h1>
                         </div>
-                        <button class="btn btn-primary" onclick="openAddPromotion()"><i data-lucide="plus" style="width:16px"></i> Thêm voucher</button>
+                        <button id="promotionAddButton" class="btn btn-primary" onclick="openAddProductPromotion()">Thêm sản phẩm khuyến mãi</button>
                     </div>
                     <div class="card pad">
-                        <div class="table-wrap">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Mã khuyến mãi</th>
-                                        <th>% giảm</th>
-                                        <th>Ngày bắt đầu</th>
-                                        <th>Ngày kết thúc</th>
-                                        <th>Điều kiện</th>
-                                        <th>Trạng thái</th>
-                                        <th>Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="promotionBody"></tbody>
-                            </table>
+                        <div class="tabs promotion-tabs" role="tablist" aria-label="Nhóm khuyến mãi">
+                            <button class="tab active promotion-tab" role="tab" aria-selected="true" onclick="switchPromotionCategory('products', this)">Sản phẩm khuyến mãi</button>
+                            <button class="tab promotion-tab" role="tab" aria-selected="false" onclick="switchPromotionCategory('vouchers', this)">Voucher</button>
                         </div>
+
+                        <section id="productPromotionPanel" class="promotion-tab-panel" aria-label="Sản phẩm khuyến mãi">
+                            <div class="table-wrap">
+                                <table class="data-table">
+                                    <thead><tr><th>Mã chương trình</th><th>% giảm</th><th>Thời gian bắt đầu</th><th>Thời gian kết thúc</th><th>Số SKU</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+                                    <tbody id="productPromotionBody"></tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <section id="voucherPanel" class="promotion-tab-panel hidden" aria-label="Voucher">
+                            <div class="table-wrap">
+                                <table class="data-table">
+                                    <thead><tr><th>Mã voucher</th><th>% giảm</th><th>Ngày bắt đầu</th><th>Ngày kết thúc</th><th>Đơn tối thiểu</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+                                    <tbody id="voucherBody"></tbody>
+                                </table>
+                            </div>
+                        </section>
                     </div>
                 </section>
 

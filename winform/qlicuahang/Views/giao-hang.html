@@ -50,6 +50,9 @@
                         <button id="shipmentTabCod" class="shipment-tab" type="button" role="tab" onclick="setShipmentTab('cod')">
                             <i data-lucide="hand-coins"></i><span><strong>Giao hàng COD</strong><small>Shipper thu tiền khi giao</small></span>
                         </button>
+                        <button id="shipmentTabCancelled" class="shipment-tab" type="button" role="tab" onclick="setShipmentTab('cancelled')">
+                            <i data-lucide="package-x"></i><span><strong>Đơn đã hủy</strong><small>Lưu riêng để tra cứu</small></span>
+                        </button>
                     </div>
 
                     <div id="deliveryPanel">
@@ -85,12 +88,29 @@
                             </div>
                         </section>
                     </div>
+
+                    <div id="cancelledPanel" class="hidden">
+                        <div class="shipment-kpis">
+                            <div class="shipment-kpi"><span class="kpi-icon red"><i data-lucide="package-x"></i></span><div><small>Tổng đơn đã hủy</small><strong id="cancelledTotalCount">0</strong></div></div>
+                            <div class="shipment-kpi"><span class="kpi-icon amber"><i data-lucide="banknote-x"></i></span><div><small>Tổng giá trị đơn hủy</small><strong id="cancelledValueTotal">0 ₫</strong></div></div>
+                            <div class="shipment-kpi"><span class="kpi-icon blue"><i data-lucide="globe-2"></i></span><div><small>Đơn hủy từ website</small><strong id="cancelledWebCount">0</strong></div></div>
+                        </div>
+                        <section class="card shipment-card">
+                            <div class="shipment-card-head"><div><strong>Đơn hàng đã hủy</strong><small>Chỉ dùng để tra cứu, không tiếp tục giao hàng.</small></div><span class="cancelled-pill"><i data-lucide="circle-x"></i> Đã hủy</span></div>
+                            <div class="table-wrap">
+                                <table class="data-table shipment-table">
+                                    <thead><tr><th>Mã đơn</th><th>Người nhận</th><th>Địa chỉ giao</th><th>Ghi chú / lý do</th><th>Thanh toán</th><th class="money-heading">Tổng tiền</th><th>Nguồn đơn</th><th>Trạng thái</th></tr></thead>
+                                    <tbody id="cancelledBody"></tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
                 </section>
             </main>
         </div>
     </div>
 
     <div id="toast" role="status" aria-live="polite"><i data-lucide="check-circle"></i><span id="toastText">Đã cập nhật</span></div>
-    <script src="../js/ung-dung.js?v=20261023-3"></script>
+    <script src="../js/ung-dung.js?v=20261028-1"></script>
 </body>
 </html>

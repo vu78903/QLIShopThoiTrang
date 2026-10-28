@@ -257,11 +257,12 @@
                     <div class="qr-info-row"><span>Số hóa đơn</span><strong id="qrInvoiceId">-</strong></div>
                     <div class="qr-info-row"><span>Số tiền</span><strong id="qrAmount">0 ₫</strong></div>
                     <div class="qr-info-row"><span>Nội dung</span><strong id="qrContent">-</strong></div>
+                    <div class="qr-info-row"><span>Tài khoản nhận</span><strong id="qrAccount">-</strong></div>
+                    <div id="qrPaymentStatus" role="status" aria-live="polite" style="margin-top:12px;color:#2563eb;font-weight:700;">Đang tạo mã QR...</div>
                 </div>
             </div>
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="cancelQrPayment()">Hủy</button>
-                <button class="btn btn-primary" onclick="confirmQrPayment()"><i data-lucide="check-circle" style="width:16px"></i> Xác nhận đã thanh toán</button>
             </div>
         </div>
     </div>
@@ -364,6 +365,6 @@
         <span id="toastText">Đã cập nhật thành công</span>
     </div>
 
-    <script src="../js/ung-dung.js?v=20261023-3"></script>
+    <script src="../js/ung-dung.js?v=20261028-1"></script>
 </body>
 </html>

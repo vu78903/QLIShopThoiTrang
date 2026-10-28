@@ -7,7 +7,10 @@ export default defineConfig({
   reporter: [["list"]],
   use: {
     trace: "retain-on-failure",
-    viewport: { width: 1366, height: 900 }
+    viewport: { width: 1366, height: 900 },
+    launchOptions: process.env.PLAYWRIGHT_EXECUTABLE_PATH
+      ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH }
+      : {}
   },
   projects: [
     {

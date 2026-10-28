@@ -59,6 +59,12 @@
                     </div>
                     <div class="card pad">
                         <div class="filterbar" style="margin-bottom:14px">
+                            <select id="productAudienceFilter" class="input" style="max-width:190px" onchange="renderProducts()" aria-label="Lọc theo danh mục">
+                                <option value="">Tất cả danh mục</option>
+                                <option value="NAM">Nam</option>
+                                <option value="NU">Nữ</option>
+                                <option value="PHU_KIEN">Phụ kiện</option>
+                            </select>
                             <div class="input-wrap" style="max-width:520px">
                                 <input id="productSearchInput" class="input" type="search"
                                        placeholder="Tìm theo Mã SP, Mã SKU hoặc tên sản phẩm..."
@@ -80,6 +86,8 @@
                                         <th>Mã SKU</th>
                                         <th>Tên sản phẩm</th>
                                         <th>Loại sản phẩm</th>
+                                        <th>Danh mục</th>
+                                        <th>Nhà cung cấp</th>
                                         <th>Màu sắc</th>
                                         <th>Size</th>
                                         <th>Giá bán</th>
@@ -196,6 +204,6 @@
         <span id="toastText">Đã cập nhật thành công</span>
     </div>
 
-    <script src="../js/ung-dung.js?v=20261023-3"></script>
+    <script src="../js/ung-dung.js?v=20261028-1"></script>
 </body>
 </html>

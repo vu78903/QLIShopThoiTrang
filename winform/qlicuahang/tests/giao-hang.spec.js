@@ -5,6 +5,7 @@ import path from "path";
 const root = path.join(process.cwd(), "Views");
 
 const appState = {
+  cancelledOrders: [{ id: "WEB-HUY-001", name: "Khách đã hủy", phone: "0909999999", address: "Quận 3", note: "Khách đổi ý", shippingFee: 30000, status: "Đã hủy", source: "WEB", receipt: { id: "WEB-HUY-001", total: 350000, paymentMethod: "COD", items: [] } }],
   productsData: [{ sku: "SP-001", name: "Áo polo", type: "Áo", color: "Xanh", size: "L", unit: "Cái", price: 200000, stock: 12 }],
   productTypesData: [{ id: "LSP-001", name: "Áo" }],
   partnersData: [
@@ -46,6 +47,14 @@ test("gộp giao hàng và COD trong cùng một form", async ({ page }) => {
   await page.locator("#shipmentTabCod").click();
   await expect(page).toHaveURL(/giao-hang\.html#cod$/);
   await expect(page.locator("#codBody")).toContainText("WEB-COD-001");
+  await page.locator("#shipmentTabCancelled").click();
+  await expect(page).toHaveURL(/giao-hang\.html#cancelled$/);
+  await expect(page.locator("#cancelledBody")).toContainText("WEB-HUY-001");
+  await expect(page.locator("#cancelledBody")).toContainText("Khách đổi ý");
+  await expect(page.locator("#cancelledBody")).toContainText("350.000 ₫");
+  await expect(page.locator("#cancelledBody button")).toHaveCount(0);
+  await expect(page.locator("#cancelledTotalCount")).toHaveText("1");
+  await expect(page.locator("#cancelledWebCount")).toHaveText("1");
   await expect(page.locator("#codBody")).toContainText("276.000 ₫");
   await expect(page.locator("#codBody")).toContainText("Giao giờ hành chính");
 });
