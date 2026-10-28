@@ -51,6 +51,10 @@ namespace qlicuahang
                     $"Ứng dụng không thể khởi động. Chi tiết đã được ghi tại:{Environment.NewLine}{logPath}{Environment.NewLine}{Environment.NewLine}{ex.Message}",
                     "Lỗi khởi động", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            finally
+            {
+                ApiProcessManager.StopOwnedProcess();
+            }
         }
     }
 }

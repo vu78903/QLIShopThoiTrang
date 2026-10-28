@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Text.Json;
 
 namespace qlicuahang;
 
@@ -8,6 +9,7 @@ internal static class ApiProcessManager
 {
     private const string HealthUrl = "http://127.0.0.1:5000/api/health";
     private const int ApiPort = 5000;
+    private static Process? ownedProcess;
     private static readonly HttpClient HealthClient = new()
     {
         Timeout = TimeSpan.FromSeconds(3)
@@ -15,15 +17,31 @@ internal static class ApiProcessManager
 
     public static async Task<bool> EnsureRunningAsync()
     {
-        if (await WaitForHealthyAsync(2, 250)) return true;
-
-        // Cổng đã có tiến trình giữ thì chờ API hiện tại sẵn sàng, không mở thêm bản thứ hai.
-        if (await IsPortOpenAsync())
-            return await WaitForHealthyAsync(6, 500);
-
         string apiDirectory = Path.Combine(AppContext.BaseDirectory, "api");
         string executablePath = Path.Combine(apiDirectory, "QLIShopThoiTrang.Api.exe");
         string dllPath = Path.Combine(apiDirectory, "QLIShopThoiTrang.Api.dll");
+
+        if (await WaitForHealthyAsync(2, 250))
+        {
+            ownedProcess = FindBundledApiProcess(executablePath);
+            return true;
+        }
+
+        // Chỉ dừng tiến trình API cũ nếu nó chạy đúng từ thư mục output của WinForms.
+        if (await IsPortOpenAsync())
+        {
+            Process? staleProcess = FindBundledApiProcess(executablePath);
+            if (staleProcess is null) return false;
+            try
+            {
+                staleProcess.Kill(entireProcessTree: true);
+                await staleProcess.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(5));
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         if (!File.Exists(executablePath) && !File.Exists(dllPath))
             return false;
@@ -56,11 +74,16 @@ internal static class ApiProcessManager
         if (string.IsNullOrWhiteSpace(connectionString))
             return false;
         startInfo.Environment["YODYSTORE_CONNECTION_STRING"] = connectionString;
+        CopyUserEnvironment(startInfo, "PAYOS_CLIENT_ID");
+        CopyUserEnvironment(startInfo, "PAYOS_API_KEY");
+        CopyUserEnvironment(startInfo, "PAYOS_CHECKSUM_KEY");
+        CopyUserEnvironment(startInfo, "PAYOS_RETURN_URL");
+        CopyUserEnvironment(startInfo, "PAYOS_CANCEL_URL");
 
         try
         {
-            using Process? process = Process.Start(startInfo);
-            if (process is null) return false;
+            ownedProcess = Process.Start(startInfo);
+            if (ownedProcess is null) return false;
         }
         catch
         {
@@ -87,7 +110,12 @@ internal static class ApiProcessManager
         try
         {
             using HttpResponseMessage response = await HealthClient.GetAsync(HealthUrl);
-            return response.IsSuccessStatusCode;
+            if (!response.IsSuccessStatusCode) return false;
+            await using Stream content = await response.Content.ReadAsStreamAsync();
+            using JsonDocument json = await JsonDocument.ParseAsync(content);
+            return json.RootElement.TryGetProperty("ok", out JsonElement ok) && ok.GetBoolean()
+                && json.RootElement.TryGetProperty("qrPayment", out JsonElement qrPayment)
+                && qrPayment.GetBoolean();
         }
         catch
         {
@@ -108,5 +136,51 @@ internal static class ApiProcessManager
         {
             return false;
         }
+    }
+
+    public static void StopOwnedProcess()
+    {
+        Process? process = ownedProcess;
+        ownedProcess = null;
+        if (process is null) return;
+        try
+        {
+            if (!process.HasExited) process.Kill(entireProcessTree: true);
+        }
+        catch
+        {
+            // Ứng dụng vẫn đóng bình thường nếu API đã tự kết thúc.
+        }
+        finally
+        {
+            process.Dispose();
+        }
+    }
+
+    private static Process? FindBundledApiProcess(string executablePath)
+    {
+        string expectedPath = Path.GetFullPath(executablePath);
+        foreach (Process process in Process.GetProcessesByName("QLIShopThoiTrang.Api"))
+        {
+            try
+            {
+                string? actualPath = process.MainModule?.FileName;
+                if (actualPath is not null && string.Equals(
+                        Path.GetFullPath(actualPath), expectedPath, StringComparison.OrdinalIgnoreCase))
+                    return process;
+                process.Dispose();
+            }
+            catch
+            {
+                process.Dispose();
+            }
+        }
+        return null;
+    }
+
+    private static void CopyUserEnvironment(ProcessStartInfo startInfo, string variableName)
+    {
+        string? value = Environment.GetEnvironmentVariable(variableName, EnvironmentVariableTarget.User);
+        if (!string.IsNullOrWhiteSpace(value)) startInfo.Environment[variableName] = value;
     }
 }

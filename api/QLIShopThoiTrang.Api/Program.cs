@@ -33,7 +33,13 @@ app.MapGet("/api/health", async (StoreRepository store) =>
 {
     try
     {
-        return Results.Ok(new { ok = true, database = await store.GetDatabaseNameAsync() });
+        return Results.Ok(new
+        {
+            ok = true,
+            database = await store.GetDatabaseNameAsync(),
+            qrPayment = true,
+            apiVersion = typeof(Program).Assembly.GetName().Version?.ToString()
+        });
     }
     catch (Exception ex)
     {

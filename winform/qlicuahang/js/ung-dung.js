@@ -3571,7 +3571,11 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
                 });
-                if (!response.ok) throw new Error(await getApiErrorMessage(response, "Không tạo được mã QR."));
+                if (!response.ok) {
+                    if (response.status === 404)
+                        throw new Error("API thanh toán đang là bản cũ. Hãy đóng form, Build lại project rồi mở lại.");
+                    throw new Error(await getApiErrorMessage(response, "Không tạo được mã QR."));
+                }
                 const session = await response.json();
                 if (!session.orderCode || !session.bankBin || !session.accountNumber) {
                     throw new Error("payOS không trả về đủ thông tin tài khoản nhận tiền.");
