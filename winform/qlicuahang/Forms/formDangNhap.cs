@@ -10,9 +10,17 @@ public partial class formDangNhap : Form
     public static string VaiTro = "";
     public static string TenHienThi = "";
     public static string MaNhanVien = "";
+    public static string ApiToken = "";
 
     public static void XoaPhienDangNhap()
     {
+        if(!string.IsNullOrEmpty(ApiToken))
+        {
+            using var client=new HttpClient {Timeout=TimeSpan.FromSeconds(5)};
+            client.DefaultRequestHeaders.Authorization=new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer",ApiToken);
+            try { client.PostAsync("http://127.0.0.1:5000/api/dang-xuat",null).GetAwaiter().GetResult(); } catch(HttpRequestException) { } catch(TaskCanceledException) { }
+        }
+        ApiToken="";
         VaiTro = "";
         TenHienThi = "";
         MaNhanVien = "";
@@ -114,6 +122,7 @@ public partial class formDangNhap : Form
             VaiTro = login.Role;
             TenHienThi = login.DisplayName;
             MaNhanVien = login.EmployeeId;
+            ApiToken = login.Token;
             DialogResult = DialogResult.OK;
             Close();
         }
@@ -142,5 +151,5 @@ public partial class formDangNhap : Form
         webView.ExecuteScriptAsync($"window.setLoginBusy({dangTai.ToString().ToLowerInvariant()});");
 
     private sealed record LoginMessage(string? Type, string? Username, string? Password);
-    private sealed record LoginResponse(string EmployeeId, string DisplayName, string Role);
+    private sealed record LoginResponse(string EmployeeId, string DisplayName, string Role, string Token);
 }

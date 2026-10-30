@@ -16,6 +16,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddSingleton<ProductImageStorage>();
 builder.Services.AddScoped<StoreRepository>();
 builder.Services.AddScoped<PayOsPaymentService>();
+builder.Services.AddSingleton<StaffSessions>();
 
 var app = builder.Build();
 
@@ -26,6 +27,41 @@ using (var scope = app.Services.CreateScope())
 
 app.UseCors("AllowLocalClients");
 app.UseStaticFiles();
+app.Use(async (context,next) =>
+{
+    var path=context.Request.Path.Value ?? "";
+    if(path.StartsWith("/api/") && (context.Request.Method is not ("GET" or "OPTIONS") || path.StartsWith("/api/thanh-toan-qr/")) && path is not ("/api/dang-nhap" or "/api/thanh-toan-qr/webhook"))
+    {
+        var token=context.Request.Headers.Authorization.ToString();
+        token=token.StartsWith("Bearer ") ? token[7..] : "";
+        var user=context.RequestServices.GetRequiredService<StaffSessions>().Get(token);
+        if(user is null) { context.Response.StatusCode=401; await context.Response.WriteAsJsonAsync(new{message="Vui lòng đăng nhập lại."}); return; }
+        if(!StaffSessions.CanWrite(user.Role,path,context.Request.Method) && path!="/api/doi-tac") { context.Response.StatusCode=403; await context.Response.WriteAsJsonAsync(new{message="Bạn không có quyền thực hiện thao tác này."}); return; }
+        if(path=="/api/doi-tac" && user.Role!="CuaHangTruong")
+        {
+            context.Request.EnableBuffering();
+            var input=await context.Request.ReadFromJsonAsync<PartnerUpsertDto>(); context.Request.Body.Position=0;
+            if(user.Role is not ("ThuNgan" or "TruongCa") || input?.Category!="Khách hàng") {context.Response.StatusCode=403;return;}
+        }
+        context.Items["StaffUser"]=user;
+        if(context.Request.ContentLength>0 && (path.StartsWith("/api/hoa-don") || path=="/api/phieu-nhap-kho" || path=="/api/doi-tra" || path=="/api/thanh-toan-qr"))
+        {
+            try
+            {
+                var body=await System.Text.Json.Nodes.JsonNode.ParseAsync(context.Request.Body);
+                if(body is System.Text.Json.Nodes.JsonObject obj)
+                {
+                    obj["employeeId"]=user.EmployeeId;
+                    var bytes=System.Text.Encoding.UTF8.GetBytes(obj.ToJsonString());
+                    context.Request.Body=new MemoryStream(bytes);context.Request.ContentLength=bytes.Length;
+                }
+            }
+            catch(System.Text.Json.JsonException) {context.Response.StatusCode=400;await context.Response.WriteAsJsonAsync(new{message="Dữ liệu gửi lên không hợp lệ."});return;}
+        }
+    }
+    await next();
+});
+app.MapPost("/api/dang-xuat", (HttpContext context,StaffSessions sessions) => {sessions.Remove(context.Request.Headers.Authorization.ToString().Replace("Bearer ",""));return Results.NoContent();});
 
 app.MapGet("/", () => Results.Ok(new { app = "QLI Shop Thoi Trang API", database = "Supabase PostgreSQL", status = "running" }));
 
@@ -57,10 +93,10 @@ app.MapGet("/api/loai-san-pham", async (StoreRepository store) =>
     return Results.Ok(await store.GetProductTypesAsync());
 });
 
-app.MapPost("/api/dang-nhap", async (LoginRequestDto input, StoreRepository store) =>
+app.MapPost("/api/dang-nhap", async (LoginRequestDto input, StoreRepository store, StaffSessions sessions) =>
 {
     var result = await store.LoginAsync(input);
-    return result is null ? Results.Unauthorized() : Results.Ok(result);
+    return result is null ? Results.Unauthorized() : Results.Ok(new {result.EmployeeId,result.DisplayName,result.Role,token=sessions.Create(result)});
 });
 
 app.MapPost("/api/san-pham", async (ProductUpsertDto input, StoreRepository store, ProductImageStorage images) =>
@@ -268,6 +304,10 @@ app.MapPost("/api/hoa-don", async (InvoiceCreateDto input, StoreRepository store
 {
     if (string.IsNullOrWhiteSpace(input.Id) || input.Items.Count == 0 || input.Total < 0)
         return Results.BadRequest("Hóa đơn và danh sách sản phẩm không hợp lệ.");
+    if(input.Items.Any(x=>x.Qty<=0 || x.Price<0 || x.Total!=x.Price*x.Qty) || input.Discount<0 || input.Discount>input.Subtotal || input.Subtotal!=input.Items.Sum(x=>x.Price*x.Qty))
+        return Results.BadRequest("Số lượng, đơn giá hoặc thành tiền của dòng hàng không hợp lệ.");
+    if(!input.IsCod && input.DeliveryMode!="COD" && input.PaymentMethod=="Tiền mặt" && input.Paid<input.Total)
+        return Results.BadRequest("Tiền khách đưa chưa đủ thanh toán.");
     var deliveryMode = (input.DeliveryMode ?? string.Empty).Trim().ToUpperInvariant();
     var isCod = input.IsCod || deliveryMode == "COD";
     var isDelivery = isCod || deliveryMode == "DELIVERY";

@@ -33,6 +33,12 @@ namespace qlicuahang
                 webView = new WebView2 { Dock = DockStyle.Fill };
                 this.Controls.Add(webView);
                 await webView.EnsureCoreWebView2Async(null);
+                string apiTokenJson=JsonSerializer.Serialize(formDangNhap.ApiToken);
+                await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync($@"
+                    (()=>{{const token={apiTokenJson};const original=window.fetch.bind(window);
+                    window.fetch=(resource,init={{}})=>{{const url=typeof resource==='string'?resource:resource.url;
+                    if(new URL(url,location.href).origin==='http://127.0.0.1:5000'){{const headers=new Headers(init.headers || (resource instanceof Request ? resource.headers : undefined));headers.set('Authorization','Bearer '+token);init={{...init,headers}};}}
+                    return original(resource,init);}};}})();");
 
                 webView.CoreWebView2.WebMessageReceived += (s, args) =>
                 {

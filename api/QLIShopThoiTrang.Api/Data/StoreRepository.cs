@@ -819,6 +819,43 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
         await connection.OpenAsync();
         await using var tx = (NpgsqlTransaction)await connection.BeginTransactionAsync();
 
+        if(input.Items.Count==0 || input.Items.Any(x=>x.Qty<=0 || x.Price<0 || x.Total!=x.Price*x.Qty))
+            throw new InvalidOperationException("Số lượng và đơn giá không hợp lệ.");
+        // Khóa SKU theo thứ tự cố định đến khi commit để hai máy không bán vượt tồn.
+        foreach(var sku in input.Items.Select(x=>x.Sku).Distinct().OrderBy(x=>x,StringComparer.Ordinal))
+        {
+            await using var locked=NewCommand(connection,tx,"SELECT MaSKU FROM SanPham WHERE MaSKU=@sku FOR UPDATE",("@sku",sku));
+            await locked.ExecuteScalarAsync();
+        }
+        if(input.Items.Select(x=>x.Sku).Distinct(StringComparer.OrdinalIgnoreCase).Count()!=input.Items.Count)
+            throw new InvalidOperationException("SKU bị lặp trong hóa đơn.");
+        foreach(var item in input.Items)
+        {
+            await using var priceCommand=NewCommand(connection,tx,"""
+                SELECT LEAST(sp.DonGia,COALESCE((SELECT MIN(GiaKhuyenMai) FROM SanPhamKhuyenMai_HienTai km WHERE km.MaSKU=sp.MaSKU),sp.DonGia))
+                FROM SanPham sp WHERE sp.MaSKU=@sku AND sp.TrangThai=TRUE
+                """,("@sku",item.Sku));
+            var value=await priceCommand.ExecuteScalarAsync();
+            if(value is null || value is DBNull || item.Price!=Convert.ToDecimal(value))
+                throw new InvalidOperationException("Giá sản phẩm đã thay đổi hoặc không hợp lệ. Vui lòng tải lại giỏ hàng.");
+        }
+        decimal validDiscount=0;
+        if(!string.IsNullOrWhiteSpace(input.PromoCode))
+        {
+            await using var discountCommand=NewCommand(connection,tx,"""
+                SELECT ROUND(@subtotal*GiaTriGiam/100,0) FROM KhuyenMai
+                WHERE MaKM=@code AND TrangThai=TRUE AND NgayBatDau<=CURRENT_TIMESTAMP AND NgayKetThuc>=CURRENT_TIMESTAMP
+                AND GiaTriDonHangToiThieu<=@subtotal AND NOT EXISTS(SELECT 1 FROM KhuyenMaiSanPham k WHERE k.MaKM=KhuyenMai.MaKM)
+                """,("@subtotal",input.Subtotal),("@code",input.PromoCode));
+            var value=await discountCommand.ExecuteScalarAsync();
+            if(value is null || value is DBNull) throw new InvalidOperationException("Voucher không còn hợp lệ.");
+            validDiscount=Convert.ToDecimal(value);
+        }
+        if(input.Subtotal!=input.Items.Sum(x=>x.Qty*x.Price) || input.Discount!=validDiscount)
+            throw new InvalidOperationException("Tạm tính hoặc giảm giá không hợp lệ.");
+        if(!input.IsCod && !string.Equals(input.DeliveryMode,"COD",StringComparison.OrdinalIgnoreCase) && input.PaymentMethod=="Tiền mặt" && input.Paid<input.Total)
+            throw new InvalidOperationException("Tiền khách đưa chưa đủ thanh toán.");
+
         if (await ScalarLongAsync(connection, tx, "SELECT COUNT(*) FROM HoaDon WHERE SoHD=@id", ("@id", input.Id)) > 0)
             throw new InvalidOperationException("Mã hóa đơn đã tồn tại.");
 
@@ -951,6 +988,11 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
     private static async Task CompleteInvoiceAsync(NpgsqlConnection connection, NpgsqlTransaction tx,
         string invoiceId, string? customerId, decimal total)
     {
+        await using(var command=NewCommand(connection,tx,"""
+            SELECT sp.MaSKU FROM SanPham sp JOIN ChiTietHoaDon ct ON ct.MaSKU=sp.MaSKU
+            WHERE ct.SoHD=@id ORDER BY sp.MaSKU FOR UPDATE OF sp
+            """,("@id",invoiceId)))
+        {await using var reader=await command.ExecuteReaderAsync();while(await reader.ReadAsync()) { }}
         var unavailable = await ScalarLongAsync(connection, tx, """
             SELECT COUNT(*) FROM ChiTietHoaDon ct
             JOIN SanPham sp ON sp.MaSKU=ct.MaSKU
