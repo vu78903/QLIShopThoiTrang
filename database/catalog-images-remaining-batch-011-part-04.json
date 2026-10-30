@@ -1,0 +1,84 @@
+{
+  "batchId": "catalog-ai-remaining-batch-011-part-04",
+  "skuCount": 16,
+  "imageCount": 12,
+  "assetDirectory": "winform/qlicuahang/assets/catalog-ai-remaining-batch-011",
+  "items": [
+    {
+      "id": "SP-052-trang",
+      "productId": "SP-052",
+      "name": "Quần jeans nữ ống đứng",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "files": [
+        "SP-052-trang-01.jpg",
+        "SP-052-trang-02.jpg",
+        "SP-052-trang-03.jpg"
+      ],
+      "skus": [
+        "QJ-052-TRANG-28",
+        "QJ-052-TRANG-30",
+        "QJ-052-TRANG-32",
+        "QJ-052-TRANG-34"
+      ]
+    },
+    {
+      "id": "SP-052-xanh-jeans",
+      "productId": "SP-052",
+      "name": "Quần jeans nữ ống đứng",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Xanh jeans",
+      "files": [
+        "SP-052-xanh-jeans-01.jpg",
+        "SP-052-xanh-jeans-02.jpg",
+        "SP-052-xanh-jeans-03.jpg"
+      ],
+      "skus": [
+        "QJ-052-XANHJ-28",
+        "QJ-052-XANHJ-30",
+        "QJ-052-XANHJ-32",
+        "QJ-052-XANHJ-34"
+      ]
+    },
+    {
+      "id": "SP-054-den",
+      "productId": "SP-054",
+      "name": "Quần jeans nữ ống loe",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "files": [
+        "SP-054-den-01.jpg",
+        "SP-054-den-02.jpg",
+        "SP-054-den-03.jpg"
+      ],
+      "skus": [
+        "QJ-054-DEN-28",
+        "QJ-054-DEN-30",
+        "QJ-054-DEN-32",
+        "QJ-054-DEN-34"
+      ]
+    },
+    {
+      "id": "SP-054-trang",
+      "productId": "SP-054",
+      "name": "Quần jeans nữ ống loe",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "files": [
+        "SP-054-trang-01.jpg",
+        "SP-054-trang-02.jpg",
+        "SP-054-trang-03.jpg"
+      ],
+      "skus": [
+        "QJ-054-TRANG-28",
+        "QJ-054-TRANG-30",
+        "QJ-054-TRANG-32",
+        "QJ-054-TRANG-34"
+      ]
+    }
+  ]
+}

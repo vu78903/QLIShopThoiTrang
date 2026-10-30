@@ -1,0 +1,84 @@
+{
+  "batchId": "catalog-ai-remaining-batch-015",
+  "skuCount": 16,
+  "imageCount": 12,
+  "assetDirectory": "winform/qlicuahang/assets/catalog-ai-remaining-batch-015",
+  "items": [
+    {
+      "id": "SP-049-do",
+      "productId": "SP-049",
+      "name": "Quần tây nữ công sở",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "files": [
+        "SP-049-do-01.jpg",
+        "SP-049-do-02.jpg",
+        "SP-049-do-03.jpg"
+      ],
+      "skus": [
+        "QT-049-DO-28",
+        "QT-049-DO-30",
+        "QT-049-DO-32",
+        "QT-049-DO-34"
+      ]
+    },
+    {
+      "id": "SP-049-trang",
+      "productId": "SP-049",
+      "name": "Quần tây nữ công sở",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "files": [
+        "SP-049-trang-01.jpg",
+        "SP-049-trang-02.jpg",
+        "SP-049-trang-03.jpg"
+      ],
+      "skus": [
+        "QT-049-TRANG-28",
+        "QT-049-TRANG-30",
+        "QT-049-TRANG-32",
+        "QT-049-TRANG-34"
+      ]
+    },
+    {
+      "id": "SP-050-den",
+      "productId": "SP-050",
+      "name": "Quần tây nữ lưng cao",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "files": [
+        "SP-050-den-01.jpg",
+        "SP-050-den-02.jpg",
+        "SP-050-den-03.jpg"
+      ],
+      "skus": [
+        "QT-050-DEN-28",
+        "QT-050-DEN-30",
+        "QT-050-DEN-32",
+        "QT-050-DEN-34"
+      ]
+    },
+    {
+      "id": "SP-050-do",
+      "productId": "SP-050",
+      "name": "Quần tây nữ lưng cao",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "files": [
+        "SP-050-do-01.jpg",
+        "SP-050-do-02.jpg",
+        "SP-050-do-03.jpg"
+      ],
+      "skus": [
+        "QT-050-DO-28",
+        "QT-050-DO-30",
+        "QT-050-DO-32",
+        "QT-050-DO-34"
+      ]
+    }
+  ]
+}

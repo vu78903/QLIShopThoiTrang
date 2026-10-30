@@ -1,0 +1,46 @@
+{
+  "batchId": "catalog-ai-remaining-batch-011-part-05",
+  "skuCount": 8,
+  "imageCount": 6,
+  "assetDirectory": "winform/qlicuahang/assets/catalog-ai-remaining-batch-011",
+  "items": [
+    {
+      "id": "SP-054-xanh-jeans",
+      "productId": "SP-054",
+      "name": "Quần jeans nữ ống loe",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Xanh jeans",
+      "files": [
+        "SP-054-xanh-jeans-01.jpg",
+        "SP-054-xanh-jeans-02.jpg",
+        "SP-054-xanh-jeans-03.jpg"
+      ],
+      "skus": [
+        "QJ-054-XANHJ-28",
+        "QJ-054-XANHJ-30",
+        "QJ-054-XANHJ-32",
+        "QJ-054-XANHJ-34"
+      ]
+    },
+    {
+      "id": "SP-053-trang",
+      "productId": "SP-053",
+      "name": "Quần jeans nữ ống rộng",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "files": [
+        "SP-053-trang-01.jpg",
+        "SP-053-trang-02.jpg",
+        "SP-053-trang-03.jpg"
+      ],
+      "skus": [
+        "QJ-053-TRANG-28",
+        "QJ-053-TRANG-30",
+        "QJ-053-TRANG-32",
+        "QJ-053-TRANG-34"
+      ]
+    }
+  ]
+}

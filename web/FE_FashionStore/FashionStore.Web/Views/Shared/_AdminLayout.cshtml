@@ -1,0 +1,4 @@
+@{ var pageTitle = (ViewBag.Title ?? "Quản trị") + " | MỘC NHIÊN Quản trị"; }
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="robots" content="noindex,nofollow" /><title>@pageTitle</title><link rel="stylesheet" href="@Url.Content("~/Content/admin.css")" /></head>
+<body class="admin-body">@RenderBody()</body></html>

@@ -1,0 +1,46 @@
+@model Newtonsoft.Json.Linq.JArray
+@using FashionStore.Web.Helpers
+@{ ViewBag.Title = "Địa chỉ giao hàng"; }
+<div class="yody-account-shell">
+    @Html.Partial("_CustomerNav")
+    @Html.Partial("_CustomerMessages")
+    <header class="yody-page-heading"><p class="eyebrow">YODY / GIAO NHẬN</p><h1>Sổ địa chỉ</h1><p>Lưu tối đa 20 địa chỉ. Địa chỉ mặc định được cập nhật tại <a href="@Url.Action("Profile", "Account")">hồ sơ của bạn</a>.</p></header>
+    <div class="yody-profile-layout yody-address-layout">
+        <section class="yody-address-list" aria-labelledby="address-list-heading">
+            <h2 id="address-list-heading" class="yody-section-subtitle">Địa chỉ đã lưu</h2>
+            @if (Model.Count == 0)
+            {
+                <div class="yody-empty-state"><h3>Chưa có địa chỉ nào</h3><p>Thêm địa chỉ để thuận tiện khi thanh toán.</p></div>
+            }
+            @foreach (var p in Model)
+            {
+                <article class="yody-surface-card yody-address-card">
+                    <p class="eyebrow">ĐỊA CHỈ GIAO HÀNG</p>
+                    <h3>@p["Recipient"]</h3>
+                    <p class="yody-muted">@p["Phone"]</p>
+                    <p>@p["Address"]</p>
+                    <div class="yody-actions">
+                        <a class="yody-text-link" href="@Url.Action("Index", "Checkout", new { addressId = (long)p["Id"] })">Giao đến địa chỉ này →</a>
+                        @using (Html.BeginForm("RemoveAddress", "Customer", FormMethod.Post, new { @class = "yody-inline-form" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@p["Id"]" />
+                            <button type="submit" class="mn-btn mn-btn-outline" data-confirm="Xóa địa chỉ đã lưu này?">Xóa địa chỉ</button>
+                        }
+                    </div>
+                </article>
+            }
+        </section>
+        <section class="yody-surface-card yody-address-form" aria-labelledby="new-address-heading">
+            <div class="yody-card-heading"><h2 id="new-address-heading">Thêm địa chỉ mới</h2></div>
+            @using (Html.BeginForm("SaveAddress", "Customer", FormMethod.Post, new { @class = "yody-account-form" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="yody-field"><label for="recipient">Tên người nhận</label><input class="filter-input" id="recipient" name="recipient" required maxlength="150" minlength="2" autocomplete="name" /></div>
+                <div class="yody-field"><label for="phone">Số điện thoại</label><input class="filter-input" id="phone" name="phone" required pattern="\+?[0-9]{9,15}" autocomplete="tel" inputmode="tel" /></div>
+                <div class="yody-field"><label for="address">Địa chỉ giao hàng</label><textarea class="filter-input" id="address" name="address" required minlength="10" maxlength="300" autocomplete="street-address" rows="4"></textarea></div>
+                <button type="submit" class="mn-btn mn-btn-primary">LƯU ĐỊA CHỈ</button>
+            }
+        </section>
+    </div>
+</div>

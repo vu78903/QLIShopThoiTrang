@@ -1,0 +1,25 @@
+@model Newtonsoft.Json.Linq.JArray
+@using FashionStore.Web.Helpers
+@{ ViewBag.Title = "Lịch sử điểm"; }
+<div class="yody-account-shell">
+    @Html.Partial("_CustomerNav")
+    @Html.Partial("_CustomerMessages")
+    <header class="yody-page-heading"><p class="eyebrow">YODY / QUYỀN LỢI THÀNH VIÊN</p><h1>Điểm thưởng &amp; thành viên</h1><p>1 điểm cho mỗi 10.000đ tiền hàng đủ điều kiện sau giảm giá, không tính phí vận chuyển. Điểm hiển thị theo giao dịch đã được cửa hàng ghi nhận.</p><a class="yody-text-link" href="@Url.Action("Index", "Customer")">Xem số dư và hạng hiện tại →</a></header>
+    <section class="yody-surface-card yody-table-section" aria-labelledby="point-history-heading">
+        <div class="yody-card-heading"><h2 id="point-history-heading">Lịch sử giao dịch điểm</h2></div>
+        @if (Model.Count == 0)
+        {
+            <div class="yody-empty-state"><h3>Chưa có giao dịch điểm</h3><p>Giao dịch đã được ghi nhận sẽ xuất hiện tại đây.</p></div>
+        }
+        else
+        {
+            <div class="customer-table-wrap"><table class="customer-cart-table yody-data-table"><thead><tr><th>Thời điểm</th><th>Giao dịch</th><th>Điểm</th><th>Đơn hàng</th><th>Ghi chú</th></tr></thead><tbody>
+            @foreach (var p in Model)
+            {
+                <tr><td data-label="Thời điểm">@(((DateTime)p["ThoiDiem"]).ToString("dd/MM/yyyy HH:mm"))</td><td data-label="Giao dịch">@CustomerViewHelper.Status((string)p["LoaiGiaoDich"])</td><td data-label="Điểm"><strong>@p["SoDiemThayDoi"]</strong></td><td data-label="Đơn hàng">@p["SoHD"]</td><td data-label="Ghi chú">@p["GhiChu"]</td></tr>
+            }
+            </tbody></table></div>
+        }
+    </section>
+    @Html.Partial("_FeaturePaging", Model)
+</div>

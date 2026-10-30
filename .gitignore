@@ -492,3 +492,11 @@ $RECYCLE.BIN/
 BanGiao_WinForms_*/
 *.zip
 *.log
+
+# Local AI catalog generation state (contains machine-specific paths)
+database/*.sources.json
+database/*.checkpoint.json
+
+# Editor assistants and generated scratch material
+**/.cursor/
+**/tmp/

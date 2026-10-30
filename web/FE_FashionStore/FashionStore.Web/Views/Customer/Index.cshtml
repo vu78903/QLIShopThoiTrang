@@ -1,0 +1,20 @@
+@model FashionStore.Web.Models.CustomerProfile
+@{ ViewBag.Title = "Tài khoản của tôi"; }
+<div class="yody-account-shell">
+    @Html.Partial("_CustomerNav")
+    <header class="yody-page-heading yody-account-greeting">
+        <p class="eyebrow">YODY / KHÔNG GIAN CỦA BẠN</p>
+        <h1>Xin chào, @Model.FullName</h1>
+        <p>Quản lý thông tin, đơn hàng và những sản phẩm bạn yêu thích tại một nơi.</p>
+    </header>
+    <div class="yody-account-metrics">
+        <article class="yody-metric-card"><span>HẠNG THÀNH VIÊN</span><strong>@Model.Membership</strong><a href="@Url.Action("Points", "Customer")">Xem quyền lợi →</a></article>
+        <article class="yody-metric-card"><span>ĐIỂM HIỆN CÓ</span><strong>@Model.Points</strong><a href="@Url.Action("Points", "Customer")">Lịch sử tích điểm →</a></article>
+        <article class="yody-metric-card"><span>ĐỊA CHỈ MẶC ĐỊNH</span><p>@(String.IsNullOrWhiteSpace(Model.Address) ? "Bạn chưa thêm địa chỉ." : Model.Address)</p><a href="@Url.Action("Profile", "Account")">Cập nhật hồ sơ →</a></article>
+    </div>
+    <div class="yody-account-shortcuts">
+        <a class="yody-shortcut" href="@Url.Action("Index", "Orders")"><span class="yody-shortcut-icon" aria-hidden="true">01</span><h2>Đơn hàng của tôi</h2><p>Kiểm tra thanh toán, giao nhận và trạng thái đơn hàng.</p><span class="yody-shortcut-arrow" aria-hidden="true">↗</span></a>
+        <a class="yody-shortcut" href="@Url.Action("Wishlist", "Customer")"><span class="yody-shortcut-icon" aria-hidden="true">02</span><h2>Sản phẩm yêu thích</h2><p>Quay lại những thiết kế bạn đã lưu.</p><span class="yody-shortcut-arrow" aria-hidden="true">↗</span></a>
+        <a class="yody-shortcut" href="@Url.Action("Promotions", "Customer")"><span class="yody-shortcut-icon" aria-hidden="true">03</span><h2>Ưu đãi thành viên</h2><p>Xem mã giảm giá và điều kiện sử dụng hiện có.</p><span class="yody-shortcut-arrow" aria-hidden="true">↗</span></a>
+    </div>
+</div>

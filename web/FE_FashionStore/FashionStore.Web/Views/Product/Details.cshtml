@@ -1,0 +1,115 @@
+@model FashionStore.Web.Models.ProductDetailViewModel
+@using FashionStore.Web.Helpers
+@using System.Linq
+@{
+    ViewBag.Title = Model.Product == null ? "Chi tiết sản phẩm" : Model.Product.TenSanPham;
+    ViewBag.IsCatalogPage = true;
+    var displayImage = Model.Product == null ? "~/Content/images/product-placeholder.svg" : CatalogViewHelper.ImagePath(Model.Product.HinhAnh);
+    var primaryImage = Model.Images.FirstOrDefault(x => String.IsNullOrEmpty(x.MaSKU));
+    if (primaryImage != null) { displayImage = CatalogViewHelper.ImagePath(primaryImage.DuongDan); }
+    var sizeOrder = new[] { "XS", "S", "M", "L", "XL", "XXL", "XXXL" };
+    var sizes = Model.Variants.Select(v => v.KichCo).Distinct().OrderBy(s => Array.IndexOf(sizeOrder, s) < 0 ? 99 : Array.IndexOf(sizeOrder, s)).ThenBy(s => s).ToList();
+    var colors = Model.Variants.Select(v => v.MauSac).Distinct().ToList();
+    var gallery = Model.Images.Select(p => new { Picture = p, Color = Model.Variants.Where(v => v.MaSKU == p.MaSKU).Select(v => v.MauSac).FirstOrDefault() })
+        .GroupBy(p => p.Color ?? p.Picture.DuongDan).Select(g => g.First()).ToList();
+}
+<main class="mn-container product-page yody-product-page">
+    <nav class="breadcrumbs" aria-label="Đường dẫn"><a href="@Url.Action("Index", "Home")">Trang chủ</a><span aria-hidden="true">/</span><a href="@Url.Action("Index", "Product")">Sản phẩm</a><span aria-hidden="true">/</span><span aria-current="page">@(Model.Product == null ? "Chi tiết" : Model.Product.TenSanPham)</span></nav>
+    @if (!String.IsNullOrEmpty(Model.CatalogError))
+    {
+        <div class="catalog-alert" role="alert">@Model.CatalogError</div>
+    }
+    else if (Model.Product != null)
+    {
+        <div class="yody-product-layout">
+            <div class="yody-product-gallery">
+                <div class="yody-product-main-image"><img id="detail-main-image" src="@Url.Content(displayImage)" alt="@Model.Product.TenSanPham" /></div>
+                @if (gallery.Count > 1)
+                {
+                    <div class="yody-product-thumbnails" role="group" aria-label="Chọn hình ảnh sản phẩm">
+                        @foreach (var entry in gallery)
+                        {
+                            <button type="button" class="detail-thumb" data-gallery-color="@entry.Color" data-gallery-image="@Url.Content(CatalogViewHelper.ImagePath(entry.Picture.DuongDan))" aria-label="Xem màu @(entry.Color ?? "sản phẩm")" aria-pressed="false" title="@entry.Color">
+                                <img loading="lazy" src="@Url.Content(CatalogViewHelper.ImagePath(entry.Picture.DuongDan))" alt="@Model.Product.TenSanPham - @entry.Color" />
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+            <section class="yody-product-purchase" aria-labelledby="detail-product-name">
+                <p class="eyebrow">@Model.Product.TenLoai · @CatalogViewHelper.AudienceLabel(Model.Product.DoiTuong)</p>
+                <h1 id="detail-product-name">@Model.Product.TenSanPham</h1>
+                <p class="yody-product-code">Mã sản phẩm: @Model.Product.MaSP</p>
+                <div class="yody-product-price" id="detail-price">@CatalogViewHelper.Vnd(Model.Product.DonGia)</div>
+                <p class="stock-note @(Model.Product.ConHang ? "in-stock" : "out-of-stock")" id="detail-stock" role="status" aria-live="polite">@(Model.Product.ConHang ? "● Còn hàng" : "● Tạm hết hàng")</p>
+                <div class="yody-product-divider"></div>
+                @if (TempData["CartError"] != null)
+                {
+                    <p class="catalog-alert" role="alert">@TempData["CartError"]</p>
+                }
+                @using (Html.BeginForm("Add", "Cart", FormMethod.Post, new { @class = "detail-add-form yody-product-form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@Model.Product.MaSP" />
+                    if (Model.Variants.Count > 0)
+                    {
+                        <div id="sku-fallback" hidden>
+                        <select id="sku-select" name="selected-sku" hidden aria-hidden="true" tabindex="-1">
+                            <option value="">Chọn kích cỡ và màu sắc</option>
+                            @foreach (var v in Model.Variants)
+                            {
+                                <option value="@v.MaSKU" data-size="@v.KichCo" data-color="@v.MauSac" data-display-price="@CatalogViewHelper.Vnd(v.DonGia)" data-stock="@v.SoLuongTonKho" @(v.SoLuongTonKho <= 0 ? "disabled" : "")>@v.KichCo · @v.MauSac</option>
+                            }
+                        </select>
+                        </div>
+                        <div id="sku-picker" class="image-variant-picker">
+                            <fieldset class="product-choice product-color-choice"><legend>Màu sắc</legend><div class="color-options">
+                            @foreach (var color in colors) {
+                                var colorImage = gallery.FirstOrDefault(p => p.Color == color);
+                                var colorImagePath = colorImage == null ? "~/Content/images/product-placeholder.svg" : CatalogViewHelper.ImagePath(colorImage.Picture.DuongDan);
+                                <button type="button" class="color-option" data-color-choice="@color" data-color-image="@Url.Content(colorImagePath)" aria-label="@color" title="@color" aria-pressed="false"><img src="@Url.Content(colorImagePath)" alt="@Model.Product.TenSanPham - @color" /></button>
+                            }
+                            </div><p id="selected-color-label" aria-live="polite">Chưa chọn màu</p></fieldset>
+                            <fieldset class="product-choice"><legend>Kích cỡ</legend><div class="size-options">
+                            @foreach (var size in sizes) {
+                                <button type="button" class="size-option" data-size-choice="@size" aria-pressed="false">@size</button>
+                            }
+                            </div></fieldset>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="detail-note">Sản phẩm hiện chưa có biến thể kích cỡ hoặc màu sắc được kích hoạt.</p>
+                    }
+                    <p class="yody-sku-note"><strong id="selected-sku-label" aria-live="polite">Vui lòng chọn kích cỡ và màu sắc</strong></p>
+                    <label class="yody-purchase-label" for="detail-quantity">Số lượng</label>
+                    <input id="detail-quantity" class="filter-input cart-quantity" type="number" name="quantity" value="1" min="1" max="1" required />
+                    <button type="submit" class="mn-btn mn-btn-primary detail-cart" @(Model.Product.ConHang ? "" : "disabled")>Thêm vào giỏ hàng <span aria-hidden="true">↗</span></button>
+                }
+                <p class="detail-note">Giá và tồn kho sẽ được hệ thống xác nhận khi thêm vào giỏ hàng.</p>
+                <div class="yody-product-divider"></div>
+                <div class="yody-product-services"><a href="@Url.Action("Policy", "Home", new { id = "shipping" })">Giao hàng &amp; vận chuyển <span aria-hidden="true">↗</span></a><a href="@Url.Action("Policy", "Home", new { id = "returns" })">Chính sách đổi trả <span aria-hidden="true">↗</span></a></div>
+                <div class="yody-product-divider"></div>
+                <div class="yody-product-description"><h2>Thông tin sản phẩm</h2><p>@(String.IsNullOrWhiteSpace(Model.Product.MoTa) ? "Thông tin mô tả đang được cập nhật." : Model.Product.MoTa)</p></div>
+                <div class="yody-product-secondary-actions">
+                    <a class="mn-btn mn-btn-outline" href="@Url.Action("Reviews", "Customer", new { id = Model.Product.MaSP })">Xem và viết đánh giá</a>
+                    @using (Html.BeginForm("SaveWishlist", "Customer", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Product.MaSP" />
+                        <button class="mn-btn mn-btn-outline" type="submit">♡ Lưu yêu thích</button>
+                    }
+                </div>
+            </section>
+        </div>
+        <section class="yody-product-help" aria-labelledby="yody-size-help"><div><p class="eyebrow">LƯU Ý KHI CHỌN MUA</p><h2 id="yody-size-help">Lựa chọn vừa vặn hơn</h2></div><div><p>Hãy chọn đúng cặp kích cỡ và màu sắc có sẵn trong phần phân loại. Bảng số đo riêng từng sản phẩm chưa có dữ liệu để tư vấn tự động; vui lòng kiểm tra nhãn hướng dẫn chăm sóc sản phẩm.</p><a class="mn-text-link" href="@Url.Action("Index", "Product")">Tiếp tục khám phá <span aria-hidden="true">↗</span></a></div></section>
+        if (Model.Related.Count > 0)
+        {
+            <section class="yody-related-products" aria-labelledby="yody-related-heading"><div class="yody-section-heading"><div><p class="eyebrow">DÀNH CHO BẠN</p><h2 id="yody-related-heading">Sản phẩm cùng danh mục</h2></div><a class="mn-text-link" href="@Url.Action("Index", "Product", new { category = Model.Product.MaLoai })">Xem thêm <span aria-hidden="true">↗</span></a></div><div class="product-grid yody-related-grid">@foreach (var p in Model.Related) { @Html.Partial("_ProductCard", p) }</div></section>
+        }
+    }
+</main>
+@section scripts {
+    <script src="@Url.Content("~/Scripts/product-picker.js")?v=@System.IO.File.GetLastWriteTimeUtc(Server.MapPath("~/Scripts/product-picker.js")).Ticks"></script>
+    <noscript><p class="mn-container catalog-alert">Vui lòng bật JavaScript để chọn màu sắc và kích cỡ.</p></noscript>
+}

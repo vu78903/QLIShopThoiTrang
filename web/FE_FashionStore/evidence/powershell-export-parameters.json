@@ -1,0 +1,23 @@
+{
+  "runtime": "PowerShell 7.4.6 on Linux",
+  "scope": "Real exporter invocation stopped after parameter binding/prologue; no SQL connection or export executed.",
+  "windowsPowerShell51": "User rerun required",
+  "checks": [
+    {
+      "name": "Exporter syntax parses",
+      "outcome": "PASS"
+    },
+    {
+      "name": "OutputDirectory has no script-root expression during parameter binding",
+      "outcome": "PASS"
+    },
+    {
+      "name": "Default output resolves under actual exporter directory",
+      "outcome": "PASS"
+    },
+    {
+      "name": "Explicit relative output directory is preserved",
+      "outcome": "PASS"
+    }
+  ]
+}

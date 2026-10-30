@@ -1,0 +1,297 @@
+{
+  "batchId": "catalog-ai-remaining-batch-007",
+  "skuCount": 72,
+  "imageCount": 54,
+  "assetDirectory": "winform/qlicuahang/assets/catalog-ai-remaining-batch-007",
+  "items": [
+    {
+      "id": "SP-011-trang",
+      "productId": "SP-011",
+      "color": "Trắng",
+      "files": [
+        "SP-011-trang-01.jpg",
+        "SP-011-trang-02.jpg",
+        "SP-011-trang-03.jpg"
+      ],
+      "skus": [
+        "QJ-011-TRANG-28",
+        "QJ-011-TRANG-30",
+        "QJ-011-TRANG-32",
+        "QJ-011-TRANG-34"
+      ]
+    },
+    {
+      "id": "SP-011-xanh-jeans",
+      "productId": "SP-011",
+      "color": "Xanh jeans",
+      "files": [
+        "SP-011-xanh-jeans-01.jpg",
+        "SP-011-xanh-jeans-02.jpg",
+        "SP-011-xanh-jeans-03.jpg"
+      ],
+      "skus": [
+        "QJ-011-XANHJ-28",
+        "QJ-011-XANHJ-30",
+        "QJ-011-XANHJ-32",
+        "QJ-011-XANHJ-34"
+      ]
+    },
+    {
+      "id": "SP-014-trang",
+      "productId": "SP-014",
+      "color": "Trắng",
+      "files": [
+        "SP-014-trang-01.jpg",
+        "SP-014-trang-02.jpg",
+        "SP-014-trang-03.jpg"
+      ],
+      "skus": [
+        "QJ-014-TRANG-28",
+        "QJ-014-TRANG-30",
+        "QJ-014-TRANG-32",
+        "QJ-014-TRANG-34"
+      ]
+    },
+    {
+      "id": "SP-014-xanh-jeans",
+      "productId": "SP-014",
+      "color": "Xanh jeans",
+      "files": [
+        "SP-014-xanh-jeans-01.jpg",
+        "SP-014-xanh-jeans-02.jpg",
+        "SP-014-xanh-jeans-03.jpg"
+      ],
+      "skus": [
+        "QJ-014-XANHJ-28",
+        "QJ-014-XANHJ-30",
+        "QJ-014-XANHJ-32",
+        "QJ-014-XANHJ-34"
+      ]
+    },
+    {
+      "id": "SP-013-trang",
+      "productId": "SP-013",
+      "color": "Trắng",
+      "files": [
+        "SP-013-trang-01.jpg",
+        "SP-013-trang-02.jpg",
+        "SP-013-trang-03.jpg"
+      ],
+      "skus": [
+        "QJ-013-TRANG-28",
+        "QJ-013-TRANG-30",
+        "QJ-013-TRANG-32",
+        "QJ-013-TRANG-34"
+      ]
+    },
+    {
+      "id": "SP-013-xanh-jeans",
+      "productId": "SP-013",
+      "color": "Xanh jeans",
+      "files": [
+        "SP-013-xanh-jeans-01.jpg",
+        "SP-013-xanh-jeans-02.jpg",
+        "SP-013-xanh-jeans-03.jpg"
+      ],
+      "skus": [
+        "QJ-013-XANHJ-28",
+        "QJ-013-XANHJ-30",
+        "QJ-013-XANHJ-32",
+        "QJ-013-XANHJ-34"
+      ]
+    },
+    {
+      "id": "SP-012-trang",
+      "productId": "SP-012",
+      "color": "Trắng",
+      "files": [
+        "SP-012-trang-01.jpg",
+        "SP-012-trang-02.jpg",
+        "SP-012-trang-03.jpg"
+      ],
+      "skus": [
+        "QJ-012-TRANG-28",
+        "QJ-012-TRANG-30",
+        "QJ-012-TRANG-32",
+        "QJ-012-TRANG-34"
+      ]
+    },
+    {
+      "id": "SP-012-xanh-jeans",
+      "productId": "SP-012",
+      "color": "Xanh jeans",
+      "files": [
+        "SP-012-xanh-jeans-01.jpg",
+        "SP-012-xanh-jeans-02.jpg",
+        "SP-012-xanh-jeans-03.jpg"
+      ],
+      "skus": [
+        "QJ-012-XANHJ-28",
+        "QJ-012-XANHJ-30",
+        "QJ-012-XANHJ-32",
+        "QJ-012-XANHJ-34"
+      ]
+    },
+    {
+      "id": "SP-015-den",
+      "productId": "SP-015",
+      "color": "Đen",
+      "files": [
+        "SP-015-den-01.jpg",
+        "SP-015-den-02.jpg",
+        "SP-015-den-03.jpg"
+      ],
+      "skus": [
+        "QJ-015-DEN-28",
+        "QJ-015-DEN-30",
+        "QJ-015-DEN-32",
+        "QJ-015-DEN-34"
+      ]
+    },
+    {
+      "id": "SP-015-trang",
+      "productId": "SP-015",
+      "color": "Trắng",
+      "files": [
+        "SP-015-trang-01.jpg",
+        "SP-015-trang-02.jpg",
+        "SP-015-trang-03.jpg"
+      ],
+      "skus": [
+        "QJ-015-TRANG-28",
+        "QJ-015-TRANG-30",
+        "QJ-015-TRANG-32",
+        "QJ-015-TRANG-34"
+      ]
+    },
+    {
+      "id": "SP-015-xanh-jeans",
+      "productId": "SP-015",
+      "color": "Xanh jeans",
+      "files": [
+        "SP-015-xanh-jeans-01.jpg",
+        "SP-015-xanh-jeans-02.jpg",
+        "SP-015-xanh-jeans-03.jpg"
+      ],
+      "skus": [
+        "QJ-015-XANHJ-28",
+        "QJ-015-XANHJ-30",
+        "QJ-015-XANHJ-32",
+        "QJ-015-XANHJ-34"
+      ]
+    },
+    {
+      "id": "SP-009-den",
+      "productId": "SP-009",
+      "color": "Đen",
+      "files": [
+        "SP-009-den-01.jpg",
+        "SP-009-den-02.jpg",
+        "SP-009-den-03.jpg"
+      ],
+      "skus": [
+        "QK-009-DEN-28",
+        "QK-009-DEN-32",
+        "QK-009-DEN-34",
+        "QT-009-DEN-30"
+      ]
+    },
+    {
+      "id": "SP-009-do",
+      "productId": "SP-009",
+      "color": "Đỏ",
+      "files": [
+        "SP-009-do-01.jpg",
+        "SP-009-do-02.jpg",
+        "SP-009-do-03.jpg"
+      ],
+      "skus": [
+        "QT-009-DO-28",
+        "QT-009-DO-30",
+        "QT-009-DO-32",
+        "QT-009-DO-34"
+      ]
+    },
+    {
+      "id": "SP-009-trang",
+      "productId": "SP-009",
+      "color": "Trắng",
+      "files": [
+        "SP-009-trang-01.jpg",
+        "SP-009-trang-02.jpg",
+        "SP-009-trang-03.jpg"
+      ],
+      "skus": [
+        "QT-009-TRANG-28",
+        "QT-009-TRANG-30",
+        "QT-009-TRANG-32",
+        "QT-009-TRANG-34"
+      ]
+    },
+    {
+      "id": "SP-010-den",
+      "productId": "SP-010",
+      "color": "Đen",
+      "files": [
+        "SP-010-den-01.jpg",
+        "SP-010-den-02.jpg",
+        "SP-010-den-03.jpg"
+      ],
+      "skus": [
+        "QJ-010-DEN-28",
+        "QJ-010-DEN-30",
+        "QJ-010-DEN-32",
+        "QJ-010-DEN-34"
+      ]
+    },
+    {
+      "id": "SP-010-do",
+      "productId": "SP-010",
+      "color": "Đỏ",
+      "files": [
+        "SP-010-do-01.jpg",
+        "SP-010-do-02.jpg",
+        "SP-010-do-03.jpg"
+      ],
+      "skus": [
+        "QT-010-DO-28",
+        "QT-010-DO-30",
+        "QT-010-DO-32",
+        "QT-010-DO-34"
+      ]
+    },
+    {
+      "id": "SP-010-trang",
+      "productId": "SP-010",
+      "color": "Trắng",
+      "files": [
+        "SP-010-trang-01.jpg",
+        "SP-010-trang-02.jpg",
+        "SP-010-trang-03.jpg"
+      ],
+      "skus": [
+        "QJ-010-TRANG-28",
+        "QJ-010-TRANG-30",
+        "QJ-010-TRANG-32",
+        "QJ-010-TRANG-34"
+      ]
+    },
+    {
+      "id": "SP-007-den",
+      "productId": "SP-007",
+      "color": "Đen",
+      "files": [
+        "SP-007-den-01.jpg",
+        "SP-007-den-02.jpg",
+        "SP-007-den-03.jpg"
+      ],
+      "skus": [
+        "QK-007-DEN-28",
+        "QK-007-DEN-30",
+        "QK-007-DEN-32",
+        "QK-007-DEN-34"
+      ]
+    }
+  ]
+}
+

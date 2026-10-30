@@ -1,0 +1,50 @@
+{
+  "scope": "Static verification only; not C# compilation, SQL execution or browser rendering",
+  "checks": [
+    {
+      "check": "MVC csproj includes source/views/CSS/JS",
+      "status": "PASS",
+      "detail": "[]"
+    },
+    {
+      "check": "All explicit project items exist",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "No duplicate project content/compile items",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "XML configuration/project syntax",
+      "status": "PASS",
+      "detail": "10 files"
+    },
+    {
+      "check": "JavaScript syntax",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "Admin-specific source and stock SQL procedure scripts unchanged",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "Checkout record validation stays on parameters",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "No placeholder buttons in Customer views",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "No raw HTML rendering of reviews",
+      "status": "PASS",
+      "detail": ""
+    }
+  ]
+}

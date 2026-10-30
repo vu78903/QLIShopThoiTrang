@@ -1,0 +1,68 @@
+@model FashionStore.Web.Models.RegisterViewModel
+@{ ViewBag.Title = "Đăng ký"; }
+<section class="customer-panel account-form-panel account-register yody-auth-card" aria-labelledby="register-title">
+    <p class="eyebrow">YODY / THÀNH VIÊN</p>
+    <h1 id="register-title">Tạo tài khoản</h1>
+    <p>Điền đầy đủ thông tin để mua sắm và theo dõi đơn hàng. Các trường có dấu * là bắt buộc.</p>
+    @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "account-form" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "customer-errors", role = "alert" })
+        <div class="account-field">
+            @Html.LabelFor(m => m.FullName, "Họ và tên *")
+            @Html.TextBoxFor(m => m.FullName, new { @class = "filter-input", autocomplete = "name", minlength = "2", maxlength = "150", required = "required", placeholder = "Ví dụ: Nguyễn Văn An" })
+            @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "field-validation-error" })
+        </div>
+        <div class="account-field">
+            @Html.LabelFor(m => m.Phone, "Số điện thoại *")
+            @Html.TextBoxFor(m => m.Phone, new { @class = "filter-input", type = "tel", inputmode = "tel", autocomplete = "tel", maxlength = "16", pattern = @"\+?[0-9]{9,15}", required = "required", placeholder = "Ví dụ: 0912345678" })
+            @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "field-validation-error" })
+        </div>
+        <div class="account-field">
+            @Html.LabelFor(m => m.Email, "Email *")
+            @Html.TextBoxFor(m => m.Email, new { @class = "filter-input", type = "email", autocomplete = "email", maxlength = "254", required = "required", placeholder = "vidu@email.com" })
+            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "field-validation-error" })
+        </div>
+        <div class="account-field">
+            @Html.LabelFor(m => m.StreetAddress, "Số nhà, tên đường *")
+            @Html.TextBoxFor(m => m.StreetAddress, new { @class = "filter-input", autocomplete = "address-line1", minlength = "5", maxlength = "180", required = "required", placeholder = "Ví dụ: 123 Nguyễn Trãi" })
+            @Html.ValidationMessageFor(m => m.StreetAddress, "", new { @class = "field-validation-error" })
+        </div>
+        <div class="account-address-grid" data-provinces-url="@Url.Action("Provinces", "Account")" data-wards-url="@Url.Action("Wards", "Account")" data-province-selected="@Model.ProvinceCode" data-ward-selected="@Model.WardCode">
+            <div class="account-field">
+                @Html.LabelFor(m => m.ProvinceCode, "Tỉnh/Thành phố *")
+                @Html.DropDownListFor(m => m.ProvinceCode, new SelectList(new object[0]), "Đang tải danh sách...", new { @class = "filter-input", required = "required", id = "ProvinceCode", autocomplete = "address-level1" })
+                @Html.ValidationMessageFor(m => m.ProvinceCode, "", new { @class = "field-validation-error" })
+            </div>
+            <div class="account-field">
+                @Html.LabelFor(m => m.WardCode, "Phường/Xã *")
+                @Html.DropDownListFor(m => m.WardCode, new SelectList(new object[0]), "Chọn tỉnh/thành phố trước", new { @class = "filter-input", required = "required", id = "WardCode", autocomplete = "address-level2", disabled = "disabled" })
+                @Html.ValidationMessageFor(m => m.WardCode, "", new { @class = "field-validation-error" })
+            </div>
+        </div>
+        <p class="account-location-status" role="status" aria-live="polite" id="location-status">Đang tải danh sách địa chỉ...</p>
+        <div class="account-field">
+            @Html.LabelFor(m => m.UserName, "Tên đăng nhập *")
+            @Html.TextBoxFor(m => m.UserName, new { @class = "filter-input", autocomplete = "username", minlength = "3", maxlength = "100", pattern = "[A-Za-z0-9._-]{3,100}", required = "required", placeholder = "Tên đăng nhập không dấu" })
+            @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "field-validation-error" })
+            <small class="account-hint">3–100 ký tự không dấu; chỉ dùng chữ, số, dấu chấm, gạch dưới hoặc gạch ngang.</small>
+        </div>
+        <div class="account-field">
+            @Html.LabelFor(m => m.Password, "Mật khẩu *")
+            @Html.PasswordFor(m => m.Password, new { @class = "filter-input", autocomplete = "new-password", minlength = "12", maxlength = "128", required = "required", placeholder = "Tối thiểu 12 ký tự" })
+            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "field-validation-error" })
+            <small class="account-hint">12–128 ký tự, có ít nhất một chữ cái và một chữ số.</small>
+        </div>
+        <div class="account-field">
+            @Html.LabelFor(m => m.ConfirmPassword, "Nhập lại mật khẩu *")
+            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "filter-input", autocomplete = "new-password", minlength = "12", maxlength = "128", required = "required", placeholder = "Nhập lại mật khẩu" })
+            @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "field-validation-error" })
+        </div>
+        <button class="mn-btn mn-btn-primary" type="submit" id="register-submit" disabled>ĐĂNG KÝ TÀI KHOẢN</button>
+    }
+    <p class="account-form-footer">Đã có tài khoản? @Html.ActionLink("Đăng nhập", "Login")</p>
+</section>
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="@Url.Content("~/Scripts/account-locations.js")"></script>
+}

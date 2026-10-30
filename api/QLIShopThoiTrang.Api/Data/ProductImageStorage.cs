@@ -77,9 +77,13 @@ public sealed class ProductImageStorage(IHttpClientFactory httpClientFactory, IC
             $"/storage/v1/object/{BucketName}/{objectPath}");
         using var response = await httpClientFactory.CreateClient().SendAsync(request);
 
-        if (!response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.NotFound)
-            throw new InvalidOperationException("Không xóa được ảnh cũ trên Supabase Storage: " +
-                                                await response.Content.ReadAsStringAsync());
+        var responseBody = await response.Content.ReadAsStringAsync();
+        var objectAlreadyMissing = response.StatusCode == HttpStatusCode.NotFound ||
+                                   responseBody.Contains("NoSuchKey", StringComparison.OrdinalIgnoreCase) ||
+                                   responseBody.Contains("Object not found", StringComparison.OrdinalIgnoreCase);
+
+        if (!response.IsSuccessStatusCode && !objectAlreadyMissing)
+            throw new InvalidOperationException("Không xóa được ảnh cũ trên Supabase Storage: " + responseBody);
     }
 
     private async Task EnsureBucketAsync()

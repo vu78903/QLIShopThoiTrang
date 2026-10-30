@@ -1,0 +1,141 @@
+@{
+    var siteTitle = ViewBag.Title == null ? "YODY" : ViewBag.Title + " | YODY";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="YODY - thời trang tinh giản, thanh lịch dành cho mọi khoảnh khắc." />
+    <title>@siteTitle</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    <link rel="stylesheet" href="@Url.Content("~/Content/moc-nhien.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/customer.css")?v=@System.IO.File.GetLastWriteTimeUtc(Server.MapPath("~/Content/customer.css")).Ticks" />
+</head>
+<body class="customer-site">
+    <a class="skip-link" href="#main-content">Chuyển đến nội dung chính</a>
+
+    <div class="promo-bar" aria-label="Thông tin cửa hàng">
+        <span>THỜI TRANG YODY</span>
+        <span>Đổi trả trong 15 ngày theo điều kiện cửa hàng</span>
+        <span>Ưu đãi &amp; tích điểm cho thành viên</span>
+    </div>
+
+    <header class="site-header yody-header">
+        <div class="mn-container header-inner">
+            <a class="brand-logo" href="@Url.Action("Index", "Home")" aria-label="YODY - Trang chủ">
+                <span>YODY</span>
+            </a>
+
+            <nav id="main-nav" class="main-nav" aria-label="Điều hướng chính">
+                <a href="@Url.Action("Index", "Home")">Trang chủ</a>
+                <a href="@Url.Action("Index", "Product", new { audience = "NAM" })">Nam</a>
+                <a href="@Url.Action("Index", "Product", new { audience = "NU" })">Nữ</a>
+                <a href="@Url.Action("Index", "Product", new { audience = "PHU_KIEN" })">Phụ kiện</a>
+                <a href="@Url.Action("Index", "Product")">Sản phẩm</a>
+                <a class="nav-promotion" href="@Url.Action("Index", "Home")#membership">Thành viên</a>
+            </nav>
+
+            <div class="header-actions">
+                <button class="icon-button" type="button" id="search-toggle" aria-label="Tìm kiếm sản phẩm" aria-expanded="false" aria-controls="search-panel" title="Tìm kiếm">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.5 15.5 5 5" /></svg>
+                </button>
+                <a class="icon-button icon-cart" href="@Url.Action("Index", "Cart")" aria-label="Giỏ hàng" title="Giỏ hàng">
+                    @if(User.Identity.IsAuthenticated){<span id="cart-count" class="cart-count" data-url="@Url.Action("Count","Cart")" hidden></span>}
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8.5h14l-1 12H6l-1-12Z" /><path d="M9 9V6a3 3 0 0 1 6 0v3" /></svg>
+                </a>
+                <button class="icon-button" type="button" id="account-toggle" aria-label="Mở tài khoản" aria-expanded="false" aria-controls="account-panel" title="Tài khoản">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M4.5 21a7.5 7.5 0 0 1 15 0" /></svg>
+                </button>
+                <div id="account-panel" class="yody-account-panel" hidden>
+                    <p class="yody-panel-label">Tài khoản của bạn</p>
+                    @if(User.Identity.IsAuthenticated) {
+                        <a class="yody-account-profile" href="@Url.Action("Index","Customer")">Hồ sơ của @User.Identity.Name</a>
+                        using(Html.BeginForm("Logout","Account",FormMethod.Post,new{@class="header-signout"})){@Html.AntiForgeryToken()<button type="submit">Đăng xuất</button>}
+                    } else if(!String.IsNullOrEmpty(FashionStore.Web.Helpers.AdminSessionCookie.Token(Request))) {
+                        <a href="@Url.Action("Index","Admin")">Quản trị</a>
+                    } else {
+                        <a href="@Url.Action("Login","Account")">Đăng nhập</a>
+                        <a href="@Url.Action("Register","Account")">Đăng ký thành viên</a>
+                    }
+                </div>
+                <button class="icon-button menu-toggle" type="button" id="menu-toggle" aria-label="Mở menu điều hướng" aria-expanded="false" aria-controls="main-nav">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+                </button>
+            </div>
+
+            @if(User.Identity.IsAuthenticated) {
+                <div class="yody-customer-name"><span>Xin chào,</span> <a class="header-account-link" href="@Url.Action("Index","Customer")" title="Hồ sơ của @User.Identity.Name">@User.Identity.Name</a></div>
+            }
+            <form id="search-panel" class="search-panel" role="search" method="get" action="@Url.Action("Index", "Product")" hidden>
+                <label for="site-search" class="search-label">Bạn đang tìm gì?</label>
+                <div class="search-field">
+                    <input class="filter-input" id="site-search" type="search" name="q" maxlength="100" placeholder="Áo sơ mi, quần, váy..." />
+                    <button type="submit" class="mn-btn mn-btn-primary">TÌM KIẾM <span aria-hidden="true">↗</span></button>
+                </div>
+                <small>Khám phá những thiết kế phù hợp với phong cách của bạn.</small>
+            </form>
+            <noscript><p class="yody-no-script"><a href="@Url.Action("Index","Product")">Tìm kiếm sản phẩm</a> · <a href="@Url.Action("Index","Customer")">Tài khoản</a></p></noscript>
+        </div>
+    </header>
+
+    <div id="main-content" tabindex="-1" class="@((ViewBag.IsStorefrontHome == true || ViewBag.IsCatalogPage == true) ? "" : "mn-container page-content")">
+        @RenderBody()
+    </div>
+
+    <footer id="footer" class="site-footer yody-footer">
+        <div class="mn-container mn-footer-lead">
+            <span class="mn-footer-kicker">YODY · THANH LỊCH MỖI NGÀY</span>
+            <p>Mặc đẹp theo cách của riêng bạn.</p>
+            <a class="mn-footer-cta" href="@Url.Action("Index", "Product")">KHÁM PHÁ SẢN PHẨM <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="mn-container footer-grid">
+            <div class="footer-brand-block">
+                <div class="footer-logo">YODY</div>
+                <p>Trang phục tinh giản, dễ kết hợp và thoải mái cho cuộc sống thường ngày.</p>
+            </div>
+            <div>
+                <h2>Khám phá</h2>
+                <a href="@Url.Action("Index", "Product", new { audience = "NAM" })">Thời trang Nam</a>
+                <a href="@Url.Action("Index", "Product", new { audience = "NU" })">Thời trang Nữ</a>
+                <a href="@Url.Action("Index", "Product", new { audience = "PHU_KIEN" })">Phụ kiện</a>
+                <a href="@Url.Action("Index", "Product")">Tất cả sản phẩm</a>
+            </div>
+            <div>
+                <h2>Hỗ trợ mua sắm</h2>
+                <a href="@Url.Action("About", "Home")">Về YODY</a>
+                <a href="@Url.Action("Contact", "Home")">Liên hệ</a>
+                <a href="@Url.Action("Index", "Cart")">Giỏ hàng</a>
+                <a href="@Url.Action("Index", "Orders")">Lịch sử đơn hàng</a>
+                <a href="@Url.Action("Policy","Home",new{id="shopping"})">Hướng dẫn mua hàng</a>
+                <a href="@Url.Action("Policy","Home",new{id="shipping"})">Giao hàng</a>
+                <a href="@Url.Action("Policy","Home",new{id="payment"})">Thanh toán</a>
+                <a href="@Url.Action("Policy","Home",new{id="returns"})">Đổi trả</a>
+                <a href="@Url.Action("Policy","Home",new{id="privacy"})">Bảo mật</a>
+                <a href="@Url.Action("Policy","Home",new{id="terms"})">Điều khoản</a>
+                <a href="@Url.Action("Policy","Home",new{id="faq"})">Câu hỏi thường gặp</a>
+            </div>
+            <div>
+                <h2>Tài khoản</h2>
+                <a href="@Url.Action("Login", "Account")">Đăng nhập khách hàng hoặc quản trị viên</a>
+                <a href="@Url.Action("Register", "Account")">Đăng ký thành viên</a>
+                <a href="@Url.Action("Index", "Customer")">Hồ sơ của tôi</a>
+                <p>Khám phá ưu đãi và quyền lợi tích điểm dành cho thành viên.</p>
+            </div>
+        </div>
+        <div class="mn-footer-bottom-wrap">
+            <div class="mn-container footer-bottom">
+                <span>© @DateTime.Now.Year YODY · Website khóa luận thời trang.</span>
+                <span>THỜI TRANG TINH GIẢN · PHONG CÁCH TỰ NHIÊN</span>
+            </div>
+        </div>
+    </footer>
+
+    <div class="mn-toast" role="status" aria-live="polite" id="demo-toast" hidden></div>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    <script src="@Url.Content("~/Scripts/moc-nhien.js")?v=@System.IO.File.GetLastWriteTimeUtc(Server.MapPath("~/Scripts/moc-nhien.js")).Ticks"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

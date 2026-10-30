@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>annotations</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../FashionStore.Backend/FashionStore.Backend.csproj" />
+    <PackageReference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform" Version="4.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.32" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.32" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" PrivateAssets="all" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <Compile Include="../FashionStore.Web/Models/CustomerModels.cs" Link="MvcClient/CustomerModels.cs" />
+    <Compile Include="../FashionStore.Web/Services/CustomerApiClient.cs" Link="MvcClient/CustomerApiClient.cs" />
+    <Compile Include="../FashionStore.Web/Models/CatalogModels.cs" Link="MvcClient/CatalogModels.cs" />
+    <Compile Include="../FashionStore.Web/Services/CatalogRepository.cs" Link="MvcClient/CatalogRepository.cs" />
+	<Compile Include="../FashionStore.Web/Models/OrderModels.cs" Link="MvcClient/OrderModels.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="../database/schema-reference/FashionStoreDB_Dev_schema_20261015_170000_433_bf029ba2.json" Link="SchemaReference.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../database/Supabase-Web-Orders.sql" Link="Supabase-Web-Orders.sql" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../database/Supabase-Customer-Cart.sql" Link="Supabase-Customer-Cart.sql" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,15 @@
+@{ ViewBag.Title = "Liên hệ";
+var phone = System.Configuration.ConfigurationManager.AppSettings["StorePhone"];
+var email = System.Configuration.ConfigurationManager.AppSettings["StoreEmail"];
+var address = System.Configuration.ConfigurationManager.AppSettings["StoreAddress"];
+}
+<article class="yody-info-page">
+    <header class="yody-info-hero"><p class="eyebrow">YODY / LIÊN HỆ</p><h1>Chúng tôi lắng nghe bạn.</h1><p>Khi cần hỗ trợ mua hàng, hãy chuẩn bị mã đơn và mô tả vấn đề để cửa hàng kiểm tra.</p></header>
+    <section class="yody-info-content" aria-label="Thông tin liên hệ">
+        @if (!String.IsNullOrWhiteSpace(phone)) { <p><strong>Điện thoại:</strong> @phone</p> }
+        @if (!String.IsNullOrWhiteSpace(email)) { <p><strong>Email:</strong> @email</p> }
+        @if (!String.IsNullOrWhiteSpace(address)) { <p><strong>Địa chỉ:</strong> @address</p> }
+        @if (String.IsNullOrWhiteSpace(phone) && String.IsNullOrWhiteSpace(email) && String.IsNullOrWhiteSpace(address)) { <p>Thông tin liên hệ cửa hàng đang được cập nhật.</p> }
+        <div class="yody-actions"><a class="mn-btn mn-btn-primary" href="@Url.Action("Index", "Orders")">KIỂM TRA ĐƠN HÀNG</a><a class="yody-text-link" href="@Url.Action("Policy", new { id = "faq" })">Câu hỏi thường gặp →</a></div>
+    </section>
+</article>

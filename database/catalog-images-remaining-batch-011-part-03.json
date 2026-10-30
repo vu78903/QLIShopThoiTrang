@@ -1,0 +1,84 @@
+{
+  "batchId": "catalog-ai-remaining-batch-011-part-03",
+  "skuCount": 16,
+  "imageCount": 12,
+  "assetDirectory": "winform/qlicuahang/assets/catalog-ai-remaining-batch-011",
+  "items": [
+    {
+      "id": "SP-076-den",
+      "productId": "SP-076",
+      "name": "Bộ thể thao nữ yoga",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "files": [
+        "SP-076-den-01.jpg",
+        "SP-076-den-02.jpg",
+        "SP-076-den-03.jpg"
+      ],
+      "skus": [
+        "BTT-076-DEN-L",
+        "BTT-076-DEN-M",
+        "BTT-076-DEN-S",
+        "BTT-076-DEN-XL"
+      ]
+    },
+    {
+      "id": "SP-076-trang",
+      "productId": "SP-076",
+      "name": "Bộ thể thao nữ yoga",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "files": [
+        "SP-076-trang-01.jpg",
+        "SP-076-trang-02.jpg",
+        "SP-076-trang-03.jpg"
+      ],
+      "skus": [
+        "BTT-076-TRANG-L",
+        "BTT-076-TRANG-M",
+        "BTT-076-TRANG-S",
+        "BTT-076-TRANG-XL"
+      ]
+    },
+    {
+      "id": "SP-051-den",
+      "productId": "SP-051",
+      "name": "Quần jeans nữ lưng cao",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "files": [
+        "SP-051-den-01.jpg",
+        "SP-051-den-02.jpg",
+        "SP-051-den-03.jpg"
+      ],
+      "skus": [
+        "QJ-051-DEN-28",
+        "QJ-051-DEN-30",
+        "QJ-051-DEN-32",
+        "QJ-051-DEN-34"
+      ]
+    },
+    {
+      "id": "SP-051-xanh-jeans",
+      "productId": "SP-051",
+      "name": "Quần jeans nữ lưng cao",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Xanh jeans",
+      "files": [
+        "SP-051-xanh-jeans-01.jpg",
+        "SP-051-xanh-jeans-02.jpg",
+        "SP-051-xanh-jeans-03.jpg"
+      ],
+      "skus": [
+        "QJ-051-XANHJ-28",
+        "QJ-051-XANHJ-30",
+        "QJ-051-XANHJ-32",
+        "QJ-051-XANHJ-34"
+      ]
+    }
+  ]
+}

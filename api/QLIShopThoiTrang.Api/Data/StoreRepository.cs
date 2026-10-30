@@ -2,6 +2,7 @@ using Npgsql;
 using QLIShopThoiTrang.Api.Models;
 using System.Globalization;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace QLIShopThoiTrang.Api.Data;
@@ -223,6 +224,7 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
             throw new InvalidOperationException("Nhà cung cấp không tồn tại hoặc đã ngừng hoạt động.");
         var color = string.IsNullOrWhiteSpace(input.Color) ? "Mặc định" : input.Color.Trim();
         var size = string.IsNullOrWhiteSpace(input.Size) ? "Free size" : input.Size.Trim();
+        var productImages = NormalizeProductImages(input.Images, input.Image);
         var maLoai = await ScalarStringAsync(connection, tx,
             "SELECT MaLoai FROM LoaiSanPham WHERE TrangThai=TRUE AND (TenLoai=@type OR MaLoai=@type) LIMIT 1",
             ("@type", type));
@@ -247,18 +249,19 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
             ("@audience", audience), ("@supplier", supplier), ("@productId", productId));
 
         await ExecuteAsync(connection, tx, """
-            INSERT INTO SanPham(MaSP,MaSKU,MaLoai,TenSanPham,DanhMuc,MaNSX,SoLuong,KichCo,MauSac,TrangThai,DonGia,SoLuongTonKho,HinhAnh)
-            VALUES(@productId,@sku,@type,@name,@audience,@supplier,@stock,@size,@color,TRUE,@price,@stock,@image)
+            INSERT INTO SanPham(MaSP,MaSKU,MaLoai,TenSanPham,DanhMuc,MaNSX,SoLuong,KichCo,MauSac,TrangThai,DonGia,SoLuongTonKho,HinhAnh,DanhSachHinhAnh)
+            VALUES(@productId,@sku,@type,@name,@audience,@supplier,@stock,@size,@color,TRUE,@price,@stock,@image,CAST(@images AS jsonb))
             ON CONFLICT (MaSKU) DO UPDATE SET
                 MaSP=EXCLUDED.MaSP,MaLoai=EXCLUDED.MaLoai,TenSanPham=EXCLUDED.TenSanPham,DonGia=EXCLUDED.DonGia,
                 SoLuong=EXCLUDED.SoLuong,SoLuongTonKho=EXCLUDED.SoLuongTonKho,
                 KichCo=EXCLUDED.KichCo,MauSac=EXCLUDED.MauSac,DanhMuc=EXCLUDED.DanhMuc,MaNSX=EXCLUDED.MaNSX,
-                HinhAnh=EXCLUDED.HinhAnh,TrangThai=TRUE;
+                HinhAnh=EXCLUDED.HinhAnh,DanhSachHinhAnh=EXCLUDED.DanhSachHinhAnh,TrangThai=TRUE;
             """,
             ("@sku", sku), ("@productId", productId), ("@type", maLoai), ("@name", input.Name.Trim()),
             ("@price", input.Price), ("@stock", input.Stock), ("@color", color),
             ("@size", size), ("@audience", audience), ("@supplier", supplier),
-            ("@image", DbValue(input.Image)));
+            ("@image", DbValue(productImages.FirstOrDefault())),
+            ("@images", JsonSerializer.Serialize(productImages)));
         await tx.CommitAsync();
     }
 
@@ -530,14 +533,34 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
         return value is null or DBNull ? null : Convert.ToString(value);
     }
 
+    public async Task<List<string>> GetProductImagesAsync(string sku)
+    {
+        await using var connection = db.CreateConnection();
+        await connection.OpenAsync();
+        await using var command = NewCommand(connection, null,
+            "SELECT HinhAnh,DanhSachHinhAnh::text FROM SanPham WHERE MaSKU=@sku", ("@sku", sku));
+        await using var reader = await command.ExecuteReaderAsync();
+        if (!await reader.ReadAsync()) return [];
+        var primary = reader.IsDBNull(0) ? null : reader.GetString(0);
+        var json = reader.IsDBNull(1) ? null : reader.GetString(1);
+        return ParseProductImages(json, primary);
+    }
+
     // Chỉ xóa file Storage khi không còn biến thể màu/size nào dùng chung URL ảnh đó.
     public async Task<bool> IsProductImageInUseAsync(string? image)
     {
         if (string.IsNullOrWhiteSpace(image)) return false;
         await using var connection = db.CreateConnection();
         await connection.OpenAsync();
-        await using var command = NewCommand(connection, null,
-            "SELECT EXISTS(SELECT 1 FROM SanPham WHERE HinhAnh=@image)", ("@image", image));
+        await using var command = NewCommand(connection, null, """
+            SELECT EXISTS(
+                SELECT 1 FROM SanPham sp
+                WHERE sp.HinhAnh=@image OR EXISTS (
+                    SELECT 1 FROM jsonb_array_elements_text(sp.DanhSachHinhAnh) value
+                    WHERE value=@image
+                )
+            )
+            """, ("@image", image));
         return Convert.ToBoolean(await command.ExecuteScalarAsync());
     }
 
@@ -1305,7 +1328,8 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
         var items = new List<ProductDto>();
         await using var command = NewCommand(connection, null, """
             SELECT sp.MaSP,sp.MaSKU,sp.TenSanPham,l.TenLoai,sp.DanhMuc,sp.MaNSX,n.TenNSX,
-                   sp.MauSac,sp.KichCo,sp.DonViTinh,sp.DonGia,sp.SoLuongTonKho,sp.HinhAnh
+                   sp.MauSac,sp.KichCo,sp.DonViTinh,sp.DonGia,sp.SoLuongTonKho,sp.HinhAnh,
+                   sp.DanhSachHinhAnh::text
             FROM SanPham sp JOIN LoaiSanPham l ON l.MaLoai=sp.MaLoai
             LEFT JOIN NhaSanXuat n ON n.MaNSX=sp.MaNSX
             WHERE sp.TrangThai=TRUE AND l.TrangThai=TRUE ORDER BY sp.MaSKU
@@ -1316,8 +1340,34 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
                 reader.IsDBNull(4) ? null : reader.GetString(4), reader.IsDBNull(5) ? null : reader.GetString(5),
                 reader.IsDBNull(6) ? null : reader.GetString(6), reader.GetString(7), reader.GetString(8),
                 reader.GetString(9), reader.GetDecimal(10), reader.GetInt32(11),
-                reader.IsDBNull(12) ? null : reader.GetString(12)));
+                reader.IsDBNull(12) ? null : reader.GetString(12),
+                ParseProductImages(reader.IsDBNull(13) ? null : reader.GetString(13),
+                    reader.IsDBNull(12) ? null : reader.GetString(12))));
         return items;
+    }
+
+    private static List<string> NormalizeProductImages(IEnumerable<string>? images, string? primary)
+    {
+        var values = (images ?? [])
+            .Append(primary ?? string.Empty)
+            .Select(value => value?.Trim())
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Select(value => value!)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(5)
+            .ToList();
+        return values;
+    }
+
+    private static List<string> ParseProductImages(string? json, string? primary)
+    {
+        List<string>? parsed = null;
+        if (!string.IsNullOrWhiteSpace(json))
+        {
+            try { parsed = JsonSerializer.Deserialize<List<string>>(json); }
+            catch (JsonException) { parsed = null; }
+        }
+        return NormalizeProductImages(parsed, primary);
     }
 
     private static async Task<List<PartnerDto>> QueryPartnersAsync(NpgsqlConnection connection)

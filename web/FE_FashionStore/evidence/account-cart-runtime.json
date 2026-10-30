@@ -1,0 +1,37 @@
+{
+  "checks": [
+    {
+      "path": "/health/live",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/health/ready",
+      "status": 503,
+      "expected": 503
+    },
+    {
+      "path": "/swagger/index.html",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/api/cart",
+      "status": 401,
+      "expected": 401
+    },
+    {
+      "path": "/api/account/me",
+      "status": 401,
+      "expected": 401
+    },
+    {
+      "path": "/api/products",
+      "status": 503,
+      "expected": 503
+    }
+  ],
+  "openApiPaths": 14,
+  "authenticationMetadata": "PASS protected/private operations distinguished from public catalog/login",
+  "database": "Intentionally unconfigured; no SQL test claimed"
+}

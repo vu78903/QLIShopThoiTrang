@@ -1,0 +1,56 @@
+@model FashionStore.Web.Models.AdminHomeViewModel
+@{ Layout = "~/Views/Shared/_AdminLayout.cshtml"; ViewBag.Title = "Tổng quan"; }
+<div class="admin-shell">
+    <aside class="admin-sidebar">
+        <a class="admin-wordmark" href="@Url.Action("Index", "Admin")">MỘC <strong>NHIÊN</strong><small>CỔNG QUẢN TRỊ</small></a>
+        <div class="admin-menu-caption">KHÔNG GIAN LÀM VIỆC</div>
+        <nav class="admin-nav" aria-label="Menu quản trị">
+            <a class="active" href="@Url.Action("Index","Admin")" aria-current="page">▦ &nbsp; Tổng quan</a>
+            <span title="Sẽ phát triển trong giai đoạn tiếp theo">◫ &nbsp; Sản phẩm <small>Sắp có</small></span>
+            <a href="@Url.Action("Orders","Admin")">▤ &nbsp; Đơn hàng</a>
+            <span title="Sẽ phát triển trong giai đoạn tiếp theo">♙ &nbsp; Khách hàng <small>Sắp có</small></span>
+            <span title="Sẽ phát triển trong giai đoạn tiếp theo">◈ &nbsp; Khuyến mãi <small>Sắp có</small></span>
+        </nav>
+        <a class="admin-back-link" href="@Url.Action("Index", "Home")">← Quay lại cửa hàng</a>
+    </aside>
+    <main class="admin-main" id="main-content">
+        <header class="admin-topbar">
+            <div><span class="admin-eyebrow">QUẢN TRỊ CỬA HÀNG</span><h1>Tổng quan hoạt động</h1><p>Thông tin trực tiếp từ FashionStoreDB_Dev.</p></div>
+            <div class="admin-user"><div class="admin-avatar">@(String.IsNullOrWhiteSpace(Model.Identity.FullName) ? "A" : Model.Identity.FullName.Substring(0,1).ToUpperInvariant())</div><div><strong>@Model.Identity.FullName</strong><small>@Model.Identity.EmployeeId · Quản trị viên</small></div>
+                @using (Html.BeginForm("Logout", "Admin", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="admin-signout">Đăng xuất</button>
+                }</div>
+        </header>
+        <section class="admin-stats" aria-label="Chỉ số cửa hàng">
+            <article class="admin-stat"><span>SẢN PHẨM ĐANG BÁN</span><strong>@Model.Dashboard.ActiveProducts.ToString("N0")</strong><small>Mẫu sản phẩm</small></article>
+            <article class="admin-stat"><span>BIẾN THỂ ĐANG BÁN</span><strong>@Model.Dashboard.ActiveSkus.ToString("N0")</strong><small>Kích cỡ / màu</small></article>
+            <article class="admin-stat"><span>ĐƠN TRỰC TUYẾN</span><strong>@Model.Dashboard.Orders.ToString("N0")</strong><small>@Model.Dashboard.PendingOrders đơn mới chờ xử lý</small></article>
+            <article class="admin-stat"><span>SẮP HẾT HÀNG</span><strong>@Model.Dashboard.LowStockSkus.ToString("N0")</strong><small>SKU còn tối đa 5 sản phẩm</small></article>
+        </section>
+        <section class="admin-panels">
+            <article class="admin-panel"><header><h2>Đơn trực tuyến gần đây</h2><span>8 đơn mới nhất</span></header>
+                <div class="admin-table-scroll"><table class="admin-table"><thead><tr><th>Mã đơn</th><th>Ngày tạo</th><th>Trạng thái</th></tr></thead><tbody>
+                @if (Model.Dashboard.RecentOrders == null || Model.Dashboard.RecentOrders.Count == 0)
+                {
+                    <tr><td colspan="3" class="admin-empty">Chưa có đơn trực tuyến nào trong cơ sở dữ liệu.</td></tr>
+                }
+                else
+                {
+                    foreach (var order in Model.Dashboard.RecentOrders)
+                    {
+                        <tr><td><a href="@Url.Action("Order","Admin",new{id=order.OrderId})"><strong>@order.OrderId</strong></a></td><td>@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td><td><span class="admin-status">@FashionStore.Web.Helpers.CustomerViewHelper.Status(order.Status)</span></td></tr>
+                    }
+                }
+                </tbody></table></div>
+            </article>
+            <article class="admin-panel admin-sidepanel"><header><h2>Tình trạng hệ thống</h2></header>
+                <div class="admin-system-ok"><span>●</span> API quản trị và SQL Server đang phản hồi</div>
+                <div class="admin-system-detail"><span>Khách hàng đã lưu</span><strong>@Model.Dashboard.Customers.ToString("N0")</strong></div>
+                <div class="admin-system-detail"><span>Đơn mới chờ xác nhận</span><strong>@Model.Dashboard.PendingOrders.ToString("N0")</strong></div>
+                <p class="admin-note">Bảng tổng quan hiển thị số liệu SQL Server. Xác nhận/hủy đơn nằm tại mục Đơn hàng; quản lý sản phẩm và báo cáo doanh thu sẽ được triển khai sau.</p>
+            </article>
+        </section>
+    </main>
+</div>

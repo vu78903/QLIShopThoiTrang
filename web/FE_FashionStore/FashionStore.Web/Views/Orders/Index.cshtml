@@ -1,0 +1,44 @@
+@model System.Collections.Generic.List<FashionStore.Web.Models.OrderSummaryModel>
+@using FashionStore.Web.Helpers
+@{ ViewBag.Title = "Lịch sử đơn hàng"; }
+<div class="yody-account-shell">
+    @Html.Partial("_CustomerNav")
+    @Html.Partial("_CustomerMessages")
+    <header class="yody-page-heading"><p class="eyebrow">YODY / LỊCH SỬ MUA SẮM</p><h1>Đơn hàng của tôi</h1><p>Theo dõi trạng thái mua sắm và giao nhận. Mỗi trang hiển thị tối đa 100 đơn hàng.</p></header>
+    <form method="get" class="yody-order-filters" aria-label="Lọc đơn hàng">
+        <div class="yody-field"><label for="order-q">Mã đơn</label><input class="filter-input" id="order-q" name="q" value="@ViewBag.Query" maxlength="30" placeholder="Nhập mã đơn hàng" /></div>
+        <div class="yody-field"><label for="order-status">Trạng thái</label><select class="filter-input" id="order-status" name="status"><option value="">Tất cả đơn hàng</option>
+            @foreach (var code in new[] { "MOI", "XAC_NHAN", "DANG_XU_LY", "HOAN_TAT", "HUY" })
+            {
+                <option value="@code" @((string)ViewBag.Status == code ? "selected" : "")>@CustomerViewHelper.Status(code)</option>
+            }
+        </select></div>
+        <button class="mn-btn mn-btn-primary" type="submit">TÌM ĐƠN HÀNG</button>
+    </form>
+    @if (Model == null || Model.Count == 0)
+    {
+        <div class="yody-empty-state"><h2>Chưa tìm thấy đơn hàng</h2><p>Thử điều chỉnh bộ lọc hoặc khám phá sản phẩm mới.</p><a class="mn-btn mn-btn-primary" href="@Url.Action("Index", "Product")">KHÁM PHÁ SẢN PHẨM</a></div>
+    }
+    else
+    {
+        <section class="yody-surface-card yody-table-section" aria-label="Danh sách đơn hàng">
+            <div class="customer-table-wrap"><table class="customer-cart-table yody-data-table"><thead><tr><th>Mã đơn</th><th>Ngày đặt</th><th>Trạng thái</th><th>Thanh toán</th><th>Tổng cộng</th></tr></thead><tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td data-label="Mã đơn"><a class="yody-text-link" href="@Url.Action("Details", "Orders", new { id = item.OrderId })"><strong>@item.OrderId</strong></a></td>
+                        <td data-label="Ngày đặt">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td data-label="Trạng thái"><span class="status-pill">@CustomerViewHelper.Status(item.Status)</span><small class="yody-table-detail">@CustomerViewHelper.Status(item.ShippingStatus)</small></td>
+                        <td data-label="Thanh toán">@CustomerViewHelper.Status(item.PaymentStatus)</td>
+                        <td data-label="Tổng cộng"><strong>@CatalogViewHelper.Vnd(item.Total)</strong></td>
+                    </tr>
+                }
+            </tbody></table></div>
+        </section>
+    }
+    <nav class="catalog-pagination" aria-label="Phân trang đơn hàng">
+        @if (ViewBag.Page > 1) { <a href="@Url.Action("Index", new { q = ViewBag.Query, status = ViewBag.Status, page = ViewBag.Page - 1 })">← Trang trước</a> }
+        <span>Trang @ViewBag.Page</span>
+        @if (Model != null && Model.Count == 100) { <a href="@Url.Action("Index", new { q = ViewBag.Query, status = ViewBag.Status, page = ViewBag.Page + 1 })">Trang tiếp →</a> }
+    </nav>
+</div>

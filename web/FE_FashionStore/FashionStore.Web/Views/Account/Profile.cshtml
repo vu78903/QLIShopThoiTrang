@@ -1,0 +1,40 @@
+@model FashionStore.Web.Models.CustomerProfile
+@{ ViewBag.Title = "Hồ sơ"; }
+<div class="yody-account-shell">
+    @Html.Partial("_CustomerNav")
+    @Html.Partial("_CustomerMessages")
+    <header class="yody-page-heading">
+        <p class="eyebrow">YODY / THÔNG TIN THÀNH VIÊN</p>
+        <h1>Hồ sơ của bạn</h1>
+        <p>Cập nhật thông tin liên hệ và địa chỉ giao nhận cho các lần mua sắm tiếp theo.</p>
+    </header>
+    <div class="yody-profile-layout">
+        <section class="yody-surface-card yody-profile-main" aria-labelledby="profile-heading">
+            <div class="yody-card-heading"><h2 id="profile-heading">Thông tin cá nhân</h2><span class="yody-overline">@Model.UserName</span></div>
+            @if (TempData["AccountMessage"] != null) { <p class="customer-message" role="status">@TempData["AccountMessage"]</p> }
+            @using (Html.BeginForm("Profile", "Account", FormMethod.Post, new { @class = "yody-account-form" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.RowVersion)
+                @Html.ValidationSummary(false, "", new { @class = "customer-errors", role = "alert" })
+                <div class="yody-form-grid">
+                    <div class="yody-field">@Html.LabelFor(m => m.FullName) @Html.TextBoxFor(m => m.FullName, new { @class = "filter-input", autocomplete = "name", maxlength = "150" }) @Html.ValidationMessageFor(m => m.FullName)</div>
+                    <div class="yody-field">@Html.LabelFor(m => m.Phone) @Html.TextBoxFor(m => m.Phone, new { @class = "filter-input", autocomplete = "tel", maxlength = "16" }) @Html.ValidationMessageFor(m => m.Phone)</div>
+                    <div class="yody-field yody-field-wide">@Html.LabelFor(m => m.Email) @Html.TextBoxFor(m => m.Email, new { @class = "filter-input", type = "email", autocomplete = "email", maxlength = "254" }) @Html.ValidationMessageFor(m => m.Email)</div>
+                    <div class="yody-field yody-field-wide">@Html.LabelFor(m => m.Address) @Html.TextAreaFor(m => m.Address, new { @class = "filter-input", autocomplete = "street-address", maxlength = "300", rows = "3" }) @Html.ValidationMessageFor(m => m.Address)</div>
+                </div>
+                <label class="customer-check">@Html.CheckBoxFor(m => m.ReceivePromotions) Nhận thông tin khuyến mãi</label>
+                <div class="yody-actions"><button class="mn-btn mn-btn-primary" type="submit">LƯU THAY ĐỔI</button><a class="yody-text-link" href="@Url.Action("Profile", "Account")">Tải lại hồ sơ</a></div>
+            }
+        </section>
+        <aside class="yody-profile-sidebar" aria-label="Quyền lợi và bảo mật">
+            <article class="yody-surface-card yody-member-card"><p class="eyebrow">YODY MEMBER</p><h2>@Model.Membership</h2><p>Hạng thành viên hiện tại</p><strong>@Model.Points điểm</strong><a class="yody-text-link" href="@Url.Action("Points", "Customer")">Xem lịch sử điểm →</a></article>
+            <article class="yody-surface-card"><h2>Bảo mật tài khoản</h2><p>Đổi mật khẩu định kỳ và đăng xuất khi sử dụng thiết bị chung.</p><a class="yody-text-link" href="@Url.Action("Password", "Account")">Đổi mật khẩu →</a></article>
+            @using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { @class = "yody-signout-form" }))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" class="mn-btn mn-btn-outline">ĐĂNG XUẤT</button>
+            }
+        </aside>
+    </div>
+</div>

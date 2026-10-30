@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-15",
+  "reportedIssue": "MVC runtime missing bin/roslyn/csc.exe",
+  "package": "Microsoft.CodeDom.Providers.DotNetCompilerPlatform 2.0.1",
+  "change": "Re-enabled standard EnsureNuGetPackageBuildImports target",
+  "missingPackageGuard": {
+    "status": "PASS",
+    "observedBuildExitCode": 1,
+    "expected": "NuGet missing-package error"
+  },
+  "restoredPackageGuard": {
+    "status": "PASS",
+    "observedBuildExitCode": 0
+  },
+  "windowsRoslynCopyAndIisRuntime": "NOT TESTED: reinstall/rebuild/run on Windows required"
+}

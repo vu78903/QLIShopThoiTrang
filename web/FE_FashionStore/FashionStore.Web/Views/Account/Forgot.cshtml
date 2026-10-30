@@ -1,0 +1,15 @@
+@{ ViewBag.Title = "Quên mật khẩu"; }
+<section class="customer-panel account-form-panel yody-auth-card" aria-labelledby="forgot-title">
+    <p class="eyebrow">YODY / KHÔI PHỤC</p>
+    <h1 id="forgot-title">Quên mật khẩu?</h1>
+    <p>Nhập email đã đăng ký. Nếu tài khoản đủ điều kiện, hệ thống sẽ gửi hướng dẫn khôi phục. Liên kết có hiệu lực 20 phút và chỉ dùng một lần.</p>
+    @Html.ValidationSummary(false, "", new { @class = "customer-errors", role = "alert" })
+    @if (ViewBag.Message != null) { <p role="status" class="customer-message">@ViewBag.Message</p> }
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        <div class="yody-field"><label for="email">Địa chỉ email</label><input class="filter-input" type="email" id="email" name="email" maxlength="254" required autocomplete="email" placeholder="vidu@email.com" /></div>
+        <button class="mn-btn mn-btn-primary" type="submit">GỬI YÊU CẦU</button>
+    }
+    <p class="account-form-footer"><a href="@Url.Action("Login", "Account")">← Quay lại đăng nhập</a></p>
+</section>

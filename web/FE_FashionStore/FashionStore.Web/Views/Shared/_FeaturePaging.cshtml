@@ -1,0 +1,6 @@
+@model Newtonsoft.Json.Linq.JArray
+<nav class="catalog-pagination" aria-label="Phân trang">
+@if(ViewBag.Page>1){<a href="@Url.Action(null,new{page=ViewBag.Page-1,id=ViewBag.ProductId})">← Trước</a>}
+<span aria-current="page">Trang @ViewBag.Page</span>
+@if(Model.Count>=((string)ViewContext.RouteData.Values["action"]=="Reviews"?10:20)){<a href="@Url.Action(null,new{page=ViewBag.Page+1,id=ViewBag.ProductId})">Tiếp →</a>}
+</nav>

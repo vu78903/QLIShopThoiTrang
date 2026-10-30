@@ -1,0 +1,84 @@
+{
+  "batchId": "catalog-ai-remaining-batch-011-part-01",
+  "skuCount": 16,
+  "imageCount": 12,
+  "assetDirectory": "winform/qlicuahang/assets/catalog-ai-remaining-batch-011",
+  "items": [
+    {
+      "id": "SP-080-den",
+      "productId": "SP-080",
+      "name": "Bộ thể thao nữ đạp xe",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "files": [
+        "SP-080-den-01.jpg",
+        "SP-080-den-02.jpg",
+        "SP-080-den-03.jpg"
+      ],
+      "skus": [
+        "BTT-080-DEN-L",
+        "BTT-080-DEN-M",
+        "BTT-080-DEN-S",
+        "BTT-080-DEN-XL"
+      ]
+    },
+    {
+      "id": "SP-080-do",
+      "productId": "SP-080",
+      "name": "Bộ thể thao nữ đạp xe",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "files": [
+        "SP-080-do-01.jpg",
+        "SP-080-do-02.jpg",
+        "SP-080-do-03.jpg"
+      ],
+      "skus": [
+        "BTT-080-DO-L",
+        "BTT-080-DO-M",
+        "BTT-080-DO-S",
+        "BTT-080-DO-XL"
+      ]
+    },
+    {
+      "id": "SP-080-trang",
+      "productId": "SP-080",
+      "name": "Bộ thể thao nữ đạp xe",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "files": [
+        "SP-080-trang-01.jpg",
+        "SP-080-trang-02.jpg",
+        "SP-080-trang-03.jpg"
+      ],
+      "skus": [
+        "BTT-080-TRANG-L",
+        "BTT-080-TRANG-M",
+        "BTT-080-TRANG-S",
+        "BTT-080-TRANG-XL"
+      ]
+    },
+    {
+      "id": "SP-079-den",
+      "productId": "SP-079",
+      "name": "Bộ thể thao nữ gym",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "files": [
+        "SP-079-den-01.jpg",
+        "SP-079-den-02.jpg",
+        "SP-079-den-03.jpg"
+      ],
+      "skus": [
+        "BTT-079-DEN-L",
+        "BTT-079-DEN-M",
+        "BTT-079-DEN-S",
+        "BTT-079-DEN-XL"
+      ]
+    }
+  ]
+}

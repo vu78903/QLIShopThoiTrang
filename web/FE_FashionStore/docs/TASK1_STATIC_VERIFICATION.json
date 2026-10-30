@@ -1,0 +1,18 @@
+{
+  "schema_NhanVien": "PASS",
+  "schema_PhanQuyen": "PASS",
+  "schema_HoaDon": "PASS",
+  "schema_BienTheSanPham": "PASS",
+  "schema_SanPham": "PASS",
+  "schema_KhachHang": "PASS",
+  "mvc_project_files": "PASS",
+  "admin_service_registered": "PASS",
+  "admin_customer_cookie_separate": "PASS",
+  "admin_controller_explicit_authorize": "PASS",
+  "csrf_on_admin_post": "PASS",
+  "production_role_failclosed": "PASS",
+  "no_dev_test_sp_modifications": "PASS",
+  "admin_test_count": 8,
+  "runtime_test": "NOT_RUN: dotnet, IIS Express and SQL Server unavailable on Linux",
+  "compile_test": "NOT_RUN: dotnet/MSBuild unavailable on Linux"
+}

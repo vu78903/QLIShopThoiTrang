@@ -1,0 +1,92 @@
+@model FashionStore.Web.Models.OrderDetailsModel
+@using FashionStore.Web.Helpers
+@{ ViewBag.Title = "Chi tiết đơn hàng"; }
+<div class="yody-account-shell">
+    @Html.Partial("_CustomerNav")
+    @Html.Partial("_CustomerMessages")
+    <header class="yody-page-heading">
+        <p class="eyebrow">YODY / ĐƠN HÀNG @Model.OrderId</p>
+        @if ((string)TempData["OrderSuccess"] == Model.OrderId)
+        {
+            <div class="yody-order-success" role="status"><h1>Đặt hàng thành công</h1><p>Cảm ơn bạn đã mua sắm tại YODY. Mã đơn của bạn: <strong>@Model.OrderId</strong>.</p></div>
+        }
+        else
+        {
+            <h1>Chi tiết đơn hàng</h1>
+        }
+        <a class="yody-text-link" href="@Url.Action("Index", "Orders")">← Quay lại tất cả đơn hàng</a>
+    </header>
+    <div class="yody-order-detail-layout">
+        <div class="yody-order-detail-main">
+            <section class="yody-surface-card" aria-labelledby="order-status-heading">
+                <div class="yody-card-heading"><h2 id="order-status-heading">Tình trạng đơn hàng</h2><span class="status-pill">@CustomerViewHelper.Status(Model.Status)</span></div>
+                <div class="yody-status-grid"><div><span>Ngày đặt hàng</span><strong>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</strong></div><div><span>Giao nhận</span><strong>@CustomerViewHelper.Status(Model.ShippingStatus)</strong></div><div><span>Thanh toán</span><strong>@CustomerViewHelper.Status(Model.PaymentStatus)</strong></div></div>
+            </section>
+            <section class="yody-surface-card yody-table-section" aria-labelledby="order-items-heading">
+                <div class="yody-card-heading"><h2 id="order-items-heading">Sản phẩm đã đặt</h2></div>
+                <div class="customer-table-wrap"><table class="customer-cart-table yody-data-table"><thead><tr><th>Sản phẩm</th><th>Đơn giá</th><th>Số lượng</th><th>Thành tiền</th></tr></thead><tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr><td data-label="Sản phẩm"><strong>@item.Name</strong><small class="yody-table-detail">@item.Sku · @item.Size · @item.Color</small></td><td data-label="Đơn giá">@CatalogViewHelper.Vnd(item.UnitPrice)</td><td data-label="Số lượng">@item.Quantity</td><td data-label="Thành tiền"><strong>@CatalogViewHelper.Vnd(item.Total)</strong></td></tr>
+                    }
+                </tbody></table></div>
+            </section>
+            @if (Model.SupportsHistory) {
+            <section class="yody-surface-card" aria-labelledby="history-heading">
+                <div class="yody-card-heading"><h2 id="history-heading">Tiến trình xử lý</h2></div>
+                @if (ViewBag.HistoryError != null) { <p class="customer-errors" role="alert">@ViewBag.HistoryError</p> }
+                @if (ViewBag.History != null)
+                {
+                    <ol class="order-timeline yody-order-timeline">
+                        @foreach (var entry in (Newtonsoft.Json.Linq.JArray)ViewBag.History)
+                        {
+                            <li><time>@(((DateTime)entry["ThoiDiem"]).ToString("dd/MM/yyyy HH:mm"))</time><strong>@CustomerViewHelper.Status((string)entry["LoaiTrangThai"]): @CustomerViewHelper.Status((string)entry["TrangThaiMoi"])</strong></li>
+                        }
+                    </ol>
+                }
+            </section>
+            }
+        </div>
+        <aside class="yody-order-detail-aside" aria-label="Thông tin và tổng cộng đơn hàng">
+            <section class="yody-surface-card" aria-labelledby="recipient-heading">
+                <div class="yody-card-heading"><h2 id="recipient-heading">Thông tin nhận hàng</h2></div>
+                <dl class="yody-detail-list"><dt>Người nhận</dt><dd>@Model.Recipient</dd><dt>Điện thoại</dt><dd>@Model.Phone</dd><dt>Địa chỉ giao hàng</dt><dd>@Model.Address</dd><dt>Phương thức thanh toán</dt><dd>@(Model.PaymentMethod == "COD" ? "Thu hộ COD" : "Chuyển khoản chờ xác nhận thủ công")</dd></dl>
+                @if (!String.IsNullOrEmpty(Model.Note)) { <p class="yody-detail-note"><strong>Ghi chú:</strong> @Model.Note</p> }
+            </section>
+            <section class="yody-surface-card" aria-labelledby="order-total-heading">
+                <div class="yody-card-heading"><h2 id="order-total-heading">Tóm tắt thanh toán</h2></div>
+                <div class="yody-summary-row"><span>Tổng tiền hàng</span><strong>@CatalogViewHelper.Vnd(Model.Subtotal)</strong></div>
+                @if (Model.Discount > 0) { <div class="yody-summary-row"><span>Ưu đãi @Model.Voucher</span><strong>−@CatalogViewHelper.Vnd(Model.Discount)</strong></div> }
+                <div class="yody-summary-row yody-summary-total"><span>Tổng cộng</span><strong>@CatalogViewHelper.Vnd(Model.Total)</strong></div>
+            </section>
+            @if (Model.PaymentMethod == "CHUYEN_KHOAN" && Model.PaymentStatus != "DA_THANH_TOAN")
+            {
+                var bank = System.Configuration.ConfigurationManager.AppSettings["BankName"];
+                var account = System.Configuration.ConfigurationManager.AppSettings["BankAccount"];
+                var owner = System.Configuration.ConfigurationManager.AppSettings["BankOwner"];
+                if (!String.IsNullOrWhiteSpace(bank) && !String.IsNullOrWhiteSpace(account) && !String.IsNullOrWhiteSpace(owner))
+                {
+                    <section class="yody-surface-card" aria-labelledby="bank-heading"><h2 id="bank-heading">Hướng dẫn chuyển khoản</h2><p>@bank · @account · @owner</p><p>Nội dung chuyển khoản: <strong>@Model.OrderId</strong></p><p>Số tiền: <strong>@CatalogViewHelper.Vnd(Model.Total)</strong></p><p class="yody-muted">Thanh toán đang chờ cửa hàng xác minh.</p></section>
+                }
+                else
+                {
+                    <p class="customer-message">Thông tin tài khoản nhận tiền chưa được cấu hình. Vui lòng liên hệ cửa hàng trước khi chuyển khoản.</p>
+                }
+            }
+            @if ((Model.Status == "MOI" || Model.Status == "XAC_NHAN" || Model.Status == "DANG_XU_LY") && (Model.ShippingStatus == "CHO_XAC_NHAN" || Model.ShippingStatus == "CHUA_GIAO" || Model.ShippingStatus == "DANG_CHUAN_BI") && (Model.PaymentStatus == "CHUA_THANH_TOAN" || Model.PaymentStatus == "THAT_BAI"))
+            {
+                using (Html.BeginForm("Cancel", "Orders", FormMethod.Post, new { @class = "yody-cancel-form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.OrderId" />
+                    <button class="mn-btn mn-btn-outline" type="submit" data-confirm="Bạn muốn hủy đơn hàng này?">HỦY ĐƠN HÀNG</button>
+                }
+            }
+            @if (!Model.SupportsHistory) { <p class="customer-message">Trạng thái được cập nhật khi tải lại trang. Nếu cần hủy hoặc thay đổi đơn, vui lòng liên hệ cửa hàng và cung cấp mã đơn.</p> }
+            @if (Model.Status == "HOAN_TAT" && Model.SupportsReturns)
+            {
+                <a class="mn-btn mn-btn-outline" href="@Url.Action("Return", "Customer", new { id = Model.OrderId })">YÊU CẦU ĐỔI / TRẢ</a>
+            }
+        </aside>
+    </div>
+</div>

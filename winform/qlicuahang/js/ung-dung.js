@@ -19,7 +19,7 @@
         let qrPaymentPollTimer = null;
         let qrPaymentFinalizing = false;
         let pendingCardReceipt = null;
-        let pendingProductImage = null;
+        let pendingProductImages = [];
         let deleteConfirmationResolver = null;
         let invoiceSearchTimer = null;
         let invoiceSearchRequestId = 0;
@@ -1157,7 +1157,7 @@
                 return;
             }
             crudContext = { action: 'add', target: 'product', editIndex: -1 };
-            pendingProductImage = null;
+            pendingProductImages = [];
             document.getElementById("crudModalTitle").textContent = "Thêm Sản Phẩm Mới";
             document.getElementById("crudModalFields").innerHTML = `
                     <label>Mã sản phẩm</label>
@@ -1190,7 +1190,7 @@
         function openEditProduct(idx) {
             crudContext = { action: 'edit', target: 'product', editIndex: idx };
             const p = productsData[idx];
-            pendingProductImage = p.image || null;
+            pendingProductImages = normalizeProductImages(p);
             document.getElementById("crudModalTitle").textContent = "Cập Nhật Sản Phẩm";
             document.getElementById("crudModalFields").innerHTML = `
                     <label>Mã sản phẩm</label>
@@ -1211,75 +1211,109 @@
                     <input id="f_price" class="input" type="number" value="${p.price}" placeholder="Giá bán">
                     <label>Số lượng tồn</label>
                     <input id="f_stock" class="input" type="number" value="${p.stock}" placeholder="Số lượng tồn">
-                    ${buildProductImageField(p.image)}
+                    ${buildProductImageField(pendingProductImages)}
                     <label>Nhà cung cấp</label>
                     <select id="f_supplier" class="input">${buildImportSupplierOptions(p.supplierId || "")}</select>
                 `;
             document.getElementById("crudModalBg").classList.add("open");
         }
 
-        // Tạo vùng chọn và xem trước ảnh trong form sản phẩm.
-        function buildProductImageField(image = null) {
-            const preview = image
-                ? `<img id="f_image_preview" class="product-image-preview" src="${escapeHtml(productImageUrl(image))}" alt="Ảnh sản phẩm">`
-                : `<div id="f_image_preview" class="product-image-empty"><i data-lucide="image"></i><span>Chưa có ảnh</span></div>`;
+        function normalizeProductImages(product) {
+            const images = Array.isArray(product?.images) ? product.images : [];
+            const values = images.length > 0 ? images : (product?.image ? [product.image] : []);
+            return [...new Set(values.filter(Boolean).map(value => String(value).trim()))].slice(0, 5);
+        }
+
+        // Tạo vùng chọn và xem trước tối đa 5 ảnh cho mỗi mã SKU.
+        function buildProductImageField(images = []) {
             return `
-                <label>Hình ảnh sản phẩm</label>
+                <label>Hình ảnh sản phẩm (tối đa 5 ảnh)</label>
                 <div class="product-image-editor">
-                    ${preview}
+                    <div id="f_image_gallery" class="product-image-gallery">
+                        ${buildProductImageCards(images)}
+                    </div>
                     <div class="product-image-actions">
                         <label class="btn btn-secondary product-image-picker">
-                            <i data-lucide="image-up" style="width:16px"></i> Chọn ảnh
-                            <input id="f_image_file" type="file" accept="image/png,image/jpeg,image/webp" onchange="handleProductImageChange(event)">
+                            <i data-lucide="image-up" style="width:16px"></i> Chọn nhiều ảnh
+                            <input id="f_image_file" type="file" multiple accept="image/png,image/jpeg,image/webp" onchange="handleProductImageChange(event)">
                         </label>
-                        <button class="btn btn-danger" type="button" onclick="removeProductImage()">
-                            <i data-lucide="trash-2" style="width:16px"></i> Xóa ảnh
+                        <button class="btn btn-danger" type="button" onclick="removeAllProductImages()">
+                            <i data-lucide="trash-2" style="width:16px"></i> Xóa tất cả
                         </button>
                     </div>
                 </div>`;
         }
 
-        // Đọc ảnh người dùng chọn để gửi cùng dữ liệu sản phẩm lên API.
-        function handleProductImageChange(event) {
-            const file = event.target.files?.[0];
-            if (!file) return;
-            if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+        function buildProductImageCards(images) {
+            if (!images?.length) {
+                return `<div class="product-image-empty"><i data-lucide="image"></i><span>Chưa có ảnh</span></div>`;
+            }
+            return images.map((image, index) => `
+                <div class="product-image-card ${index === 0 ? "is-primary" : ""}">
+                    <img class="product-image-preview" src="${escapeHtml(productImageUrl(image))}" alt="Ảnh sản phẩm ${index + 1}">
+                    <span>${index === 0 ? "Ảnh chính" : `Ảnh ${index + 1}`}</span>
+                    <div class="product-image-card-actions">
+                        ${index === 0 ? "" : `<button type="button" onclick="setPrimaryProductImage(${index})">Đặt chính</button>`}
+                        <button type="button" class="danger" onclick="removeProductImage(${index})">Xóa</button>
+                    </div>
+                </div>`).join("");
+        }
+
+        function renderProductImageEditor() {
+            const gallery = document.getElementById("f_image_gallery");
+            if (!gallery) return;
+            gallery.innerHTML = buildProductImageCards(pendingProductImages);
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // Đọc nhiều ảnh người dùng chọn để gửi cùng dữ liệu sản phẩm lên API.
+        async function handleProductImageChange(event) {
+            const files = Array.from(event.target.files || []);
+            if (files.length === 0) return;
+            if (pendingProductImages.length + files.length > 5) {
+                alert("Mỗi mã SKU chỉ được chọn tối đa 5 ảnh.");
+                event.target.value = "";
+                return;
+            }
+            if (files.some(file => !['image/png', 'image/jpeg', 'image/webp'].includes(file.type))) {
                 alert("Chỉ chấp nhận ảnh PNG, JPG hoặc WEBP.");
                 event.target.value = "";
                 return;
             }
-            if (file.size > 2 * 1024 * 1024) {
-                alert("Ảnh không được lớn hơn 2 MB.");
+            if (files.some(file => file.size > 2 * 1024 * 1024)) {
+                alert("Mỗi ảnh không được lớn hơn 2 MB.");
                 event.target.value = "";
                 return;
             }
-            const reader = new FileReader();
-            reader.onload = () => {
-                pendingProductImage = String(reader.result || "");
-                const oldPreview = document.getElementById("f_image_preview");
-                const preview = document.createElement("img");
-                preview.id = "f_image_preview";
-                preview.className = "product-image-preview";
-                preview.alt = "Ảnh sản phẩm";
-                preview.src = pendingProductImage;
-                oldPreview?.replaceWith(preview);
-            };
-            reader.readAsDataURL(file);
+            const selectedImages = await Promise.all(files.map(file => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(String(reader.result || ""));
+                reader.onerror = () => reject(new Error(`Không đọc được ảnh ${file.name}.`));
+                reader.readAsDataURL(file);
+            })));
+            pendingProductImages = [...new Set([...pendingProductImages, ...selectedImages])].slice(0, 5);
+            event.target.value = "";
+            renderProductImageEditor();
         }
 
-        // Bỏ ảnh hiện tại; khi bấm Lưu, API cập nhật HinhAnh thành NULL.
-        async function removeProductImage() {
-            if (!await confirmDeletion("Ảnh sản phẩm sẽ bị gỡ khi bạn bấm Lưu dữ liệu. Bạn có chắc muốn xóa ảnh?", "Xóa ảnh sản phẩm?")) return;
-            pendingProductImage = null;
-            const oldPreview = document.getElementById("f_image_preview");
-            if (!oldPreview) return;
-            const empty = document.createElement("div");
-            empty.id = "f_image_preview";
-            empty.className = "product-image-empty";
-            empty.innerHTML = '<i data-lucide="image"></i><span>Chưa có ảnh</span>';
-            oldPreview.replaceWith(empty);
-            document.getElementById("f_image_file").value = "";
-            if (window.lucide) lucide.createIcons();
+        function setPrimaryProductImage(index) {
+            if (index <= 0 || index >= pendingProductImages.length) return;
+            const [selected] = pendingProductImages.splice(index, 1);
+            pendingProductImages.unshift(selected);
+            renderProductImageEditor();
+        }
+
+        async function removeProductImage(index) {
+            if (!await confirmDeletion("Ảnh này sẽ bị gỡ khi bạn bấm Lưu dữ liệu.", "Xóa ảnh sản phẩm?")) return;
+            pendingProductImages.splice(index, 1);
+            renderProductImageEditor();
+        }
+
+        async function removeAllProductImages() {
+            if (pendingProductImages.length === 0) return;
+            if (!await confirmDeletion("Tất cả ảnh sẽ bị gỡ khi bạn bấm Lưu dữ liệu.", "Xóa tất cả ảnh?")) return;
+            pendingProductImages = [];
+            renderProductImageEditor();
         }
 
         // Xóa thật khi chưa có chứng từ; nếu đã phát sinh thì API sẽ tắt sản phẩm để giữ lịch sử.
@@ -1813,7 +1847,11 @@
                     const response = await fetch(`${API_BASE_URL}/api/san-pham`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ productId, sku, name, type, audience, supplierId, color, size, price, stock, image: pendingProductImage })
+                        body: JSON.stringify({
+                            productId, sku, name, type, audience, supplierId, color, size, price, stock,
+                            image: pendingProductImages[0] || null,
+                            images: pendingProductImages
+                        })
                     });
                     if (!response.ok) throw new Error(await response.text());
                     await loadAppState();

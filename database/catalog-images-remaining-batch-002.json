@@ -1,0 +1,14 @@
+{
+  "batchId": "catalog-ai-remaining-batch-002",
+  "skuCount": 24,
+  "imageCount": 18,
+  "assetDirectory": "winform/qlicuahang/assets/catalog-ai-remaining-batch-002",
+  "items": [
+    { "id": "SP-020-trang", "productId": "SP-020", "color": "Trắng", "files": ["SP-020-trang-01.jpg", "SP-020-trang-02.jpg", "SP-020-trang-03.jpg"], "skus": ["DAM-020-TRANG-L", "DAM-020-TRANG-M", "DAM-020-TRANG-S", "DAM-020-TRANG-XL"] },
+    { "id": "SP-018-do", "productId": "SP-018", "color": "Đỏ", "files": ["SP-018-do-01.jpg", "SP-018-do-02.jpg", "SP-018-do-03.jpg"], "skus": ["VAY-018-DO-L", "VAY-018-DO-M", "VAY-018-DO-S", "VAY-018-DO-XL"] },
+    { "id": "SP-018-trang", "productId": "SP-018", "color": "Trắng", "files": ["SP-018-trang-01.jpg", "SP-018-trang-02.jpg", "SP-018-trang-03.jpg"], "skus": ["VAY-018-TRANG-L", "VAY-018-TRANG-M", "VAY-018-TRANG-S", "VAY-018-TRANG-XL"] },
+    { "id": "SP-016-den", "productId": "SP-016", "color": "Đen", "files": ["SP-016-den-01.jpg", "SP-016-den-02.jpg", "SP-016-den-03.jpg"], "skus": ["HD-016-DEN-L", "HD-016-DEN-M", "HD-016-DEN-S", "HD-016-DEN-XL"] },
+    { "id": "SP-016-do", "productId": "SP-016", "color": "Đỏ", "files": ["SP-016-do-01.jpg", "SP-016-do-02.jpg", "SP-016-do-03.jpg"], "skus": ["HD-016-DO-L", "HD-016-DO-M", "HD-016-DO-S", "HD-016-DO-XL"] },
+    { "id": "SP-016-trang", "productId": "SP-016", "color": "Trắng", "files": ["SP-016-trang-01.jpg", "SP-016-trang-02.jpg", "SP-016-trang-03.jpg"], "skus": ["HD-016-TRANG-L", "HD-016-TRANG-M", "HD-016-TRANG-S", "HD-016-TRANG-XL"] }
+  ]
+}

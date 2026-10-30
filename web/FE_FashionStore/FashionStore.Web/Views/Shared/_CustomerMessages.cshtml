@@ -1,0 +1,2 @@
+@if(TempData["CustomerMessage"]!=null){<p class="customer-message" role="status"><strong class="yody-alert-title">Thông báo</strong>@TempData["CustomerMessage"]</p>}
+@if(TempData["CustomerError"]!=null){<p class="customer-errors" role="alert"><strong class="yody-alert-title">Chưa thể hoàn tất</strong>@TempData["CustomerError"]</p>}

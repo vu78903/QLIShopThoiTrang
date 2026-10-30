@@ -1,0 +1,84 @@
+{
+  "batchId": "catalog-ai-remaining-batch-013",
+  "skuCount": 16,
+  "imageCount": 12,
+  "assetDirectory": "winform/qlicuahang/assets/catalog-ai-remaining-batch-013",
+  "items": [
+    {
+      "id": "SP-046-den",
+      "productId": "SP-046",
+      "name": "Quần tây nữ ống rộng",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "files": [
+        "SP-046-den-01.jpg",
+        "SP-046-den-02.jpg",
+        "SP-046-den-03.jpg"
+      ],
+      "skus": [
+        "QT-046-DEN-28",
+        "QT-046-DEN-30",
+        "QT-046-DEN-32",
+        "QT-046-DEN-34"
+      ]
+    },
+    {
+      "id": "SP-046-trang",
+      "productId": "SP-046",
+      "name": "Quần tây nữ ống rộng",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "files": [
+        "SP-046-trang-01.jpg",
+        "SP-046-trang-02.jpg",
+        "SP-046-trang-03.jpg"
+      ],
+      "skus": [
+        "QT-046-TRANG-28",
+        "QT-046-TRANG-30",
+        "QT-046-TRANG-32",
+        "QT-046-TRANG-34"
+      ]
+    },
+    {
+      "id": "SP-047-do",
+      "productId": "SP-047",
+      "name": "Quần tây nữ slim fit",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "files": [
+        "SP-047-do-01.jpg",
+        "SP-047-do-02.jpg",
+        "SP-047-do-03.jpg"
+      ],
+      "skus": [
+        "QT-047-DO-28",
+        "QT-047-DO-30",
+        "QT-047-DO-32",
+        "QT-047-DO-34"
+      ]
+    },
+    {
+      "id": "SP-047-trang",
+      "productId": "SP-047",
+      "name": "Quần tây nữ slim fit",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "files": [
+        "SP-047-trang-01.jpg",
+        "SP-047-trang-02.jpg",
+        "SP-047-trang-03.jpg"
+      ],
+      "skus": [
+        "QT-047-TRANG-28",
+        "QT-047-TRANG-30",
+        "QT-047-TRANG-32",
+        "QT-047-TRANG-34"
+      ]
+    }
+  ]
+}

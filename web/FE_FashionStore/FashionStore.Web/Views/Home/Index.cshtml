@@ -1,0 +1,106 @@
+@model FashionStore.Web.Models.HomeViewModel
+@{
+    ViewBag.Title = "Trang chủ";
+    ViewBag.IsStorefrontHome = true;
+}
+<main class="mn-home yody-home">
+    <section class="mn-container yody-hero" aria-labelledby="yody-hero-title">
+        <div class="yody-hero-copy">
+            <p class="eyebrow yody-hero-kicker">YODY / THỜI TRANG VÀ PHỤ KIỆN</p>
+            <h1 id="yody-hero-title">Mặc đẹp.<br /><span>Theo cách của bạn.</span></h1>
+            <p>Chọn những thiết kế tinh tế, dễ kết hợp và thoải mái để tự tin trong từng khoảnh khắc.</p>
+            <div class="yody-hero-actions">
+                <a class="mn-btn mn-btn-primary" href="@Url.Action("Index", "Product")">Khám phá sản phẩm <span aria-hidden="true">↗</span></a>
+                <a class="mn-text-link" href="#categories">Xem danh mục <span aria-hidden="true">↓</span></a>
+            </div>
+            <div class="yody-hero-footer"><span>BỘ SƯU TẬP YODY</span><span>PHONG CÁCH HẰNG NGÀY</span></div>
+        </div>
+        <div class="yody-hero-image">
+            <img src="https://images.unsplash.com/photo-1526413232644-8a40f03cc03b?auto=format&amp;fit=crop&amp;w=1600&amp;q=85"
+                 alt="Hình ảnh minh họa phong cách thời trang thanh lịch" fetchpriority="high" />
+            <span class="yody-hero-photo-caption">THANH LỊCH · HIỆN ĐẠI</span>
+        </div>
+    </section>
+
+    <section class="mn-container yody-benefits" aria-label="Khám phá YODY">
+        <div><span aria-hidden="true" class="yody-benefit-symbol">01</span><div><strong>Dễ phối, dễ mặc</strong><p>Khám phá phong cách phù hợp với bạn.</p></div></div>
+        <div><span aria-hidden="true" class="yody-benefit-symbol">02</span><div><strong>Quyền lợi thành viên</strong><p>Theo dõi ưu đãi và điểm tích lũy.</p></div></div>
+        <div><span aria-hidden="true" class="yody-benefit-symbol">03</span><div><strong>Chính sách đổi trả</strong><p>Xem điều kiện đổi trả trước khi mua.</p></div></div>
+    </section>
+
+    <section class="mn-container yody-home-section" id="categories" aria-labelledby="yody-category-heading">
+        <header class="yody-section-heading">
+            <div><p class="eyebrow">DANH MỤC MUA SẮM</p><h2 id="yody-category-heading">Khám phá theo phong cách</h2></div>
+            <a class="mn-text-link" href="@Url.Action("Index", "Product")">Tất cả sản phẩm <span aria-hidden="true">↗</span></a>
+        </header>
+        <div class="yody-category-grid">
+            <a class="yody-category-card" href="@Url.Action("Index", "Product", new { audience = "NAM" })">
+                <img src="https://images.unsplash.com/photo-1565101129934-0da84e9fd368?auto=format&amp;fit=crop&amp;w=1100&amp;q=85" alt="Hình minh họa danh mục thời trang nam" loading="lazy" />
+                <span class="yody-category-info"><span><small>01 / KHÁM PHÁ</small><strong>Thời trang nam</strong></span><span class="yody-category-arrow" aria-hidden="true">↗</span></span>
+            </a>
+            <a class="yody-category-card" href="@Url.Action("Index", "Product", new { audience = "NU" })">
+                <img src="https://images.unsplash.com/photo-1772443325539-0572726cb8c6?auto=format&amp;fit=crop&amp;w=1100&amp;q=85" alt="Hình minh họa danh mục thời trang nữ" loading="lazy" />
+                <span class="yody-category-info"><span><small>02 / KHÁM PHÁ</small><strong>Thời trang nữ</strong></span><span class="yody-category-arrow" aria-hidden="true">↗</span></span>
+            </a>
+            <a class="yody-category-card" href="@Url.Action("Index", "Product", new { audience = "PHU_KIEN" })">
+                <img src="https://images.unsplash.com/photo-1772443323934-2bf0282359c3?auto=format&amp;fit=crop&amp;w=1100&amp;q=85" alt="Hình minh họa danh mục phụ kiện" loading="lazy" />
+                <span class="yody-category-info"><span><small>03 / KHÁM PHÁ</small><strong>Phụ kiện</strong></span><span class="yody-category-arrow" aria-hidden="true">↗</span></span>
+            </a>
+        </div>
+    </section>
+
+    <section class="yody-products-band" id="products" aria-labelledby="yody-products-heading">
+        <div class="mn-container yody-home-section">
+            <header class="yody-section-heading">
+                <div><p class="eyebrow">SẢN PHẨM NỔI BẬT</p><h2 id="yody-products-heading">Tuyển chọn dành cho bạn</h2></div>
+                <a class="mn-text-link" href="@Url.Action("Index", "Product")">Xem toàn bộ <span aria-hidden="true">↗</span></a>
+            </header>
+            @if (!String.IsNullOrEmpty(Model.CatalogError))
+            {
+                <div class="catalog-alert" role="alert">@Model.CatalogError</div>
+            }
+            else if (Model.FeaturedProducts.Count == 0)
+            {
+                <div class="catalog-empty" role="status"><h3>Sản phẩm đang được cập nhật</h3><p>Hãy quay lại sau để khám phá các thiết kế mới.</p><a class="mn-btn mn-btn-outline" href="@Url.Action("Index", "Product")">Đến trang sản phẩm</a></div>
+            }
+            else
+            {
+                <div class="product-grid yody-home-products">
+                    @foreach (var product in Model.FeaturedProducts)
+                    {
+                        @Html.Partial("_ProductCard", product)
+                    }
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="mn-container yody-editorial" aria-labelledby="yody-editorial-heading">
+        <div class="yody-editorial-image">
+            <img src="https://images.unsplash.com/photo-1565101129934-0da84e9fd368?auto=format&amp;fit=crop&amp;w=1400&amp;q=85" alt="Hình ảnh minh họa phong cách thời trang thường ngày" loading="lazy" />
+        </div>
+        <div class="yody-editorial-copy">
+            <p class="eyebrow">PHONG CÁCH YODY</p>
+            <h2 id="yody-editorial-heading">Tinh giản trong lựa chọn.<br />Khác biệt ở cách mặc.</h2>
+            <p>Để trang phục trở thành một phần của nhịp sống: tự nhiên, thoải mái và thể hiện cá tính của riêng bạn.</p>
+            <a class="mn-text-link" href="@Url.Action("About", "Home")">Tìm hiểu thêm <span aria-hidden="true">↗</span></a>
+        </div>
+    </section>
+
+    <section class="mn-container yody-promotion" aria-labelledby="yody-promo-heading">
+        <div><p class="eyebrow">ƯU ĐÃI DÀNH CHO BẠN</p><h2 id="yody-promo-heading">Mua sắm thông minh, chọn đúng ưu đãi.</h2><p>Kiểm tra các chương trình, mã giảm giá và điều kiện áp dụng đang có.</p></div>
+        <a class="mn-btn mn-btn-outline" href="@Url.Action("Promotions", "Customer")">Xem ưu đãi <span aria-hidden="true">↗</span></a>
+    </section>
+
+    <section class="yody-membership" id="membership" aria-labelledby="yody-membership-heading">
+        <div class="mn-container yody-membership-grid">
+            <div class="yody-membership-copy">
+                <p class="eyebrow">THÀNH VIÊN YODY</p>
+                <h2 id="yody-membership-heading">Phong cách của bạn.<br />Quyền lợi của bạn.</h2>
+                <p>Đăng nhập để theo dõi điểm tích lũy, ưu đãi và lịch sử mua sắm trong tài khoản thành viên.</p>
+                <a class="mn-btn mn-btn-light" href="@Url.Action("Index", "Customer")">Khám phá quyền lợi <span aria-hidden="true">↗</span></a>
+            </div>
+            <div class="yody-membership-monogram" aria-hidden="true"><span>YODY</span><small>THỜI TRANG &amp; PHỤ KIỆN</small></div>
+        </div>
+    </section>
+</main>

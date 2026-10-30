@@ -1,0 +1,72 @@
+{
+  "batchId": "remaining-batch-021",
+  "skuCount": 4,
+  "imageCount": 12,
+  "assetDirectory": "winform/qlicuahang/assets/catalog-ai-remaining-batch-021",
+  "items": [
+    {
+      "id": "SP-087-den",
+      "productId": "SP-087",
+      "name": "Vớ cổ ngắn",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Đen",
+      "files": [
+        "SP-087-den-01.jpg",
+        "SP-087-den-02.jpg",
+        "SP-087-den-03.jpg"
+      ],
+      "skus": [
+        "VO-087-DEN-FS"
+      ]
+    },
+    {
+      "id": "SP-087-do",
+      "productId": "SP-087",
+      "name": "Vớ cổ ngắn",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Đỏ",
+      "files": [
+        "SP-087-do-01.jpg",
+        "SP-087-do-02.jpg",
+        "SP-087-do-03.jpg"
+      ],
+      "skus": [
+        "VO-087-DO-FS"
+      ]
+    },
+    {
+      "id": "SP-087-trang",
+      "productId": "SP-087",
+      "name": "Vớ cổ ngắn",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Trắng",
+      "files": [
+        "SP-087-trang-01.jpg",
+        "SP-087-trang-02.jpg",
+        "SP-087-trang-03.jpg"
+      ],
+      "skus": [
+        "VO-087-TRANG-FS"
+      ]
+    },
+    {
+      "id": "SP-088-den",
+      "productId": "SP-088",
+      "name": "Vớ thể thao",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Đen",
+      "files": [
+        "SP-088-den-01.jpg",
+        "SP-088-den-02.jpg",
+        "SP-088-den-03.jpg"
+      ],
+      "skus": [
+        "VO-088-DEN-FS"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+@model Newtonsoft.Json.Linq.JArray
+@using FashionStore.Web.Helpers
+@{ ViewBag.Title = "Yêu cầu đổi trả"; }
+<div class="yody-account-shell">
+    @Html.Partial("_CustomerNav")
+    @Html.Partial("_CustomerMessages")
+    <header class="yody-page-heading"><p class="eyebrow">YODY / SAU MUA HÀNG</p><h1>Yêu cầu đổi / trả</h1><p>Bạn có thể gửi yêu cầu từ <a href="@Url.Action("Index", "Orders")">chi tiết đơn hàng</a>. Thời hạn 15 ngày tính từ mốc giao hàng được ghi nhận; cửa hàng sẽ kiểm tra điều kiện trước khi duyệt.</p></header>
+    @if (Model.Count == 0)
+    {
+        <div class="yody-empty-state"><h2>Chưa có yêu cầu đổi trả</h2><p>Hãy mở đơn hàng đủ điều kiện nếu bạn cần hỗ trợ sau khi nhận sản phẩm.</p><a class="mn-btn mn-btn-primary" href="@Url.Action("Index", "Orders")">XEM ĐƠN HÀNG</a></div>
+    }
+    else
+    {
+        <div class="yody-record-list">
+            @foreach (var p in Model)
+            {
+                <article class="yody-surface-card yody-return-card">
+                    <div class="yody-record-top"><span class="eyebrow">@p["SoPhieuDT"] · @(((DateTime)p["NgayLap"]).ToString("dd/MM/yyyy"))</span><span class="status-pill">@CustomerViewHelper.Status((string)p["TrangThai"])</span></div>
+                    <h2>@CustomerViewHelper.Status((string)p["HinhThucXuLy"])</h2>
+                    <p>Đơn hàng: <a class="yody-text-link" href="@Url.Action("Details", "Orders", new { id = (string)p["SoHD"] })">@p["SoHD"]</a></p>
+                    <p>@p["LyDo"]</p>
+                    @if (!String.IsNullOrWhiteSpace((string)p["LyDoTuChoi"]))
+                    {
+                        <p class="customer-errors">@p["LyDoTuChoi"]</p>
+                    }
+                </article>
+            }
+        </div>
+    }
+    @Html.Partial("_FeaturePaging", Model)
+</div>

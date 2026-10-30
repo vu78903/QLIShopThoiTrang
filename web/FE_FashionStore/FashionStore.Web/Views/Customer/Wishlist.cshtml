@@ -1,0 +1,38 @@
+@model Newtonsoft.Json.Linq.JArray
+@using FashionStore.Web.Helpers
+@{ ViewBag.Title = "Sản phẩm yêu thích"; }
+<div class="yody-account-shell">
+    @Html.Partial("_CustomerNav")
+    @Html.Partial("_CustomerMessages")
+    <header class="yody-page-heading"><p class="eyebrow">YODY / DANH SÁCH CỦA BẠN</p><h1>Sản phẩm yêu thích</h1><p>Những sản phẩm được lưu theo tài khoản, luôn sẵn sàng để bạn khám phá lại.</p></header>
+    @if (Model.Count == 0)
+    {
+        <div class="yody-empty-state"><h2>Chưa có sản phẩm yêu thích</h2><p>Bắt đầu khám phá và lưu những thiết kế phù hợp với bạn.</p><a class="mn-btn mn-btn-primary" href="@Url.Action("Index", "Product")">KHÁM PHÁ SẢN PHẨM</a></div>
+    }
+    else
+    {
+        <div class="yody-feature-grid">
+            @foreach (var p in Model)
+            {
+                <article class="yody-surface-card yody-wishlist-item">
+                    <p class="eyebrow">ĐÃ LƯU</p>
+                    <h2>@p["TenSanPham"]</h2>
+                    @if ((bool)p["TrangThai"])
+                    {
+                        <a class="yody-text-link" href="@Url.Action("Details", "Product", new { id = (string)p["MaSP"] })">Chọn kích cỡ, màu sắc và mua sắm →</a>
+                    }
+                    else
+                    {
+                        <p class="yody-muted">Sản phẩm hiện ngừng kinh doanh.</p>
+                    }
+                    @using (Html.BeginForm("RemoveWishlist", "Customer", FormMethod.Post, new { @class = "yody-inline-form" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@p["MaSP"]" />
+                        <button type="submit" class="mn-btn mn-btn-outline">BỎ YÊU THÍCH</button>
+                    }
+                </article>
+            }
+        </div>
+    }
+</div>

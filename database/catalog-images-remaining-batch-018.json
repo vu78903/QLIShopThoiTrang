@@ -1,0 +1,84 @@
+{
+  "batchId": "remaining-batch-018",
+  "skuCount": 16,
+  "imageCount": 12,
+  "assetDirectory": "winform/qlicuahang/assets/catalog-ai-remaining-batch-018",
+  "items": [
+    {
+      "id": "SP-062-den",
+      "productId": "SP-062",
+      "name": "Váy nữ maxi",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Đen",
+      "files": [
+        "SP-062-den-01.jpg",
+        "SP-062-den-02.jpg",
+        "SP-062-den-03.jpg"
+      ],
+      "skus": [
+        "VAY-062-DEN-L",
+        "VAY-062-DEN-M",
+        "VAY-062-DEN-S",
+        "VAY-062-DEN-XL"
+      ]
+    },
+    {
+      "id": "SP-062-do",
+      "productId": "SP-062",
+      "name": "Váy nữ maxi",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Đỏ",
+      "files": [
+        "SP-062-do-01.jpg",
+        "SP-062-do-02.jpg",
+        "SP-062-do-03.jpg"
+      ],
+      "skus": [
+        "VAY-062-DO-L",
+        "VAY-062-DO-M",
+        "VAY-062-DO-S",
+        "VAY-062-DO-XL"
+      ]
+    },
+    {
+      "id": "SP-062-trang",
+      "productId": "SP-062",
+      "name": "Váy nữ maxi",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Trắng",
+      "files": [
+        "SP-062-trang-01.jpg",
+        "SP-062-trang-02.jpg",
+        "SP-062-trang-03.jpg"
+      ],
+      "skus": [
+        "VAY-062-TRANG-L",
+        "VAY-062-TRANG-M",
+        "VAY-062-TRANG-S",
+        "VAY-062-TRANG-XL"
+      ]
+    },
+    {
+      "id": "SP-063-do",
+      "productId": "SP-063",
+      "name": "Váy nữ xếp ly",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Đỏ",
+      "files": [
+        "SP-063-do-01.jpg",
+        "SP-063-do-02.jpg",
+        "SP-063-do-03.jpg"
+      ],
+      "skus": [
+        "VAY-063-DO-L",
+        "VAY-063-DO-M",
+        "VAY-063-DO-S",
+        "VAY-063-DO-XL"
+      ]
+    }
+  ]
+}

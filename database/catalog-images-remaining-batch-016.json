@@ -1,0 +1,84 @@
+{
+  "batchId": "remaining-batch-016",
+  "skuCount": 16,
+  "imageCount": 12,
+  "assetDirectory": "winform/qlicuahang/assets/catalog-ai-remaining-batch-016",
+  "items": [
+    {
+      "id": "SP-050-trang",
+      "productId": "SP-050",
+      "name": "Quần tây nữ lưng cao",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "files": [
+        "SP-050-trang-01.jpg",
+        "SP-050-trang-02.jpg",
+        "SP-050-trang-03.jpg"
+      ],
+      "skus": [
+        "QT-050-TRANG-28",
+        "QT-050-TRANG-30",
+        "QT-050-TRANG-32",
+        "QT-050-TRANG-34"
+      ]
+    },
+    {
+      "id": "SP-053-xanh-jeans",
+      "productId": "SP-053",
+      "name": "Quần jeans nữ ống rộng",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Xanh jeans",
+      "files": [
+        "SP-053-xanh-jeans-01.jpg",
+        "SP-053-xanh-jeans-02.jpg",
+        "SP-053-xanh-jeans-03.jpg"
+      ],
+      "skus": [
+        "QJ-053-XANHJ-28",
+        "QJ-053-XANHJ-30",
+        "QJ-053-XANHJ-32",
+        "QJ-053-XANHJ-34"
+      ]
+    },
+    {
+      "id": "SP-055-den",
+      "productId": "SP-055",
+      "name": "Quần jeans nữ rách nhẹ",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "files": [
+        "SP-055-den-01.jpg",
+        "SP-055-den-02.jpg",
+        "SP-055-den-03.jpg"
+      ],
+      "skus": [
+        "QJ-055-DEN-28",
+        "QJ-055-DEN-30",
+        "QJ-055-DEN-32",
+        "QJ-055-DEN-34"
+      ]
+    },
+    {
+      "id": "SP-055-trang",
+      "productId": "SP-055",
+      "name": "Quần jeans nữ rách nhẹ",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "files": [
+        "SP-055-trang-01.jpg",
+        "SP-055-trang-02.jpg",
+        "SP-055-trang-03.jpg"
+      ],
+      "skus": [
+        "QJ-055-TRANG-28",
+        "QJ-055-TRANG-30",
+        "QJ-055-TRANG-32",
+        "QJ-055-TRANG-34"
+      ]
+    }
+  ]
+}

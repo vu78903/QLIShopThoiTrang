@@ -1,0 +1,33 @@
+@model FashionStore.Web.Models.OrderDetailsModel
+@using FashionStore.Web.Helpers
+@{ Layout="~/Views/Shared/_AdminLayout.cshtml"; ViewBag.Title="Chi tiết đơn"; }
+<div class="admin-shell"><aside class="admin-sidebar">
+<a class="admin-wordmark" href="@Url.Action("Index","Admin")">MỘC <strong>NHIÊN</strong><small>CỔNG QUẢN TRỊ</small></a>
+<div class="admin-menu-caption">QUẢN LÝ CỬA HÀNG</div><nav class="admin-nav"><a href="@Url.Action("Index","Admin")">▦ &nbsp; Tổng quan</a><a class="active" href="@Url.Action("Orders","Admin")">▤ &nbsp; Đơn hàng</a></nav>
+<a class="admin-back-link" href="@Url.Action("Index","Home")">← Quay lại cửa hàng</a></aside>
+<main class="admin-main" id="main-content"><header class="admin-topbar"><div><span class="admin-eyebrow"><a href="@Url.Action("Orders","Admin")">ĐƠN TRỰC TUYẾN</a> / CHI TIẾT</span><h1>@Model.OrderId</h1><p>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p></div></header>
+@if(TempData["OrderNotice"] != null){<p class="admin-result-ok" role="status">@TempData["OrderNotice"]</p>}
+@if(TempData["OrderError"] != null){<p class="admin-result-error" role="alert">@TempData["OrderError"]</p>}
+<section class="admin-panel"><header><h2>Thông tin đơn hàng</h2><span>Trạng thái hiện tại</span></header>
+<div class="admin-order-detail">
+<p><strong>Đơn:</strong> @CustomerViewHelper.Status(Model.Status) · <strong>Giao hàng:</strong> @CustomerViewHelper.Status(Model.ShippingStatus) · <strong>Thanh toán:</strong> @CustomerViewHelper.Status(Model.PaymentStatus)</p>
+<p><strong>Người nhận:</strong> @Model.Recipient · @Model.Phone</p><p><strong>Địa chỉ:</strong> @Model.Address</p>
+<p><strong>Phương thức:</strong> @(Model.PaymentMethod == "COD" ? "Thanh toán khi nhận hàng" : "Chuyển khoản ngân hàng") — đối soát thủ công; chưa tự động đánh dấu đã thanh toán</p>
+@if(!String.IsNullOrWhiteSpace(Model.Note)){<p><strong>Ghi chú:</strong> @Model.Note</p>}
+@if(Model.Status == "MOI") {
+    using(Html.BeginForm("ChangeOrder","Admin",FormMethod.Post,new{@class="admin-inline-form"})){
+        @Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.OrderId"/><input type="hidden" name="operation" value="confirm"/>
+        <button class="admin-action-primary" type="submit">Xác nhận đơn — trừ tồn kho</button>
+    }
+}
+@if ((Model.Status == "MOI" || Model.Status == "XAC_NHAN" || Model.Status == "DANG_XU_LY") &&
+    (Model.ShippingStatus == "CHUA_GIAO" || Model.ShippingStatus == "CHO_XAC_NHAN" || Model.ShippingStatus == "DANG_CHUAN_BI") && Model.PaymentStatus == "CHUA_THANH_TOAN") {
+    using(Html.BeginForm("ChangeOrder","Admin",FormMethod.Post,new{@class="admin-inline-form",onsubmit="return confirm('Bạn chắc chắn muốn hủy đơn này?');"})){
+        @Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.OrderId"/><input type="hidden" name="operation" value="cancel"/>
+        <button class="admin-action-danger" type="submit">Hủy đơn (hoàn kho nếu đã xác nhận)</button>
+    }
+}
+</div>
+<div class="admin-table-scroll"><table class="admin-table"><thead><tr><th>SKU</th><th>Sản phẩm</th><th>Kích cỡ / màu</th><th>Số lượng</th><th>Đơn giá</th><th>Thành tiền</th></tr></thead><tbody>
+@foreach(var item in Model.Items){<tr><td>@item.Sku</td><td>@item.Name</td><td>@item.Size / @item.Color</td><td>@item.Quantity</td><td>@CatalogViewHelper.Vnd(item.UnitPrice)</td><td>@CatalogViewHelper.Vnd(item.Total)</td></tr>}
+</tbody></table></div><div class="admin-order-detail"><strong>Tổng tiền: @CatalogViewHelper.Vnd(Model.Total)</strong></div></section></main></div>

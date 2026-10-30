@@ -1,0 +1,84 @@
+{
+  "batchId": "catalog-ai-remaining-batch-011-part-02",
+  "skuCount": 16,
+  "imageCount": 12,
+  "assetDirectory": "winform/qlicuahang/assets/catalog-ai-remaining-batch-011",
+  "items": [
+    {
+      "id": "SP-079-do",
+      "productId": "SP-079",
+      "name": "Bộ thể thao nữ gym",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "files": [
+        "SP-079-do-01.jpg",
+        "SP-079-do-02.jpg",
+        "SP-079-do-03.jpg"
+      ],
+      "skus": [
+        "BTT-079-DO-L",
+        "BTT-079-DO-M",
+        "BTT-079-DO-S",
+        "BTT-079-DO-XL"
+      ]
+    },
+    {
+      "id": "SP-079-trang",
+      "productId": "SP-079",
+      "name": "Bộ thể thao nữ gym",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "files": [
+        "SP-079-trang-01.jpg",
+        "SP-079-trang-02.jpg",
+        "SP-079-trang-03.jpg"
+      ],
+      "skus": [
+        "BTT-079-TRANG-L",
+        "BTT-079-TRANG-M",
+        "BTT-079-TRANG-S",
+        "BTT-079-TRANG-XL"
+      ]
+    },
+    {
+      "id": "SP-078-do",
+      "productId": "SP-078",
+      "name": "Bộ thể thao nữ tennis",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "files": [
+        "SP-078-do-01.jpg",
+        "SP-078-do-02.jpg",
+        "SP-078-do-03.jpg"
+      ],
+      "skus": [
+        "BTT-078-DO-L",
+        "BTT-078-DO-M",
+        "BTT-078-DO-S",
+        "BTT-078-DO-XL"
+      ]
+    },
+    {
+      "id": "SP-078-trang",
+      "productId": "SP-078",
+      "name": "Bộ thể thao nữ tennis",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "files": [
+        "SP-078-trang-01.jpg",
+        "SP-078-trang-02.jpg",
+        "SP-078-trang-03.jpg"
+      ],
+      "skus": [
+        "BTT-078-TRANG-L",
+        "BTT-078-TRANG-M",
+        "BTT-078-TRANG-S",
+        "BTT-078-TRANG-XL"
+      ]
+    }
+  ]
+}

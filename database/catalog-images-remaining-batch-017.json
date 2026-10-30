@@ -1,0 +1,84 @@
+{
+  "batchId": "remaining-batch-017",
+  "skuCount": 16,
+  "imageCount": 12,
+  "assetDirectory": "winform/qlicuahang/assets/catalog-ai-remaining-batch-017",
+  "items": [
+    {
+      "id": "SP-055-xanh-jeans",
+      "productId": "SP-055",
+      "name": "Quần jeans nữ rách nhẹ",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Xanh jeans",
+      "files": [
+        "SP-055-xanh-jeans-01.jpg",
+        "SP-055-xanh-jeans-02.jpg",
+        "SP-055-xanh-jeans-03.jpg"
+      ],
+      "skus": [
+        "QJ-055-XANHJ-28",
+        "QJ-055-XANHJ-30",
+        "QJ-055-XANHJ-32",
+        "QJ-055-XANHJ-34"
+      ]
+    },
+    {
+      "id": "SP-061-den",
+      "productId": "SP-061",
+      "name": "Váy nữ chữ A",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Đen",
+      "files": [
+        "SP-061-den-01.jpg",
+        "SP-061-den-02.jpg",
+        "SP-061-den-03.jpg"
+      ],
+      "skus": [
+        "VAY-061-DEN-L",
+        "VAY-061-DEN-M",
+        "VAY-061-DEN-S",
+        "VAY-061-DEN-XL"
+      ]
+    },
+    {
+      "id": "SP-061-do",
+      "productId": "SP-061",
+      "name": "Váy nữ chữ A",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Đỏ",
+      "files": [
+        "SP-061-do-01.jpg",
+        "SP-061-do-02.jpg",
+        "SP-061-do-03.jpg"
+      ],
+      "skus": [
+        "VAY-061-DO-L",
+        "VAY-061-DO-M",
+        "VAY-061-DO-S",
+        "VAY-061-DO-XL"
+      ]
+    },
+    {
+      "id": "SP-061-trang",
+      "productId": "SP-061",
+      "name": "Váy nữ chữ A",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Trắng",
+      "files": [
+        "SP-061-trang-01.jpg",
+        "SP-061-trang-02.jpg",
+        "SP-061-trang-03.jpg"
+      ],
+      "skus": [
+        "VAY-061-TRANG-L",
+        "VAY-061-TRANG-M",
+        "VAY-061-TRANG-S",
+        "VAY-061-TRANG-XL"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,403 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="f154e709-70f8-4660-b64f-d62d99bc63c9" name="@75457ea768ed 2026-10-16 00:05:45" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-16T00:05:45.6836973+09:00" queuing="2026-10-16T00:05:45.6836974+09:00" start="2026-10-16T00:05:44.6105827+09:00" finish="2026-10-16T00:05:47.4058976+09:00" />
+  <TestSettings name="default" id="35e53539-0b05-4e59-b697-7bb8559cf0e5">
+    <Deployment runDeploymentRoot="_75457ea768ed_2026-10-16_00_05_45" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="926923a2-2287-4c63-902a-8baf65b67ea0" testId="c2e9cacb-1621-0c9a-cb42-70dafb47e4c6" testName="FashionStore.Backend.Tests.FoundationTests.OversizedSearchAndProductIdAreRejected" computerName="75457ea768ed" duration="00:00:00.5434347" startTime="2026-10-16T00:05:46.0131991+09:00" endTime="2026-10-16T00:05:46.0131994+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="926923a2-2287-4c63-902a-8baf65b67ea0" />
+    <UnitTestResult executionId="e3b932a3-b5cd-48bc-84fb-a9f49fb5366e" testId="eb081393-335d-1785-c6fe-cf2dbb9b54a1" testName="FashionStore.Backend.Tests.SqlTranslationTests.ProductQueriesTranslateWithFiltersAndServerSidePagination(sort: &quot;name&quot;)" computerName="75457ea768ed" duration="00:00:00.0518329" startTime="2026-10-16T00:05:46.7908669+09:00" endTime="2026-10-16T00:05:46.7908671+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e3b932a3-b5cd-48bc-84fb-a9f49fb5366e" />
+    <UnitTestResult executionId="621c27c3-0810-4565-984c-c332483ae76b" testId="823ab382-5964-9509-d570-5a0a712e5068" testName="FashionStore.Backend.Tests.FoundationTests.InvalidQueryIs400WithoutReadingDatabase(query: &quot;page=-1&quot;)" computerName="75457ea768ed" duration="00:00:00.0023561" startTime="2026-10-16T00:05:47.2713410+09:00" endTime="2026-10-16T00:05:47.2713411+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="621c27c3-0810-4565-984c-c332483ae76b" />
+    <UnitTestResult executionId="a70b7d30-2084-4fcf-b159-e4a7a46cb6c4" testId="3e62baea-e2a5-5c28-17b4-006635c2793c" testName="FashionStore.Backend.Tests.FoundationTests.LivenessAndSwaggerUiDoNotRequireSqlConnection" computerName="75457ea768ed" duration="00:00:01.0995985" startTime="2026-10-16T00:05:47.2295854+09:00" endTime="2026-10-16T00:05:47.2295857+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a70b7d30-2084-4fcf-b159-e4a7a46cb6c4" />
+    <UnitTestResult executionId="7d9d1205-e1b4-47fe-9bc7-b20ca89e8ae9" testId="fc223505-2995-4d36-b0b7-3d5396f172f5" testName="FashionStore.Backend.Tests.FoundationTests.InvalidQueryIs400WithoutReadingDatabase(query: &quot;sort=invalid&quot;)" computerName="75457ea768ed" duration="00:00:00.0025649" startTime="2026-10-16T00:05:47.2744447+09:00" endTime="2026-10-16T00:05:47.2744448+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7d9d1205-e1b4-47fe-9bc7-b20ca89e8ae9" />
+    <UnitTestResult executionId="13586419-f13a-4064-ae9b-2e605ceb69ee" testId="b7db9a33-5a4c-02f1-10f1-bb0e4716cbfd" testName="FashionStore.Backend.Tests.SqlCatalogIntegrationTests.CategoriesAndUnicodeSearchUseDatabase" computerName="75457ea768ed" duration="00:00:00.0010000" startTime="2026-10-16T00:05:47.3378311+09:00" endTime="2026-10-16T00:05:47.3378311+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="13586419-f13a-4064-ae9b-2e605ceb69ee">
+      <Output>
+        <ErrorInfo>
+          <Message>BLOCKED: set FASHIONSTORE_TEST_CONNECTION to a restored FashionStoreDB_Dev SQL Server database.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="acf66f44-3802-4e49-ab5b-53a1a4214c20" testId="35c76b1f-5b12-2467-9182-f78d81a290f1" testName="FashionStore.Backend.Tests.SqlCatalogIntegrationTests.MissingOrInactiveProductIs404" computerName="75457ea768ed" duration="00:00:00.0010000" startTime="2026-10-16T00:05:47.3375193+09:00" endTime="2026-10-16T00:05:47.3375194+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="acf66f44-3802-4e49-ab5b-53a1a4214c20">
+      <Output>
+        <ErrorInfo>
+          <Message>BLOCKED: set FASHIONSTORE_TEST_CONNECTION to a restored FashionStoreDB_Dev SQL Server database.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="719c5723-52eb-4831-8776-39d7851bc02f" testId="785e12b4-d776-e32e-638a-668ce4f17f77" testName="FashionStore.Backend.Tests.FoundationTests.SqlUnavailableIs503AndDoesNotLeakConnectionInformation" computerName="75457ea768ed" duration="00:00:00.0493460" startTime="2026-10-16T00:05:47.3250862+09:00" endTime="2026-10-16T00:05:47.3250865+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="719c5723-52eb-4831-8776-39d7851bc02f" />
+    <UnitTestResult executionId="a0e02e6b-25f7-43af-95fd-46b02c3f7a4c" testId="ac786532-b4b9-d2b8-7c4a-ce49b445025b" testName="FashionStore.Backend.Tests.SqlTranslationTests.ProductQueriesTranslateWithFiltersAndServerSidePagination(sort: &quot;price_asc&quot;)" computerName="75457ea768ed" duration="00:00:00.0164545" startTime="2026-10-16T00:05:46.8626940+09:00" endTime="2026-10-16T00:05:46.8626941+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a0e02e6b-25f7-43af-95fd-46b02c3f7a4c" />
+    <UnitTestResult executionId="c73b3043-f491-4c5c-a7a7-9ade47c51cdb" testId="965b6f21-3802-54d1-8a3a-85c03b28152f" testName="FashionStore.Backend.Tests.FoundationTests.InvalidQueryIs400WithoutReadingDatabase(query: &quot;pageSize=0&quot;)" computerName="75457ea768ed" duration="00:00:00.0017926" startTime="2026-10-16T00:05:47.2685234+09:00" endTime="2026-10-16T00:05:47.2685235+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c73b3043-f491-4c5c-a7a7-9ade47c51cdb" />
+    <UnitTestResult executionId="d8b86d1a-4cb0-41eb-9493-15eb36231007" testId="e1032966-6196-73b2-456e-5337621a8882" testName="FashionStore.Backend.Tests.MvcClientContractTests.Detail404IsMissingProductBut503IsAnError" computerName="75457ea768ed" duration="00:00:00.0011123" startTime="2026-10-16T00:05:45.5973659+09:00" endTime="2026-10-16T00:05:45.5973661+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d8b86d1a-4cb0-41eb-9493-15eb36231007" />
+    <UnitTestResult executionId="96eb8652-9f71-44ce-9f67-1e8468933159" testId="7fbd9b2d-40d5-9d3b-1cfb-f6d0cf5a2fa8" testName="FashionStore.Backend.Tests.SqlCatalogIntegrationTests.MvcRepositoryMapsActualApiAndSqlResponses" computerName="75457ea768ed" duration="00:00:00.0010000" startTime="2026-10-16T00:05:47.3379131+09:00" endTime="2026-10-16T00:05:47.3379131+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="96eb8652-9f71-44ce-9f67-1e8468933159">
+      <Output>
+        <ErrorInfo>
+          <Message>BLOCKED: set FASHIONSTORE_TEST_CONNECTION to a restored FashionStoreDB_Dev SQL Server database.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="6f40afc4-e38d-4e98-8465-93df27101f28" testId="45cebdac-5e74-54e4-45b1-85d0fa49d5a4" testName="FashionStore.Backend.Tests.SqlCatalogIntegrationTests.DetailsReturnActualVariantsPricesStockAndVisibleImages" computerName="75457ea768ed" duration="00:00:00.0010000" startTime="2026-10-16T00:05:47.3373891+09:00" endTime="2026-10-16T00:05:47.3373892+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6f40afc4-e38d-4e98-8465-93df27101f28">
+      <Output>
+        <ErrorInfo>
+          <Message>BLOCKED: set FASHIONSTORE_TEST_CONNECTION to a restored FashionStoreDB_Dev SQL Server database.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c20de30b-44bb-4617-82f2-8a39ab7e5db5" testId="3838d2a6-b165-6f0e-e348-c40a4d053ee5" testName="FashionStore.Backend.Tests.FoundationTests.InvalidQueryIs400WithoutReadingDatabase(query: &quot;page=0&quot;)" computerName="75457ea768ed" duration="00:00:00.0157136" startTime="2026-10-16T00:05:47.2469286+09:00" endTime="2026-10-16T00:05:47.2469288+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c20de30b-44bb-4617-82f2-8a39ab7e5db5" />
+    <UnitTestResult executionId="676afb73-469d-4192-8d0d-77e04a29475a" testId="54d7b62c-f661-ae60-af2a-3f5d743abbf9" testName="FashionStore.Backend.Tests.SqlTranslationTests.DetailIncludesTranslateUsingActualTableAndKeyMapping" computerName="75457ea768ed" duration="00:00:00.0868131" startTime="2026-10-16T00:05:46.9497452+09:00" endTime="2026-10-16T00:05:46.9497454+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="676afb73-469d-4192-8d0d-77e04a29475a" />
+    <UnitTestResult executionId="cd8b3ae5-57d1-4797-a6e7-9de5676e4dd0" testId="9c10320d-2254-c630-cf7d-fa8935b62f44" testName="FashionStore.Backend.Tests.MvcClientContractTests.SearchSendsFiltersToProductApiAndKeepsServerPagination" computerName="75457ea768ed" duration="00:00:00.0411337" startTime="2026-10-16T00:05:45.5402458+09:00" endTime="2026-10-16T00:05:45.5402461+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cd8b3ae5-57d1-4797-a6e7-9de5676e4dd0" />
+    <UnitTestResult executionId="af1cba16-a1a5-44ef-b483-d19872ccc08f" testId="2fc680b3-d18a-dfe2-ca1f-54daa3a52356" testName="FashionStore.Backend.Tests.MvcClientContractTests.DetailMapsActualSkuSizeColorDescriptionAndImages" computerName="75457ea768ed" duration="00:00:00.0155807" startTime="2026-10-16T00:05:45.5595549+09:00" endTime="2026-10-16T00:05:45.5595551+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="af1cba16-a1a5-44ef-b483-d19872ccc08f" />
+    <UnitTestResult executionId="6058e729-e7b1-47d6-8639-f5a816e0453c" testId="3112d1e0-d6f7-7d5c-57b4-661261d0c8b0" testName="FashionStore.Backend.Tests.SqlCatalogIntegrationTests.FiltersAndVisibilityUseSqlData" computerName="75457ea768ed" duration="00:00:00.0010000" startTime="2026-10-16T00:05:47.3376999+09:00" endTime="2026-10-16T00:05:47.3376999+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6058e729-e7b1-47d6-8639-f5a816e0453c">
+      <Output>
+        <ErrorInfo>
+          <Message>BLOCKED: set FASHIONSTORE_TEST_CONNECTION to a restored FashionStoreDB_Dev SQL Server database.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="5b14bd12-e5f4-4400-bb82-65f7d83a4827" testId="5e07195c-40f0-1cc6-c6cd-232737cc6633" testName="FashionStore.Backend.Tests.MvcClientContractTests.BrokenApiResponseMustNotLookLikeAnEmptyCatalog(response: &quot;null&quot;)" computerName="75457ea768ed" duration="00:00:00.0026497" startTime="2026-10-16T00:05:45.5622346+09:00" endTime="2026-10-16T00:05:45.5622347+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5b14bd12-e5f4-4400-bb82-65f7d83a4827" />
+    <UnitTestResult executionId="2a620b11-c0d3-4ffa-93f8-bf4399838fff" testId="6e8a9a13-5ed9-f675-083b-8f623bd32cec" testName="FashionStore.Backend.Tests.FoundationTests.InvalidQueryIs400WithoutReadingDatabase(query: &quot;pageSize=101&quot;)" computerName="75457ea768ed" duration="00:00:00.0024266" startTime="2026-10-16T00:05:47.2660512+09:00" endTime="2026-10-16T00:05:47.2660513+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2a620b11-c0d3-4ffa-93f8-bf4399838fff" />
+    <UnitTestResult executionId="c4b75fb4-6baa-42a8-ab89-19908904c019" testId="dbc3dafe-ca4f-bf87-5247-47d2528b260a" testName="FashionStore.Backend.Tests.MvcClientContractTests.BrokenApiResponseMustNotLookLikeAnEmptyCatalog(response: &quot;not-json&quot;)" computerName="75457ea768ed" duration="00:00:00.0017244" startTime="2026-10-16T00:05:45.5640259+09:00" endTime="2026-10-16T00:05:45.5640259+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c4b75fb4-6baa-42a8-ab89-19908904c019" />
+    <UnitTestResult executionId="4bcb0efe-f9cf-4000-9b25-4fa2cd460962" testId="6cbdba3b-b65f-471a-6f5c-ed4e4853981a" testName="FashionStore.Backend.Tests.SqlCatalogIntegrationTests.PagingAndPriceSortAreExecutedBySql" computerName="75457ea768ed" duration="00:00:00.0010000" startTime="2026-10-16T00:05:47.3379543+09:00" endTime="2026-10-16T00:05:47.3379543+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4bcb0efe-f9cf-4000-9b25-4fa2cd460962">
+      <Output>
+        <ErrorInfo>
+          <Message>BLOCKED: set FASHIONSTORE_TEST_CONNECTION to a restored FashionStoreDB_Dev SQL Server database.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="ee5b13e4-7696-460f-a6a0-8d5daf2cc017" testId="ec821f75-9094-4e62-a050-4f56f424b944" testName="FashionStore.Backend.Tests.SqlTranslationTests.ProductQueriesTranslateWithFiltersAndServerSidePagination(sort: &quot;price_desc&quot;)" computerName="75457ea768ed" duration="00:00:00.0542129" startTime="2026-10-16T00:05:46.8454341+09:00" endTime="2026-10-16T00:05:46.8454343+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ee5b13e4-7696-460f-a6a0-8d5daf2cc017" />
+    <UnitTestResult executionId="b4d4dfad-2dfb-47e7-af7a-8a61ff047f62" testId="7ccc7d34-73bd-cd2a-e6b8-ca56cdf25711" testName="FashionStore.Backend.Tests.FoundationTests.InvalidQueryIs400WithoutReadingDatabase(query: &quot;audience=invalid&quot;)" computerName="75457ea768ed" duration="00:00:00.0039401" startTime="2026-10-16T00:05:47.2632669+09:00" endTime="2026-10-16T00:05:47.2632670+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b4d4dfad-2dfb-47e7-af7a-8a61ff047f62" />
+    <UnitTestResult executionId="08eb11ee-24a9-4294-a201-a137b4448fd5" testId="21efb71e-cf93-ea32-53fb-24eceb119d82" testName="FashionStore.Backend.Tests.MvcClientContractTests.BrokenApiResponseMustNotLookLikeAnEmptyCatalog(response: &quot;{\&quot;total\&quot;:0,\&quot;page\&quot;:1,\&quot;pageSize\&quot;:12}&quot;)" computerName="75457ea768ed" duration="00:00:00.0001351" startTime="2026-10-16T00:05:45.5642057+09:00" endTime="2026-10-16T00:05:45.5642058+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="08eb11ee-24a9-4294-a201-a137b4448fd5" />
+    <UnitTestResult executionId="213b5408-283b-4e7b-a1f1-2e52c4b63587" testId="df70daf1-151d-34ad-dd6b-512604e7ced2" testName="FashionStore.Backend.Tests.FoundationTests.InvalidQueryIs400WithoutReadingDatabase(query: &quot;category=123456789012345678901&quot;)" computerName="75457ea768ed" duration="00:00:00.0105425" startTime="2026-10-16T00:05:47.2590691+09:00" endTime="2026-10-16T00:05:47.2590693+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="213b5408-283b-4e7b-a1f1-2e52c4b63587" />
+    <UnitTestResult executionId="f81eab30-73b0-40fe-8c2c-575c5c438576" testId="beefea96-88e4-9b52-f660-78523156aaa1" testName="FashionStore.Backend.Tests.MvcClientContractTests.FeaturedUsesNewestProductEndpointOnce" computerName="75457ea768ed" duration="00:00:00.0035408" startTime="2026-10-16T00:05:45.5445624+09:00" endTime="2026-10-16T00:05:45.5445626+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f81eab30-73b0-40fe-8c2c-575c5c438576" />
+    <UnitTestResult executionId="d704f4a1-c956-4c83-a43c-153d2fd30c85" testId="69805e8c-0e46-47ab-6047-8acdaa09c6f8" testName="FashionStore.Backend.Tests.SqlTranslationTests.ProductQueriesTranslateWithFiltersAndServerSidePagination(sort: &quot;new&quot;)" computerName="75457ea768ed" duration="00:00:01.2707733" startTime="2026-10-16T00:05:46.7389674+09:00" endTime="2026-10-16T00:05:46.7389676+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d704f4a1-c956-4c83-a43c-153d2fd30c85" />
+    <UnitTestResult executionId="3d0110f4-ce98-4edf-8935-dd32a893ae7a" testId="08be8c94-2719-4e8f-19ec-69e08f332e05" testName="FashionStore.Backend.Tests.SqlCatalogIntegrationTests.NewSortUsesActualCreatedAtAndSoldOutProductsRemainVisible" computerName="75457ea768ed" duration="00:00:00.0010000" startTime="2026-10-16T00:05:47.3369893+09:00" endTime="2026-10-16T00:05:47.3369893+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3d0110f4-ce98-4edf-8935-dd32a893ae7a">
+      <Output>
+        <ErrorInfo>
+          <Message>BLOCKED: set FASHIONSTORE_TEST_CONNECTION to a restored FashionStoreDB_Dev SQL Server database.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="10fcf670-3e05-4b81-80fe-92ceae55f060" testId="17e0d284-2ede-9cf8-4a04-3d0201ef455c" testName="FashionStore.Backend.Tests.FoundationTests.SwaggerDocumentsProductEndpoints" computerName="75457ea768ed" duration="00:00:00.1121666" startTime="2026-10-16T00:05:46.1288096+09:00" endTime="2026-10-16T00:05:46.1288098+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="10fcf670-3e05-4b81-80fe-92ceae55f060" />
+    <UnitTestResult executionId="09707f7f-2acb-4fc0-9d95-1306a6bc87c0" testId="54c12733-a29c-bd31-c66d-2faf10dba057" testName="FashionStore.Backend.Tests.MvcClientContractTests.CategoriesUseDedicatedEndpoint" computerName="75457ea768ed" duration="00:00:00.0270929" startTime="2026-10-16T00:05:45.5019522+09:00" endTime="2026-10-16T00:05:45.5019732+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="09707f7f-2acb-4fc0-9d95-1306a6bc87c0" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="FashionStore.Backend.Tests.FoundationTests.OversizedSearchAndProductIdAreRejected" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="c2e9cacb-1621-0c9a-cb42-70dafb47e4c6">
+      <Execution id="926923a2-2287-4c63-902a-8baf65b67ea0" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.FoundationTests" name="OversizedSearchAndProductIdAreRejected" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.SqlCatalogIntegrationTests.CategoriesAndUnicodeSearchUseDatabase" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="b7db9a33-5a4c-02f1-10f1-bb0e4716cbfd">
+      <Execution id="13586419-f13a-4064-ae9b-2e605ceb69ee" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.SqlCatalogIntegrationTests" name="CategoriesAndUnicodeSearchUseDatabase" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.FoundationTests.InvalidQueryIs400WithoutReadingDatabase(query: &quot;page=0&quot;)" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="3838d2a6-b165-6f0e-e348-c40a4d053ee5">
+      <Execution id="c20de30b-44bb-4617-82f2-8a39ab7e5db5" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.FoundationTests" name="InvalidQueryIs400WithoutReadingDatabase" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.MvcClientContractTests.FeaturedUsesNewestProductEndpointOnce" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="beefea96-88e4-9b52-f660-78523156aaa1">
+      <Execution id="f81eab30-73b0-40fe-8c2c-575c5c438576" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.MvcClientContractTests" name="FeaturedUsesNewestProductEndpointOnce" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.SqlCatalogIntegrationTests.DetailsReturnActualVariantsPricesStockAndVisibleImages" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="45cebdac-5e74-54e4-45b1-85d0fa49d5a4">
+      <Execution id="6f40afc4-e38d-4e98-8465-93df27101f28" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.SqlCatalogIntegrationTests" name="DetailsReturnActualVariantsPricesStockAndVisibleImages" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.FoundationTests.InvalidQueryIs400WithoutReadingDatabase(query: &quot;page=-1&quot;)" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="823ab382-5964-9509-d570-5a0a712e5068">
+      <Execution id="621c27c3-0810-4565-984c-c332483ae76b" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.FoundationTests" name="InvalidQueryIs400WithoutReadingDatabase" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.MvcClientContractTests.DetailMapsActualSkuSizeColorDescriptionAndImages" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="2fc680b3-d18a-dfe2-ca1f-54daa3a52356">
+      <Execution id="af1cba16-a1a5-44ef-b483-d19872ccc08f" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.MvcClientContractTests" name="DetailMapsActualSkuSizeColorDescriptionAndImages" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.FoundationTests.SqlUnavailableIs503AndDoesNotLeakConnectionInformation" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="785e12b4-d776-e32e-638a-668ce4f17f77">
+      <Execution id="719c5723-52eb-4831-8776-39d7851bc02f" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.FoundationTests" name="SqlUnavailableIs503AndDoesNotLeakConnectionInformation" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.SqlTranslationTests.DetailIncludesTranslateUsingActualTableAndKeyMapping" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="54d7b62c-f661-ae60-af2a-3f5d743abbf9">
+      <Execution id="676afb73-469d-4192-8d0d-77e04a29475a" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.SqlTranslationTests" name="DetailIncludesTranslateUsingActualTableAndKeyMapping" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.SqlCatalogIntegrationTests.FiltersAndVisibilityUseSqlData" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="3112d1e0-d6f7-7d5c-57b4-661261d0c8b0">
+      <Execution id="6058e729-e7b1-47d6-8639-f5a816e0453c" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.SqlCatalogIntegrationTests" name="FiltersAndVisibilityUseSqlData" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.FoundationTests.LivenessAndSwaggerUiDoNotRequireSqlConnection" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="3e62baea-e2a5-5c28-17b4-006635c2793c">
+      <Execution id="a70b7d30-2084-4fcf-b159-e4a7a46cb6c4" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.FoundationTests" name="LivenessAndSwaggerUiDoNotRequireSqlConnection" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.FoundationTests.InvalidQueryIs400WithoutReadingDatabase(query: &quot;pageSize=101&quot;)" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="6e8a9a13-5ed9-f675-083b-8f623bd32cec">
+      <Execution id="2a620b11-c0d3-4ffa-93f8-bf4399838fff" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.FoundationTests" name="InvalidQueryIs400WithoutReadingDatabase" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.SqlTranslationTests.ProductQueriesTranslateWithFiltersAndServerSidePagination(sort: &quot;name&quot;)" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="eb081393-335d-1785-c6fe-cf2dbb9b54a1">
+      <Execution id="e3b932a3-b5cd-48bc-84fb-a9f49fb5366e" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.SqlTranslationTests" name="ProductQueriesTranslateWithFiltersAndServerSidePagination" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.FoundationTests.InvalidQueryIs400WithoutReadingDatabase(query: &quot;category=123456789012345678901&quot;)" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="df70daf1-151d-34ad-dd6b-512604e7ced2">
+      <Execution id="213b5408-283b-4e7b-a1f1-2e52c4b63587" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.FoundationTests" name="InvalidQueryIs400WithoutReadingDatabase" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.FoundationTests.SwaggerDocumentsProductEndpoints" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="17e0d284-2ede-9cf8-4a04-3d0201ef455c">
+      <Execution id="10fcf670-3e05-4b81-80fe-92ceae55f060" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.FoundationTests" name="SwaggerDocumentsProductEndpoints" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.SqlCatalogIntegrationTests.MvcRepositoryMapsActualApiAndSqlResponses" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="7fbd9b2d-40d5-9d3b-1cfb-f6d0cf5a2fa8">
+      <Execution id="96eb8652-9f71-44ce-9f67-1e8468933159" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.SqlCatalogIntegrationTests" name="MvcRepositoryMapsActualApiAndSqlResponses" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.FoundationTests.InvalidQueryIs400WithoutReadingDatabase(query: &quot;pageSize=0&quot;)" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="965b6f21-3802-54d1-8a3a-85c03b28152f">
+      <Execution id="c73b3043-f491-4c5c-a7a7-9ade47c51cdb" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.FoundationTests" name="InvalidQueryIs400WithoutReadingDatabase" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.SqlTranslationTests.ProductQueriesTranslateWithFiltersAndServerSidePagination(sort: &quot;price_asc&quot;)" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="ac786532-b4b9-d2b8-7c4a-ce49b445025b">
+      <Execution id="a0e02e6b-25f7-43af-95fd-46b02c3f7a4c" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.SqlTranslationTests" name="ProductQueriesTranslateWithFiltersAndServerSidePagination" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.MvcClientContractTests.CategoriesUseDedicatedEndpoint" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="54c12733-a29c-bd31-c66d-2faf10dba057">
+      <Execution id="09707f7f-2acb-4fc0-9d95-1306a6bc87c0" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.MvcClientContractTests" name="CategoriesUseDedicatedEndpoint" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.MvcClientContractTests.BrokenApiResponseMustNotLookLikeAnEmptyCatalog(response: &quot;null&quot;)" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="5e07195c-40f0-1cc6-c6cd-232737cc6633">
+      <Execution id="5b14bd12-e5f4-4400-bb82-65f7d83a4827" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.MvcClientContractTests" name="BrokenApiResponseMustNotLookLikeAnEmptyCatalog" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.SqlTranslationTests.ProductQueriesTranslateWithFiltersAndServerSidePagination(sort: &quot;new&quot;)" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="69805e8c-0e46-47ab-6047-8acdaa09c6f8">
+      <Execution id="d704f4a1-c956-4c83-a43c-153d2fd30c85" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.SqlTranslationTests" name="ProductQueriesTranslateWithFiltersAndServerSidePagination" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.MvcClientContractTests.BrokenApiResponseMustNotLookLikeAnEmptyCatalog(response: &quot;not-json&quot;)" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="dbc3dafe-ca4f-bf87-5247-47d2528b260a">
+      <Execution id="c4b75fb4-6baa-42a8-ab89-19908904c019" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.MvcClientContractTests" name="BrokenApiResponseMustNotLookLikeAnEmptyCatalog" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.SqlCatalogIntegrationTests.PagingAndPriceSortAreExecutedBySql" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="6cbdba3b-b65f-471a-6f5c-ed4e4853981a">
+      <Execution id="4bcb0efe-f9cf-4000-9b25-4fa2cd460962" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.SqlCatalogIntegrationTests" name="PagingAndPriceSortAreExecutedBySql" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.MvcClientContractTests.SearchSendsFiltersToProductApiAndKeepsServerPagination" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="9c10320d-2254-c630-cf7d-fa8935b62f44">
+      <Execution id="cd8b3ae5-57d1-4797-a6e7-9de5676e4dd0" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.MvcClientContractTests" name="SearchSendsFiltersToProductApiAndKeepsServerPagination" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.FoundationTests.InvalidQueryIs400WithoutReadingDatabase(query: &quot;sort=invalid&quot;)" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="fc223505-2995-4d36-b0b7-3d5396f172f5">
+      <Execution id="7d9d1205-e1b4-47fe-9bc7-b20ca89e8ae9" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.FoundationTests" name="InvalidQueryIs400WithoutReadingDatabase" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.FoundationTests.InvalidQueryIs400WithoutReadingDatabase(query: &quot;audience=invalid&quot;)" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="7ccc7d34-73bd-cd2a-e6b8-ca56cdf25711">
+      <Execution id="b4d4dfad-2dfb-47e7-af7a-8a61ff047f62" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.FoundationTests" name="InvalidQueryIs400WithoutReadingDatabase" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.SqlCatalogIntegrationTests.NewSortUsesActualCreatedAtAndSoldOutProductsRemainVisible" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="08be8c94-2719-4e8f-19ec-69e08f332e05">
+      <Execution id="3d0110f4-ce98-4edf-8935-dd32a893ae7a" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.SqlCatalogIntegrationTests" name="NewSortUsesActualCreatedAtAndSoldOutProductsRemainVisible" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.SqlCatalogIntegrationTests.MissingOrInactiveProductIs404" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="35c76b1f-5b12-2467-9182-f78d81a290f1">
+      <Execution id="acf66f44-3802-4e49-ab5b-53a1a4214c20" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.SqlCatalogIntegrationTests" name="MissingOrInactiveProductIs404" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.SqlTranslationTests.ProductQueriesTranslateWithFiltersAndServerSidePagination(sort: &quot;price_desc&quot;)" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="ec821f75-9094-4e62-a050-4f56f424b944">
+      <Execution id="ee5b13e4-7696-460f-a6a0-8d5daf2cc017" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.SqlTranslationTests" name="ProductQueriesTranslateWithFiltersAndServerSidePagination" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.MvcClientContractTests.Detail404IsMissingProductBut503IsAnError" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="e1032966-6196-73b2-456e-5337621a8882">
+      <Execution id="d8b86d1a-4cb0-41eb-9493-15eb36231007" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.MvcClientContractTests" name="Detail404IsMissingProductBut503IsAnError" />
+    </UnitTest>
+    <UnitTest name="FashionStore.Backend.Tests.MvcClientContractTests.BrokenApiResponseMustNotLookLikeAnEmptyCatalog(response: &quot;{\&quot;total\&quot;:0,\&quot;page\&quot;:1,\&quot;pageSize\&quot;:12}&quot;)" storage="/workspace/scratch/571aae16b48f/implementation/fashionstore/fashionstore.backend.tests/bin/debug/net8.0/fashionstore.backend.tests.dll" id="21efb71e-cf93-ea32-53fb-24eceb119d82">
+      <Execution id="08eb11ee-24a9-4294-a201-a137b4448fd5" />
+      <TestMethod codeBase="/workspace/scratch/571aae16b48f/implementation/FashionStore/FashionStore.Backend.Tests/bin/Debug/net8.0/FashionStore.Backend.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="FashionStore.Backend.Tests.MvcClientContractTests" name="BrokenApiResponseMustNotLookLikeAnEmptyCatalog" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="c2e9cacb-1621-0c9a-cb42-70dafb47e4c6" executionId="926923a2-2287-4c63-902a-8baf65b67ea0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="eb081393-335d-1785-c6fe-cf2dbb9b54a1" executionId="e3b932a3-b5cd-48bc-84fb-a9f49fb5366e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="823ab382-5964-9509-d570-5a0a712e5068" executionId="621c27c3-0810-4565-984c-c332483ae76b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3e62baea-e2a5-5c28-17b4-006635c2793c" executionId="a70b7d30-2084-4fcf-b159-e4a7a46cb6c4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fc223505-2995-4d36-b0b7-3d5396f172f5" executionId="7d9d1205-e1b4-47fe-9bc7-b20ca89e8ae9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b7db9a33-5a4c-02f1-10f1-bb0e4716cbfd" executionId="13586419-f13a-4064-ae9b-2e605ceb69ee" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="35c76b1f-5b12-2467-9182-f78d81a290f1" executionId="acf66f44-3802-4e49-ab5b-53a1a4214c20" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="785e12b4-d776-e32e-638a-668ce4f17f77" executionId="719c5723-52eb-4831-8776-39d7851bc02f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ac786532-b4b9-d2b8-7c4a-ce49b445025b" executionId="a0e02e6b-25f7-43af-95fd-46b02c3f7a4c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="965b6f21-3802-54d1-8a3a-85c03b28152f" executionId="c73b3043-f491-4c5c-a7a7-9ade47c51cdb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e1032966-6196-73b2-456e-5337621a8882" executionId="d8b86d1a-4cb0-41eb-9493-15eb36231007" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7fbd9b2d-40d5-9d3b-1cfb-f6d0cf5a2fa8" executionId="96eb8652-9f71-44ce-9f67-1e8468933159" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="45cebdac-5e74-54e4-45b1-85d0fa49d5a4" executionId="6f40afc4-e38d-4e98-8465-93df27101f28" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3838d2a6-b165-6f0e-e348-c40a4d053ee5" executionId="c20de30b-44bb-4617-82f2-8a39ab7e5db5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="54d7b62c-f661-ae60-af2a-3f5d743abbf9" executionId="676afb73-469d-4192-8d0d-77e04a29475a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9c10320d-2254-c630-cf7d-fa8935b62f44" executionId="cd8b3ae5-57d1-4797-a6e7-9de5676e4dd0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2fc680b3-d18a-dfe2-ca1f-54daa3a52356" executionId="af1cba16-a1a5-44ef-b483-d19872ccc08f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3112d1e0-d6f7-7d5c-57b4-661261d0c8b0" executionId="6058e729-e7b1-47d6-8639-f5a816e0453c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5e07195c-40f0-1cc6-c6cd-232737cc6633" executionId="5b14bd12-e5f4-4400-bb82-65f7d83a4827" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6e8a9a13-5ed9-f675-083b-8f623bd32cec" executionId="2a620b11-c0d3-4ffa-93f8-bf4399838fff" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dbc3dafe-ca4f-bf87-5247-47d2528b260a" executionId="c4b75fb4-6baa-42a8-ab89-19908904c019" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6cbdba3b-b65f-471a-6f5c-ed4e4853981a" executionId="4bcb0efe-f9cf-4000-9b25-4fa2cd460962" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ec821f75-9094-4e62-a050-4f56f424b944" executionId="ee5b13e4-7696-460f-a6a0-8d5daf2cc017" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7ccc7d34-73bd-cd2a-e6b8-ca56cdf25711" executionId="b4d4dfad-2dfb-47e7-af7a-8a61ff047f62" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="21efb71e-cf93-ea32-53fb-24eceb119d82" executionId="08eb11ee-24a9-4294-a201-a137b4448fd5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="df70daf1-151d-34ad-dd6b-512604e7ced2" executionId="213b5408-283b-4e7b-a1f1-2e52c4b63587" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="beefea96-88e4-9b52-f660-78523156aaa1" executionId="f81eab30-73b0-40fe-8c2c-575c5c438576" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="69805e8c-0e46-47ab-6047-8acdaa09c6f8" executionId="d704f4a1-c956-4c83-a43c-153d2fd30c85" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="08be8c94-2719-4e8f-19ec-69e08f332e05" executionId="3d0110f4-ce98-4edf-8935-dd32a893ae7a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="17e0d284-2ede-9cf8-4a04-3d0201ef455c" executionId="10fcf670-3e05-4b81-80fe-92ceae55f060" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="54c12733-a29c-bd31-c66d-2faf10dba057" executionId="09707f7f-2acb-4fc0-9d95-1306a6bc87c0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="31" executed="24" passed="24" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.8.2+699d445a1a (64-bit .NET 8.0.32)
+[xUnit.net 00:00:00.13]   Discovering: FashionStore.Backend.Tests
+[xUnit.net 00:00:00.22]   Discovered:  FashionStore.Backend.Tests
+[xUnit.net 00:00:00.22]   Starting:    FashionStore.Backend.Tests
+fail: Microsoft.EntityFrameworkCore.Database.Connection[20004]
+      An error occurred using the connection to database 'FashionStoreDB_Dev' on server '127.0.0.1,1'.
+fail: Microsoft.EntityFrameworkCore.Query[10100]
+      An exception occurred while iterating over the results of a query for context type 'FashionStore.Backend.Data.FashionStoreDbContext'.
+      Microsoft.Data.SqlClient.SqlException (0x80131904): A network-related or instance-specific error occurred while establishing a connection to SQL Server. The server was not found or was not accessible. Verify that the instance name is correct and that SQL Server is configured to allow remote connections. (provider: TCP Provider, error: 40 - Could not open a connection to SQL Server)
+         at Microsoft.Data.ProviderBase.DbConnectionPool.TryGetConnection(DbConnection owningObject, UInt32 waitForMultipleObjectsTimeout, Boolean allowCreate, Boolean onlyOneCheckConnection, DbConnectionOptions userOptions, DbConnectionInternal&amp; connection)
+         at Microsoft.Data.ProviderBase.DbConnectionPool.TryGetConnection(DbConnection owningObject, TaskCompletionSource`1 retry, DbConnectionOptions userOptions, DbConnectionInternal&amp; connection)
+         at Microsoft.Data.ProviderBase.DbConnectionFactory.TryGetConnection(DbConnection owningConnection, TaskCompletionSource`1 retry, DbConnectionOptions userOptions, DbConnectionInternal oldConnection, DbConnectionInternal&amp; connection)
+         at Microsoft.Data.ProviderBase.DbConnectionInternal.TryOpenConnectionInternal(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+         at Microsoft.Data.ProviderBase.DbConnectionClosed.TryOpenConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+         at Microsoft.Data.SqlClient.SqlConnection.TryOpen(TaskCompletionSource`1 retry, SqlConnectionOverrides overrides)
+         at Microsoft.Data.SqlClient.SqlConnection.InternalOpenAsync(CancellationToken cancellationToken)
+      --- End of stack trace from previous location ---
+         at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenAsync(CancellationToken cancellationToken, Boolean errorsExpected)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+      ClientConnectionId:00000000-0000-0000-0000-000000000000
+      Microsoft.Data.SqlClient.SqlException (0x80131904): A network-related or instance-specific error occurred while establishing a connection to SQL Server. The server was not found or was not accessible. Verify that the instance name is correct and that SQL Server is configured to allow remote connections. (provider: TCP Provider, error: 40 - Could not open a connection to SQL Server)
+         at Microsoft.Data.ProviderBase.DbConnectionPool.TryGetConnection(DbConnection owningObject, UInt32 waitForMultipleObjectsTimeout, Boolean allowCreate, Boolean onlyOneCheckConnection, DbConnectionOptions userOptions, DbConnectionInternal&amp; connection)
+         at Microsoft.Data.ProviderBase.DbConnectionPool.TryGetConnection(DbConnection owningObject, TaskCompletionSource`1 retry, DbConnectionOptions userOptions, DbConnectionInternal&amp; connection)
+         at Microsoft.Data.ProviderBase.DbConnectionFactory.TryGetConnection(DbConnection owningConnection, TaskCompletionSource`1 retry, DbConnectionOptions userOptions, DbConnectionInternal oldConnection, DbConnectionInternal&amp; connection)
+         at Microsoft.Data.ProviderBase.DbConnectionInternal.TryOpenConnectionInternal(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+         at Microsoft.Data.ProviderBase.DbConnectionClosed.TryOpenConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+         at Microsoft.Data.SqlClient.SqlConnection.TryOpen(TaskCompletionSource`1 retry, SqlConnectionOverrides overrides)
+         at Microsoft.Data.SqlClient.SqlConnection.InternalOpenAsync(CancellationToken cancellationToken)
+      --- End of stack trace from previous location ---
+         at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenAsync(CancellationToken cancellationToken, Boolean errorsExpected)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+      ClientConnectionId:00000000-0000-0000-0000-000000000000
+fail: Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      Microsoft.Data.SqlClient.SqlException (0x80131904): A network-related or instance-specific error occurred while establishing a connection to SQL Server. The server was not found or was not accessible. Verify that the instance name is correct and that SQL Server is configured to allow remote connections. (provider: TCP Provider, error: 40 - Could not open a connection to SQL Server)
+         at Microsoft.Data.ProviderBase.DbConnectionPool.TryGetConnection(DbConnection owningObject, UInt32 waitForMultipleObjectsTimeout, Boolean allowCreate, Boolean onlyOneCheckConnection, DbConnectionOptions userOptions, DbConnectionInternal&amp; connection)
+         at Microsoft.Data.ProviderBase.DbConnectionPool.TryGetConnection(DbConnection owningObject, TaskCompletionSource`1 retry, DbConnectionOptions userOptions, DbConnectionInternal&amp; connection)
+         at Microsoft.Data.ProviderBase.DbConnectionFactory.TryGetConnection(DbConnection owningConnection, TaskCompletionSource`1 retry, DbConnectionOptions userOptions, DbConnectionInternal oldConnection, DbConnectionInternal&amp; connection)
+         at Microsoft.Data.ProviderBase.DbConnectionInternal.TryOpenConnectionInternal(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+         at Microsoft.Data.ProviderBase.DbConnectionClosed.TryOpenConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+         at Microsoft.Data.SqlClient.SqlConnection.TryOpen(TaskCompletionSource`1 retry, SqlConnectionOverrides overrides)
+         at Microsoft.Data.SqlClient.SqlConnection.InternalOpenAsync(CancellationToken cancellationToken)
+      --- End of stack trace from previous location ---
+         at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenAsync(CancellationToken cancellationToken, Boolean errorsExpected)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+         at lambda_method162(Closure, Object)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeActionMethodAsync&gt;g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeNextActionFilterAsync&gt;g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State&amp; next, Scope&amp; scope, Object&amp; state, Boolean&amp; isCompleted)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeFilterPipelineAsync&gt;g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+         at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+         at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+         at Microsoft.AspNetCore.Diagnostics.StatusCodePagesMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.&lt;Invoke&gt;g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+      ClientConnectionId:00000000-0000-0000-0000-000000000000
+fail: FashionStore.Backend.Middleware.ApiExceptionHandler[0]
+      Catalog request failed with status 503; trace 00-2f2e908147fad061cb589c858eb229b8-9129adf76212a82f-00
+      Microsoft.Data.SqlClient.SqlException (0x80131904): A network-related or instance-specific error occurred while establishing a connection to SQL Server. The server was not found or was not accessible. Verify that the instance name is correct and that SQL Server is configured to allow remote connections. (provider: TCP Provider, error: 40 - Could not open a connection to SQL Server)
+         at Microsoft.Data.ProviderBase.DbConnectionPool.TryGetConnection(DbConnection owningObject, UInt32 waitForMultipleObjectsTimeout, Boolean allowCreate, Boolean onlyOneCheckConnection, DbConnectionOptions userOptions, DbConnectionInternal&amp; connection)
+         at Microsoft.Data.ProviderBase.DbConnectionPool.TryGetConnection(DbConnection owningObject, TaskCompletionSource`1 retry, DbConnectionOptions userOptions, DbConnectionInternal&amp; connection)
+         at Microsoft.Data.ProviderBase.DbConnectionFactory.TryGetConnection(DbConnection owningConnection, TaskCompletionSource`1 retry, DbConnectionOptions userOptions, DbConnectionInternal oldConnection, DbConnectionInternal&amp; connection)
+         at Microsoft.Data.ProviderBase.DbConnectionInternal.TryOpenConnectionInternal(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+         at Microsoft.Data.ProviderBase.DbConnectionClosed.TryOpenConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource`1 retry, DbConnectionOptions userOptions)
+         at Microsoft.Data.SqlClient.SqlConnection.TryOpen(TaskCompletionSource`1 retry, SqlConnectionOverrides overrides)
+         at Microsoft.Data.SqlClient.SqlConnection.InternalOpenAsync(CancellationToken cancellationToken)
+      --- End of stack trace from previous location ---
+         at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenAsync(CancellationToken cancellationToken, Boolean errorsExpected)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+         at lambda_method162(Closure, Object)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeActionMethodAsync&gt;g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.&lt;InvokeNextActionFilterAsync&gt;g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State&amp; next, Scope&amp; scope, Object&amp; state, Boolean&amp; isCompleted)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeFilterPipelineAsync&gt;g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.&lt;InvokeAsync&gt;g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+         at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+         at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+         at Microsoft.AspNetCore.Diagnostics.StatusCodePagesMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.&lt;Invoke&gt;g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+      ClientConnectionId:00000000-0000-0000-0000-000000000000
+[xUnit.net 00:00:02.16]       BLOCKED: set FASHIONSTORE_TEST_CONNECTION to a restored FashionStoreDB_Dev SQL Server database.
+[xUnit.net 00:00:02.16]       BLOCKED: set FASHIONSTORE_TEST_CONNECTION to a restored FashionStoreDB_Dev SQL Server database.
+[xUnit.net 00:00:02.16]       BLOCKED: set FASHIONSTORE_TEST_CONNECTION to a restored FashionStoreDB_Dev SQL Server database.
+[xUnit.net 00:00:02.16]       BLOCKED: set FASHIONSTORE_TEST_CONNECTION to a restored FashionStoreDB_Dev SQL Server database.
+[xUnit.net 00:00:02.16]       BLOCKED: set FASHIONSTORE_TEST_CONNECTION to a restored FashionStoreDB_Dev SQL Server database.
+[xUnit.net 00:00:02.16]       BLOCKED: set FASHIONSTORE_TEST_CONNECTION to a restored FashionStoreDB_Dev SQL Server database.
+[xUnit.net 00:00:02.16]       BLOCKED: set FASHIONSTORE_TEST_CONNECTION to a restored FashionStoreDB_Dev SQL Server database.
+[xUnit.net 00:00:02.16]   Finished:    FashionStore.Backend.Tests
+Test 'FashionStore.Backend.Tests.SqlCatalogIntegrationTests.NewSortUsesActualCreatedAtAndSoldOutProductsRemainVisible' was skipped in the test run.
+Test 'FashionStore.Backend.Tests.SqlCatalogIntegrationTests.DetailsReturnActualVariantsPricesStockAndVisibleImages' was skipped in the test run.
+Test 'FashionStore.Backend.Tests.SqlCatalogIntegrationTests.MissingOrInactiveProductIs404' was skipped in the test run.
+Test 'FashionStore.Backend.Tests.SqlCatalogIntegrationTests.FiltersAndVisibilityUseSqlData' was skipped in the test run.
+Test 'FashionStore.Backend.Tests.SqlCatalogIntegrationTests.CategoriesAndUnicodeSearchUseDatabase' was skipped in the test run.
+Test 'FashionStore.Backend.Tests.SqlCatalogIntegrationTests.MvcRepositoryMapsActualApiAndSqlResponses' was skipped in the test run.
+Test 'FashionStore.Backend.Tests.SqlCatalogIntegrationTests.PagingAndPriceSortAreExecutedBySql' was skipped in the test run.
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="75457ea768ed" outcome="Warning" timestamp="2026-10-16T00:05:47.3370434+09:00">
+        <Text>[xUnit.net 00:00:02.16]     FashionStore.Backend.Tests.SqlCatalogIntegrationTests.NewSortUsesActualCreatedAtAndSoldOutProductsRemainVisible [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="75457ea768ed" outcome="Warning" timestamp="2026-10-16T00:05:47.3375040+09:00">
+        <Text>[xUnit.net 00:00:02.16]     FashionStore.Backend.Tests.SqlCatalogIntegrationTests.DetailsReturnActualVariantsPricesStockAndVisibleImages [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="75457ea768ed" outcome="Warning" timestamp="2026-10-16T00:05:47.3377918+09:00">
+        <Text>[xUnit.net 00:00:02.16]     FashionStore.Backend.Tests.SqlCatalogIntegrationTests.MissingOrInactiveProductIs404 [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="75457ea768ed" outcome="Warning" timestamp="2026-10-16T00:05:47.3378105+09:00">
+        <Text>[xUnit.net 00:00:02.16]     FashionStore.Backend.Tests.SqlCatalogIntegrationTests.FiltersAndVisibilityUseSqlData [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="75457ea768ed" outcome="Warning" timestamp="2026-10-16T00:05:47.3378172+09:00">
+        <Text>[xUnit.net 00:00:02.16]     FashionStore.Backend.Tests.SqlCatalogIntegrationTests.CategoriesAndUnicodeSearchUseDatabase [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="75457ea768ed" outcome="Warning" timestamp="2026-10-16T00:05:47.3381719+09:00">
+        <Text>[xUnit.net 00:00:02.16]     FashionStore.Backend.Tests.SqlCatalogIntegrationTests.MvcRepositoryMapsActualApiAndSqlResponses [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="75457ea768ed" outcome="Warning" timestamp="2026-10-16T00:05:47.3383419+09:00">
+        <Text>[xUnit.net 00:00:02.16]     FashionStore.Backend.Tests.SqlCatalogIntegrationTests.PagingAndPriceSortAreExecutedBySql [SKIP]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

@@ -1,0 +1,32 @@
+@model Newtonsoft.Json.Linq.JArray
+@using FashionStore.Web.Helpers
+@{ ViewBag.Title = "Ưu đãi"; }
+<div class="yody-account-shell">
+    @Html.Partial("_CustomerNav")
+    @Html.Partial("_CustomerMessages")
+    <header class="yody-page-heading"><p class="eyebrow">YODY / ĐẶC QUYỀN THÀNH VIÊN</p><h1>Ưu đãi dành cho bạn</h1><p>Khám phá các chương trình còn hiệu lực. Hệ thống kiểm tra lại điều kiện và lượt sử dụng khi đặt hàng.</p></header>
+    @if (Model.Count == 0)
+    {
+        <div class="yody-empty-state"><h2>Chưa có chương trình đang áp dụng</h2><p>Bạn vẫn có thể khám phá những sản phẩm hiện có của cửa hàng.</p><a class="mn-btn mn-btn-primary" href="@Url.Action("Index", "Product")">XEM SẢN PHẨM</a></div>
+    }
+    else
+    {
+        <div class="yody-feature-grid">
+            @foreach (var p in Model)
+            {
+                <article class="yody-voucher-card">
+                    <div class="yody-voucher-top"><span class="eyebrow">ƯU ĐÃI YODY</span><strong>@p["MaKM"]</strong></div>
+                    <h2>@p["TenChuongTrinh"]</h2>
+                    <p class="yody-voucher-value">Giảm @((string)p["LoaiKM"] == "PHAN_TRAM" ? p["GiaTriGiam"] + "%" : CatalogViewHelper.Vnd((decimal)p["GiaTriGiam"]))</p>
+                    <p>Áp dụng cho đơn từ <strong>@CatalogViewHelper.Vnd((decimal)p["GiaTriDonHangToiThieu"])</strong></p>
+                    <p class="yody-muted">Hết hạn: @(((DateTime)p["NgayKetThuc"]).ToString("dd/MM/yyyy HH:mm"))</p>
+                    @if (p["SoLuotToiDa"].Type != Newtonsoft.Json.Linq.JTokenType.Null)
+                    {
+                        <p class="yody-muted">Còn @((int)p["SoLuotToiDa"] - (int)p["SoLuotDaDung"]) lượt tại thời điểm tải trang</p>
+                    }
+                    <a class="yody-text-link" href="@Url.Action("Index", "Checkout")">Dùng tại thanh toán →</a>
+                </article>
+            }
+        </div>
+    }
+</div>

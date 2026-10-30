@@ -1,0 +1,28 @@
+@model FashionStore.Web.Models.OrderDetailsModel
+@{ ViewBag.Title = "Gửi yêu cầu đổi trả"; }
+<div class="yody-account-shell">
+    @Html.Partial("_CustomerNav")
+    @Html.Partial("_CustomerMessages")
+    <header class="yody-page-heading"><p class="eyebrow">YODY / HỖ TRỢ SAU MUA</p><h1>Gửi yêu cầu đổi / trả</h1><p>Đơn <strong>@Model.OrderId</strong>. Mỗi yêu cầu dành cho một phân loại sản phẩm; chưa tự động hoàn tiền hoặc giữ tồn cho sản phẩm đổi.</p></header>
+    <section class="yody-surface-card yody-form-card yody-form-card-wide">
+        @using (Html.BeginForm("SendReturn", "Customer", FormMethod.Post, new { @class = "yody-account-form" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="requestId" value="@ViewBag.RequestId" />
+            <input type="hidden" name="orderId" value="@Model.OrderId" />
+            <div class="yody-field"><label for="sku">Sản phẩm trong đơn</label><select class="filter-input" id="sku" name="sku" required>
+                @foreach (var l in Model.Items)
+                {
+                    <option value="@l.Sku">@l.Name · @l.Size · @l.Color (đã mua @l.Quantity)</option>
+                }
+            </select></div>
+            <div class="yody-form-grid">
+                <div class="yody-field"><label for="quantity">Số lượng</label><input class="filter-input" id="quantity" name="quantity" type="number" value="1" min="1" required /></div>
+                <div class="yody-field"><label for="kind">Loại yêu cầu</label><select class="filter-input" id="kind" name="kind"><option value="TRA">Trả hàng</option><option value="DOI">Đổi hàng</option></select></div>
+            </div>
+            <div class="yody-field"><label for="newSku">SKU muốn đổi (chỉ dành cho đổi hàng)</label><input class="filter-input" id="newSku" name="newSku" maxlength="40" /><small>Xem SKU khi chọn size/màu tại <a href="@Url.Action("Index", "Product")" target="_blank" rel="noopener">trang sản phẩm</a>. Số lượng đổi mới bằng số lượng trả.</small></div>
+            <div class="yody-field"><label for="reason">Lý do và mô tả tình trạng</label><textarea class="filter-input" id="reason" name="reason" required minlength="5" maxlength="500" rows="5"></textarea><small>Website hiện tiếp nhận mô tả bằng văn bản; minh chứng hình ảnh được bổ sung khi cửa hàng hướng dẫn.</small></div>
+            <div class="yody-actions"><button class="mn-btn mn-btn-primary" type="submit">GỬI YÊU CẦU</button><a class="yody-text-link" href="@Url.Action("Details", "Orders", new { id = Model.OrderId })">Quay lại đơn hàng</a></div>
+        }
+    </section>
+</div>

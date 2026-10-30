@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "FashionStore.Backend": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "http://127.0.0.1:5000",
+      "environmentVariables": { "ASPNETCORE_ENVIRONMENT": "Development" }
+    }
+  }
+}

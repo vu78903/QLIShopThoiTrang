@@ -1,0 +1,19 @@
+@model FashionStore.Web.Models.ProductSummary
+@using FashionStore.Web.Helpers
+@{
+    var picture = CatalogViewHelper.ImagePath(Model.HinhAnh);
+}
+<article class="product-card">
+    <a class="product-image" href="@Url.Action("Details", "Product", new { id = Model.MaSP })" aria-label="Xem chi tiết @Model.TenSanPham">
+        <img width="600" height="800" loading="lazy" decoding="async" src="@Url.Content(picture)" alt="@Model.TenSanPham" />
+        <span class="product-tag">@(Model.ConHang ? CatalogViewHelper.AudienceLabel(Model.DoiTuong) : "HẾT HÀNG")</span>
+        <span class="product-view">Xem sản phẩm <span aria-hidden="true">↗</span></span>
+    </a>
+    <div class="product-detail">
+        <p class="product-category">@Model.TenLoai</p>
+        <h3><a href="@Url.Action("Details", "Product", new { id = Model.MaSP })">@Model.TenSanPham</a></h3>
+        <strong>Từ @CatalogViewHelper.Vnd(Model.DonGia)</strong>
+        <span class="product-meta">@(Model.ConHang ? "Có sẵn tại cửa hàng" : "Tạm hết hàng")</span>
+    </div>
+    @using(Html.BeginForm("SaveWishlist","Customer",FormMethod.Post,new{@class="wishlist-form"})){@Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.MaSP"/><button type="submit" aria-label="Lưu yêu thích @Model.TenSanPham"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20 3.8 12A5.2 5.2 0 0 1 12 5.6 5.2 5.2 0 0 1 20.2 12Z" /></svg><span>Yêu thích</span></button>}
+</article>

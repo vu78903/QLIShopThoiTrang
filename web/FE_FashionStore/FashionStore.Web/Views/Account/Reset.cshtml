@@ -1,0 +1,15 @@
+@{ ViewBag.Title = "Đặt lại mật khẩu"; }
+<section class="customer-panel account-form-panel yody-auth-card" aria-labelledby="reset-title">
+    <p class="eyebrow">YODY / BẢO MẬT</p>
+    <h1 id="reset-title">Đặt lại mật khẩu</h1>
+    <p>Tạo mật khẩu mới có tối thiểu 12 ký tự để tiếp tục sử dụng tài khoản.</p>
+    @Html.ValidationSummary(false, "", new { @class = "customer-errors", role = "alert" })
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="token" value="@ViewBag.Token" />
+        <div class="yody-field"><label for="password">Mật khẩu mới</label><input class="filter-input" type="password" id="password" name="password" minlength="12" maxlength="128" required autocomplete="new-password" /></div>
+        <div class="yody-field"><label for="confirmPassword">Nhập lại mật khẩu</label><input class="filter-input" type="password" id="confirmPassword" name="confirmPassword" minlength="12" maxlength="128" required autocomplete="new-password" /></div>
+        <button class="mn-btn mn-btn-primary" type="submit">LƯU MẬT KHẨU MỚI</button>
+    }
+</section>

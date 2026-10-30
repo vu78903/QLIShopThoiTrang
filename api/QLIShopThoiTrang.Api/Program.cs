@@ -76,12 +76,32 @@ app.MapPost("/api/san-pham", async (ProductUpsertDto input, StoreRepository stor
     try
     {
         var identified = await store.ResolveProductIdentityAsync(input);
-        var oldImage = await store.GetProductImageAsync(identified.Sku!);
-        var savedImage = await images.SaveAsync(identified.Sku!, identified.Image);
-        var savedProduct = identified with { Image = savedImage };
+        var requestedImages = identified.Images is not null
+            ? identified.Images
+            : string.IsNullOrWhiteSpace(identified.Image) ? [] : [identified.Image];
+        requestedImages = requestedImages
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Select(value => value.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (requestedImages.Count > 5)
+            return Results.BadRequest("Mỗi mã SKU chỉ được lưu tối đa 5 hình ảnh.");
+
+        var oldImages = await store.GetProductImagesAsync(identified.Sku!);
+        var savedImages = new List<string>();
+        foreach (var requestedImage in requestedImages)
+        {
+            var savedImage = await images.SaveAsync(identified.Sku!, requestedImage);
+            if (!string.IsNullOrWhiteSpace(savedImage) &&
+                !savedImages.Contains(savedImage, StringComparer.OrdinalIgnoreCase))
+                savedImages.Add(savedImage);
+        }
+        var savedProduct = identified with { Image = savedImages.FirstOrDefault(), Images = savedImages };
         await store.SaveProductAsync(savedProduct);
-        if (!string.Equals(oldImage, savedImage, StringComparison.OrdinalIgnoreCase))
-            await images.DeleteManagedFileAsync(oldImage);
+        foreach (var oldImage in oldImages.Where(oldImage =>
+                     !savedImages.Contains(oldImage, StringComparer.OrdinalIgnoreCase)))
+            if (!await store.IsProductImageInUseAsync(oldImage))
+                await images.DeleteManagedFileAsync(oldImage);
         return Results.Ok(savedProduct);
     }
     catch (Exception ex)
@@ -113,11 +133,13 @@ app.MapDelete("/api/san-pham/{sku}", async (string sku, StoreRepository store, P
 {
     try
     {
-        var image = await store.GetProductImageAsync(sku);
+        var productImages = await store.GetProductImagesAsync(sku);
         var result = await store.DeleteProductAsync(sku);
         if (result == ProductDeleteResult.NotFound) return Results.NotFound();
-        if (result == ProductDeleteResult.Deleted && !await store.IsProductImageInUseAsync(image))
-            await images.DeleteManagedFileAsync(image);
+        if (result == ProductDeleteResult.Deleted)
+            foreach (var image in productImages)
+                if (!await store.IsProductImageInUseAsync(image))
+                    await images.DeleteManagedFileAsync(image);
         return Results.Ok(new
         {
             mode = result == ProductDeleteResult.Deactivated ? "deactivated" : "deleted",

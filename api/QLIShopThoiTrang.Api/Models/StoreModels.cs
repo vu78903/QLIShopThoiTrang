@@ -24,7 +24,8 @@ public sealed record ProductDto(
     string Unit,
     decimal Price,
     int Stock,
-    string? Image);
+    string? Image,
+    List<string> Images);
 
 public sealed record ProductUpsertDto(
     string? ProductId,
@@ -37,7 +38,8 @@ public sealed record ProductUpsertDto(
     int Stock,
     string? Color = null,
     string? Size = null,
-    string? Image = null);
+    string? Image = null,
+    List<string>? Images = null);
 
 public sealed record ProductTypeDto(string Id, string Name);
 

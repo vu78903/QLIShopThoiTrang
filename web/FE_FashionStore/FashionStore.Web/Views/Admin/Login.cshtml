@@ -1,0 +1,18 @@
+@model FashionStore.Web.Models.AdminLoginViewModel
+@{ Layout = "~/Views/Shared/_AdminLayout.cshtml"; ViewBag.Title = "Đăng nhập quản trị"; }
+<section class="admin-login-wrap">
+    <div class="admin-login-card">
+        <span class="admin-eyebrow">MỘC NHIÊN · BACK OFFICE</span>
+        <h1>Chào mừng trở lại.</h1>
+        <p>Đăng nhập bằng mã nhân viên đã được cấp quyền quản trị. Tài khoản mua sắm không đăng nhập được tại đây.</p>
+        @using (Html.BeginForm("Login", "Admin", FormMethod.Post, new { @class = "admin-form", autocomplete = "off" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "admin-errors", role = "alert" })
+            <div class="admin-field">@Html.LabelFor(m => m.EmployeeId)@Html.TextBoxFor(m => m.EmployeeId, new { autocomplete = "username", maxlength = "20", placeholder = "Ví dụ: WEBADMIN001" })@Html.ValidationMessageFor(m => m.EmployeeId)</div>
+            <div class="admin-field">@Html.LabelFor(m => m.Password)@Html.PasswordFor(m => m.Password, new { autocomplete = "current-password", maxlength = "128", placeholder = "Nhập mật khẩu quản trị" })@Html.ValidationMessageFor(m => m.Password)</div>
+            <button class="admin-button" type="submit">Đăng nhập quản trị <span aria-hidden="true">↗</span></button>
+        }
+        <p class="admin-hint">Chỉ sử dụng trên máy và mạng đáng tin cậy. Phiên làm việc hết hạn sau 60 phút.</p>
+    </div>
+</section>

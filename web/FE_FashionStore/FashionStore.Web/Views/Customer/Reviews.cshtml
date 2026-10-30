@@ -1,0 +1,53 @@
+@model Newtonsoft.Json.Linq.JArray
+@using FashionStore.Web.Helpers
+@{ ViewBag.Title = "Đánh giá sản phẩm"; }
+<div class="yody-account-shell">
+    @Html.Partial("_CustomerNav")
+    @Html.Partial("_CustomerMessages")
+    <header class="yody-page-heading"><p class="eyebrow">YODY / CẢM NHẬN KHÁCH HÀNG</p><h1>Đánh giá sản phẩm</h1><p>Chia sẻ trải nghiệm thực tế sau khi mua hàng. Chỉ những đánh giá được duyệt mới xuất hiện công khai.</p><a class="yody-text-link" href="@Url.Action("Details", "Product", new { id = ViewBag.ProductId })">← Quay lại chi tiết sản phẩm</a></header>
+    <div class="yody-review-layout">
+        <section class="yody-review-list" aria-labelledby="review-list-heading">
+            <h2 id="review-list-heading" class="yody-section-subtitle">Nhận xét đã được duyệt</h2>
+            @if (Model.Count == 0)
+            {
+                <div class="yody-empty-state"><h3>Chưa có đánh giá nào</h3><p>Các nhận xét hợp lệ sẽ xuất hiện tại đây sau khi được duyệt.</p></div>
+            }
+            @foreach (var p in Model)
+            {
+                <article class="yody-surface-card yody-review-card">
+                    <p class="review-stars" aria-label="@p["SoSao"] trên 5 sao">@p["SoSao"] / 5 ★</p>
+                    <p class="yody-muted">@p["TenHienThi"] · @(((DateTime)p["NgayDanhGia"]).ToString("dd/MM/yyyy"))</p>
+                    <p class="review-body">@p["NoiDung"]</p>
+                </article>
+            }
+            @Html.Partial("_FeaturePaging", Model)
+        </section>
+        <aside class="yody-review-side">
+            @if (User.Identity.IsAuthenticated)
+            {
+                <section class="yody-surface-card yody-review-form" aria-labelledby="review-form-heading">
+                    <h2 id="review-form-heading">Chia sẻ trải nghiệm</h2>
+                    <p>Đánh giá phải gắn với đơn đã hoàn tất và sẽ hiển thị sau khi cửa hàng duyệt.</p>
+                    @using (Html.BeginForm("Review", "Customer", FormMethod.Post, new { @class = "yody-account-form" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="productId" value="@ViewBag.ProductId" />
+                        <div class="yody-field"><label for="orderId">Mã đơn đã mua sản phẩm</label><input class="filter-input" id="orderId" name="orderId" required maxlength="30" /><small><a href="@Url.Action("Index", "Orders")">Xem mã đơn của tôi →</a></small></div>
+                        <div class="yody-field"><label for="stars">Đánh giá sao</label><select class="filter-input" id="stars" name="stars">
+                            @for (var i = 5; i >= 1; i--)
+                            {
+                                <option value="@i">@i sao</option>
+                            }
+                        </select></div>
+                        <div class="yody-field"><label for="body">Nhận xét của bạn</label><textarea class="filter-input" id="body" name="body" required maxlength="2000" rows="5"></textarea></div>
+                        <button type="submit" class="mn-btn mn-btn-primary">GỬI ĐÁNH GIÁ</button>
+                    }
+                </section>
+            }
+            else
+            {
+                <div class="yody-surface-card"><h2>Muốn chia sẻ trải nghiệm?</h2><p>Hãy đăng nhập để viết đánh giá từ đơn hàng của bạn.</p><a class="mn-btn mn-btn-primary" href="@Url.Action("Login", "Account", new { returnUrl = Request.RawUrl })">ĐĂNG NHẬP</a></div>
+            }
+        </aside>
+    </div>
+</div>

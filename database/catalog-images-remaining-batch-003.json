@@ -1,0 +1,104 @@
+{
+  "batchId": "catalog-ai-remaining-batch-003",
+  "skuCount": 24,
+  "imageCount": 18,
+  "assetDirectory": "winform/qlicuahang/assets/catalog-ai-remaining-batch-003",
+  "items": [
+    {
+      "id": "SP-027-den",
+      "productId": "SP-027",
+      "color": "Đen",
+      "files": [
+        "SP-027-den-01.jpg",
+        "SP-027-den-02.jpg",
+        "SP-027-den-03.jpg"
+      ],
+      "skus": [
+        "AK-027-DEN-L",
+        "AK-027-DEN-M",
+        "AK-027-DEN-S",
+        "AK-027-DEN-XL"
+      ]
+    },
+    {
+      "id": "SP-027-trang",
+      "productId": "SP-027",
+      "color": "Trắng",
+      "files": [
+        "SP-027-trang-01.jpg",
+        "SP-027-trang-02.jpg",
+        "SP-027-trang-03.jpg"
+      ],
+      "skus": [
+        "AK-027-TRANG-L",
+        "AK-027-TRANG-M",
+        "AK-027-TRANG-S",
+        "AK-027-TRANG-XL"
+      ]
+    },
+    {
+      "id": "SP-028-do",
+      "productId": "SP-028",
+      "color": "Đỏ",
+      "files": [
+        "SP-028-do-01.jpg",
+        "SP-028-do-02.jpg",
+        "SP-028-do-03.jpg"
+      ],
+      "skus": [
+        "AK-028-DO-L",
+        "AK-028-DO-M",
+        "AK-028-DO-S",
+        "AK-028-DO-XL"
+      ]
+    },
+    {
+      "id": "SP-028-trang",
+      "productId": "SP-028",
+      "color": "Trắng",
+      "files": [
+        "SP-028-trang-01.jpg",
+        "SP-028-trang-02.jpg",
+        "SP-028-trang-03.jpg"
+      ],
+      "skus": [
+        "AK-028-TRANG-L",
+        "AK-028-TRANG-M",
+        "AK-028-TRANG-S",
+        "AK-028-TRANG-XL"
+      ]
+    },
+    {
+      "id": "SP-029-do",
+      "productId": "SP-029",
+      "color": "Đỏ",
+      "files": [
+        "SP-029-do-01.jpg",
+        "SP-029-do-02.jpg",
+        "SP-029-do-03.jpg"
+      ],
+      "skus": [
+        "AK-029-DO-L",
+        "AK-029-DO-M",
+        "AK-029-DO-S",
+        "AK-029-DO-XL"
+      ]
+    },
+    {
+      "id": "SP-029-trang",
+      "productId": "SP-029",
+      "color": "Trắng",
+      "files": [
+        "SP-029-trang-01.jpg",
+        "SP-029-trang-02.jpg",
+        "SP-029-trang-03.jpg"
+      ],
+      "skus": [
+        "AK-029-TRANG-L",
+        "AK-029-TRANG-M",
+        "AK-029-TRANG-S",
+        "AK-029-TRANG-XL"
+      ]
+    }
+  ]
+}

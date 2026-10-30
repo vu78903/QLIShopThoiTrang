@@ -1,0 +1,63 @@
+@model FashionStore.Web.Models.CheckoutViewModel
+@using FashionStore.Web.Helpers
+@{ ViewBag.Title = "Thanh toán đơn hàng";
+    var codOnly = Model.Cart != null && Model.Cart.CodOnly;
+    var paymentOptions = new System.Collections.Generic.List<SelectListItem> { new SelectListItem { Text = "Thanh toán khi nhận hàng (COD)", Value = "COD" } };
+    if (!codOnly) { paymentOptions.Add(new SelectListItem { Text = "Chuyển khoản ngân hàng (chờ nhân viên đối soát)", Value = "CHUYEN_KHOAN" }); }
+}
+<section class="checkout-page yody-checkout-page">
+    <nav class="breadcrumbs" aria-label="Đường dẫn"><a href="@Url.Action("Index", "Cart")">Giỏ hàng</a><span aria-hidden="true">/</span><span aria-current="page">Thanh toán</span></nav>
+    <header class="yody-task-heading"><div><p class="eyebrow">YODY / ĐẶT HÀNG</p><h1>Thông tin thanh toán</h1><p>Kiểm tra thông tin nhận hàng và đơn hàng trước khi xác nhận.</p></div><a class="mn-text-link" href="@Url.Action("Index", "Cart")">← Quay lại giỏ hàng</a></header>
+    <div class="checkout-grid yody-checkout-grid">
+        <div class="customer-panel checkout-form yody-checkout-form">
+            @using (Html.BeginForm("Index", "Checkout", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.RequestId)
+                @Html.ValidationSummary(true, "", new { @class = "customer-errors", role = "alert" })
+                <section class="yody-checkout-step" aria-labelledby="yody-checkout-recipient">
+                    <div class="yody-step-heading"><span class="yody-step-number">01</span><div><p class="eyebrow">THÔNG TIN GIAO HÀNG</p><h2 id="yody-checkout-recipient">Người nhận và địa chỉ</h2></div></div>
+                    <div class="yody-checkout-fields">
+                        <div class="yody-checkout-field"><label for="Recipient">Tên người nhận <span aria-hidden="true">*</span></label>@Html.TextBoxFor(m => m.Recipient, new { @class = "filter-input", maxlength = "150", autocomplete = "name", required = "required" })@Html.ValidationMessageFor(m => m.Recipient, "", new { @class = "customer-errors" })</div>
+                        <div class="yody-checkout-field"><label for="Phone">Số điện thoại <span aria-hidden="true">*</span></label>@Html.TextBoxFor(m => m.Phone, new { @class = "filter-input", type = "tel", inputmode = "tel", maxlength = "20", autocomplete = "tel", required = "required" })@Html.ValidationMessageFor(m => m.Phone, "", new { @class = "customer-errors" })</div>
+                    </div>
+                    <div class="yody-checkout-field"><label for="Address">Địa chỉ nhận hàng <span aria-hidden="true">*</span></label>@Html.TextAreaFor(m => m.Address, new { @class = "filter-input", rows = "3", maxlength = "300", autocomplete = "street-address", required = "required" })@Html.ValidationMessageFor(m => m.Address, "", new { @class = "customer-errors" })</div>
+                    @if (!codOnly) { <p class="yody-checkout-helper"><a href="@Url.Action("Addresses", "Customer")">Quản lý địa chỉ đã lưu</a> · <span>Để chọn địa chỉ đã lưu, quay lại trang địa chỉ và tiếp tục thanh toán từ đó.</span></p> }
+                </section>
+                <section class="yody-checkout-step" aria-labelledby="yody-checkout-payment">
+                    <div class="yody-step-heading"><span class="yody-step-number">02</span><div><p class="eyebrow">PHƯƠNG THỨC THANH TOÁN</p><h2 id="yody-checkout-payment">Lựa chọn thanh toán</h2></div></div>
+                    <div class="yody-checkout-field"><label for="PaymentMethod">Phương thức thanh toán</label>@Html.DropDownListFor(m => m.PaymentMethod, paymentOptions, new { @class = "filter-input" })@Html.ValidationMessageFor(m => m.PaymentMethod, "", new { @class = "customer-errors" })</div>
+                    @if (!codOnly) { <p class="yody-checkout-helper">Với chuyển khoản, cửa hàng xác nhận thanh toán sau khi nhận và đối soát tiền.</p> }
+                </section>
+                <section class="yody-checkout-step" aria-labelledby="yody-checkout-voucher">
+                    <div class="yody-step-heading"><span class="yody-step-number">03</span><div><p class="eyebrow">ƯU ĐÃI VÀ GHI CHÚ</p><h2 id="yody-checkout-voucher">Hoàn tất thông tin</h2></div></div>
+                    @if (!codOnly) { <div class="yody-checkout-field"><label for="Voucher">Mã ưu đãi (nếu có)</label><div class="yody-voucher-row">@Html.TextBoxFor(m => m.Voucher, new { @class = "filter-input", maxlength = "20", placeholder = "Nhập mã ưu đãi" })<button class="mn-btn mn-btn-outline" type="submit" name="intent" value="quote" formnovalidate>Kiểm tra mã</button></div><a class="yody-checkout-link" href="@Url.Action("Promotions", "Customer")">Xem ưu đãi hiện có ↗</a></div> }
+                    <div class="yody-checkout-field"><label for="Note">Ghi chú đơn hàng (tùy chọn)</label>@Html.TextAreaFor(m => m.Note, new { @class = "filter-input", rows = "2", maxlength = "500", placeholder = "Hướng dẫn giao hàng, thời gian nhận..." })</div>
+                </section>
+                <div class="yody-checkout-submit"><p>Vui lòng kiểm tra lại sản phẩm, số lượng và địa chỉ giao hàng trước khi xác nhận.</p><button type="submit" class="mn-btn mn-btn-primary yody-checkout-place-order">Xác nhận đặt hàng <span aria-hidden="true">↗</span></button></div>
+            }
+        </div>
+        <aside class="checkout-summary yody-checkout-summary" aria-labelledby="yody-checkout-summary-heading">
+            <p class="eyebrow">KIỂM TRA LẦN CUỐI</p><h2 id="yody-checkout-summary-heading">Đơn hàng của bạn</h2>
+            @if (Model.Cart != null)
+            {
+                foreach (var item in Model.Cart.Items)
+                {
+                    <div class="checkout-line yody-checkout-line"><div><strong>@item.ProductName</strong><small>@item.Size · @item.Color · SL: @item.Quantity</small></div><span>@CatalogViewHelper.Vnd(item.LineTotal)</span></div>
+                }
+                <div class="yody-checkout-totals"><div class="yody-summary-row"><span>Tạm tính</span><strong>@CatalogViewHelper.Vnd(Model.Cart.Subtotal)</strong></div><div class="yody-summary-row"><span>Phí vận chuyển áp dụng</span><strong>0đ</strong></div>
+                @if (Model.QuotedTotal.HasValue)
+                {
+                    <div class="yody-summary-row"><span>Ưu đãi tạm tính</span><strong>−@CatalogViewHelper.Vnd(Model.QuotedDiscount ?? 0)</strong></div>
+                    <div class="yody-summary-row yody-summary-total"><span>Dự tính thanh toán</span><strong>@CatalogViewHelper.Vnd(Model.QuotedTotal.Value)</strong></div>
+                }
+                else
+                {
+                    <div class="yody-summary-row yody-summary-total"><span>Tạm tính</span><strong>@CatalogViewHelper.Vnd(Model.Cart.Subtotal)</strong></div>
+                }</div>
+                <p class="yody-summary-help">Giá và ưu đãi được hệ thống kiểm tra lại khi đặt hàng. Tính năng đổi điểm thành tiền hiện chưa mở.</p>
+            }
+            <a class="yody-summary-return" href="@Url.Action("Index", "Cart")">← Chỉnh sửa giỏ hàng</a>
+        </aside>
+    </div>
+</section>

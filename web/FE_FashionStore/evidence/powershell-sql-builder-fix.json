@@ -1,0 +1,87 @@
+{
+  "runtime": "PowerShell 7.4.6 on Linux",
+  "scope": "Original error reproduction; actual test-runner wiring with a dotnet stub; export initializer; parsing. No database connection or Product API tests executed.",
+  "windowsPowerShell51": "NOT TESTED in this environment; Windows user rerun required",
+  "checks": [
+    {
+      "check": "Original DataSource property assignment reproduces reported exception",
+      "outcome": "PASS"
+    },
+    {
+      "check": "Parser: scripts/Test-SqlCatalog.ps1",
+      "outcome": "PASS"
+    },
+    {
+      "check": "Parser: database/Export-Schema.ps1",
+      "outcome": "PASS"
+    },
+    {
+      "check": "Windows auth, certificate switch absent",
+      "outcome": "PASS"
+    },
+    {
+      "check": "Windows authentication flag",
+      "outcome": "PASS"
+    },
+    {
+      "check": "Environment restored after successful invocation",
+      "outcome": "PASS"
+    },
+    {
+      "check": "Actual runner passes project and TRX arguments",
+      "outcome": "PASS"
+    },
+    {
+      "check": "Windows auth, certificate switch enabled",
+      "outcome": "PASS"
+    },
+    {
+      "check": "Windows authentication flag",
+      "outcome": "PASS"
+    },
+    {
+      "check": "Environment restored after successful invocation",
+      "outcome": "PASS"
+    },
+    {
+      "check": "Actual runner passes project and TRX arguments",
+      "outcome": "PASS"
+    },
+    {
+      "check": "SQL auth with escaped password",
+      "outcome": "PASS"
+    },
+    {
+      "check": "SQL credentials round-trip without interpolation",
+      "outcome": "PASS"
+    },
+    {
+      "check": "Environment restored after successful invocation",
+      "outcome": "PASS"
+    },
+    {
+      "check": "Actual runner passes project and TRX arguments",
+      "outcome": "PASS"
+    },
+    {
+      "check": "Nonzero dotnet exit is reported as failure",
+      "outcome": "PASS"
+    },
+    {
+      "check": "Environment restored after failed invocation",
+      "outcome": "PASS"
+    },
+    {
+      "check": "Schema-export initializer: FashionStoreDB_Dev",
+      "outcome": "PASS"
+    },
+    {
+      "check": "Schema-export initializer: YodyStore_Dev",
+      "outcome": "PASS"
+    },
+    {
+      "check": "Schema-export initializer: SQL authentication",
+      "outcome": "PASS"
+    }
+  ]
+}

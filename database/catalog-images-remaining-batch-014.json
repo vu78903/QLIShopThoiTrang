@@ -1,0 +1,84 @@
+{
+  "batchId": "catalog-ai-remaining-batch-014",
+  "skuCount": 16,
+  "imageCount": 12,
+  "assetDirectory": "winform/qlicuahang/assets/catalog-ai-remaining-batch-014",
+  "items": [
+    {
+      "id": "SP-048-den",
+      "productId": "SP-048",
+      "name": "Quần tây nữ xếp ly",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "files": [
+        "SP-048-den-01.jpg",
+        "SP-048-den-02.jpg",
+        "SP-048-den-03.jpg"
+      ],
+      "skus": [
+        "QT-048-DEN-28",
+        "QT-048-DEN-30",
+        "QT-048-DEN-32",
+        "QT-048-DEN-34"
+      ]
+    },
+    {
+      "id": "SP-048-do",
+      "productId": "SP-048",
+      "name": "Quần tây nữ xếp ly",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "files": [
+        "SP-048-do-01.jpg",
+        "SP-048-do-02.jpg",
+        "SP-048-do-03.jpg"
+      ],
+      "skus": [
+        "QT-048-DO-28",
+        "QT-048-DO-30",
+        "QT-048-DO-32",
+        "QT-048-DO-34"
+      ]
+    },
+    {
+      "id": "SP-048-trang",
+      "productId": "SP-048",
+      "name": "Quần tây nữ xếp ly",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "files": [
+        "SP-048-trang-01.jpg",
+        "SP-048-trang-02.jpg",
+        "SP-048-trang-03.jpg"
+      ],
+      "skus": [
+        "QT-048-TRANG-28",
+        "QT-048-TRANG-30",
+        "QT-048-TRANG-32",
+        "QT-048-TRANG-34"
+      ]
+    },
+    {
+      "id": "SP-049-den",
+      "productId": "SP-049",
+      "name": "Quần tây nữ công sở",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "files": [
+        "SP-049-den-01.jpg",
+        "SP-049-den-02.jpg",
+        "SP-049-den-03.jpg"
+      ],
+      "skus": [
+        "QT-049-DEN-28",
+        "QT-049-DEN-30",
+        "QT-049-DEN-32",
+        "QT-049-DEN-34"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "batchId": "catalog-ai-remaining-batch-012-part-04",
+  "skuCount": 3,
+  "imageCount": 9,
+  "assetDirectory": "winform/qlicuahang/assets/catalog-ai-remaining-batch-012",
+  "items": [
+    {
+      "id": "SP-085-den",
+      "productId": "SP-085",
+      "name": "Nón beret",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Đen",
+      "files": [
+        "SP-085-den-01.jpg",
+        "SP-085-den-02.jpg",
+        "SP-085-den-03.jpg"
+      ],
+      "skus": [
+        "NON-085-DEN-FS"
+      ]
+    },
+    {
+      "id": "SP-085-do",
+      "productId": "SP-085",
+      "name": "Nón beret",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Đỏ",
+      "files": [
+        "SP-085-do-01.jpg",
+        "SP-085-do-02.jpg",
+        "SP-085-do-03.jpg"
+      ],
+      "skus": [
+        "NON-085-DO-FS"
+      ]
+    },
+    {
+      "id": "SP-085-trang",
+      "productId": "SP-085",
+      "name": "Nón beret",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Trắng",
+      "files": [
+        "SP-085-trang-01.jpg",
+        "SP-085-trang-02.jpg",
+        "SP-085-trang-03.jpg"
+      ],
+      "skus": [
+        "NON-085-TRANG-FS"
+      ]
+    }
+  ]
+}

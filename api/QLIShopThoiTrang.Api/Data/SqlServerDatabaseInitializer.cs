@@ -107,6 +107,25 @@ public sealed class SqlServerDatabaseInitializer(SqlServerConnectionFactory db)
             """;
         await productAudience.ExecuteNonQueryAsync();
 
+        // Giữ HinhAnh làm ảnh đại diện để website cũ vẫn hoạt động, đồng thời lưu
+        // tối đa 5 ảnh cho mỗi SKU trong JSON để WinForms và website mới dùng gallery.
+        await using var productImages = connection.CreateCommand();
+        productImages.CommandText = """
+            ALTER TABLE sanpham
+                ADD COLUMN IF NOT EXISTS danhsachhinhanh jsonb NOT NULL DEFAULT '[]'::jsonb;
+            UPDATE sanpham
+            SET danhsachhinhanh = jsonb_build_array(hinhanh)
+            WHERE hinhanh IS NOT NULL AND btrim(hinhanh) <> ''
+              AND (danhsachhinhanh IS NULL OR danhsachhinhanh = '[]'::jsonb);
+            UPDATE sanpham
+            SET hinhanh = danhsachhinhanh->>0
+            WHERE (hinhanh IS NULL OR btrim(hinhanh) = '')
+              AND jsonb_array_length(danhsachhinhanh) > 0;
+            CREATE INDEX IF NOT EXISTS ix_sanpham_danhsachhinhanh
+                ON sanpham USING gin (danhsachhinhanh);
+            """;
+        await productImages.ExecuteNonQueryAsync();
+
         // Mỗi sản phẩm chỉ nhập từ một nhà cung cấp. Phiếu nhập có thể chứa nhiều SKU,
         // nhưng tất cả SKU trên phiếu phải thuộc nhà cung cấp đã chọn.
         await using var productSupplier = connection.CreateCommand();

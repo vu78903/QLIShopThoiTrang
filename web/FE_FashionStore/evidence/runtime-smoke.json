@@ -1,0 +1,31 @@
+{
+  "url": "http://127.0.0.1:5012",
+  "databaseConfigured": false,
+  "requests": [
+    {
+      "path": "/health/live",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "path": "/swagger/index.html",
+      "status": 200,
+      "contentType": "text/html;charset=utf-8"
+    },
+    {
+      "path": "/swagger/v1/swagger.json",
+      "status": 200,
+      "contentType": "application/json;charset=utf-8"
+    },
+    {
+      "path": "/health/ready",
+      "status": 503,
+      "contentType": "application/problem+json"
+    },
+    {
+      "path": "/api/products",
+      "status": 503,
+      "contentType": "application/problem+json"
+    }
+  ]
+}

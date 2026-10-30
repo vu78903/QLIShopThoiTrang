@@ -1,0 +1,7 @@
+Evidence source: user-supplied Windows terminal output on 2026-10-15 23:34 Asia/Saigon.
+Detailed Windows TRX not received yet.
+
+FashionStore.Backend.Tests test succeeded (7.4s)
+
+Test summary: total: 31, failed: 0, succeeded: 31, skipped: 0, duration: 7.4s
+Build succeeded in 12.7s

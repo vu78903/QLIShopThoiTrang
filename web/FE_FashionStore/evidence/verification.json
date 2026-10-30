@@ -1,0 +1,54 @@
+{
+  "checkpoint": "Account/Cart",
+  "date": "2026-10-16",
+  "localTestResults": {
+    "total": 62,
+    "passed": 47,
+    "failed": 0,
+    "skippedSql": 15,
+    "newSqlCasesAwaitingWindows": 8
+  },
+  "previousWindowsProductTrx": {
+    "total": 31,
+    "passed": 31,
+    "failed": 0,
+    "skipped": 0,
+    "sha256": "0af9065405c06d987abf66138357503e543269653002ecd5bb94aa740d18c974"
+  },
+  "schema": {
+    "file": "database/schema-reference/FashionStoreDB_Dev_schema_20261015_170000_433_bf029ba2.json",
+    "sha256": "04986b95d94fc9250a646d6605e267420e5e3cc4ea35b727388b0aacdd696f31",
+    "objectCounts": {
+      "tables": 29,
+      "views": 2,
+      "foreignKeys": 47,
+      "procedures": 6
+    },
+    "offlineColumnAndKeyMapping": "PASS",
+    "newSqlExecution": "BLOCKED in AI environment"
+  },
+  "backendReleaseBuild": "PASS",
+  "mvcCSharpNet48Compile": "PASS 0 warnings/errors",
+  "mvcNewRazorIisUat": "NOT TESTED",
+  "runtimeSmoke": "PASS six statuses + OpenAPI14paths; no SQL configured",
+  "modifiedOriginalFiles": [
+    "FashionStore.Web/Controllers/HomeController.cs",
+    "FashionStore.Web/Controllers/ProductController.cs",
+    "FashionStore.Web/FashionStore.Web.csproj",
+    "FashionStore.Web/Models/CatalogModels.cs",
+    "FashionStore.Web/Services/CatalogRepository.cs",
+    "FashionStore.Web/Views/Product/Details.cshtml",
+    "FashionStore.Web/Views/Shared/_Layout.cshtml",
+    "FashionStore.Web/Web.config",
+    "FashionStore.sln"
+  ],
+  "deletedOriginalSourceFiles": [],
+  "originalUiFiles": 71,
+  "unchangedOriginalUiFiles": 69,
+  "modifiedOriginalUiFiles": [
+    "FashionStore.Web/Views/Product/Details.cshtml",
+    "FashionStore.Web/Views/Shared/_Layout.cshtml"
+  ],
+  "sessionScope": "Single backend DEV in-memory sessions, absolute 60min; restart signs out; no shared distributed session store",
+  "addressScope": "One default address in existing KhachHang.DiaChi"
+}

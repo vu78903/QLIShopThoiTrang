@@ -1,0 +1,28 @@
+@model FashionStore.Web.Models.LoginViewModel
+@{ ViewBag.Title = "Đăng nhập"; }
+<section class="customer-panel account-form-panel yody-auth-card" aria-labelledby="login-title">
+    <p class="eyebrow">YODY / TÀI KHOẢN</p>
+    <h1 id="login-title">Chào mừng trở lại</h1>
+    <p>Đăng nhập để quản lý đơn hàng, lưu sản phẩm yêu thích và theo dõi quyền lợi thành viên.</p>
+    @if (TempData["AccountMessage"] != null) { <p class="customer-message" role="status">@TempData["AccountMessage"]</p> }
+    @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @class = "account-form yody-account-form" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.ReturnUrl)
+        @Html.ValidationSummary(true, "", new { @class = "customer-errors", role = "alert" })
+        <div class="account-field">
+            @Html.LabelFor(m => m.UserName)
+            @Html.TextBoxFor(m => m.UserName, new { @class = "filter-input", autocomplete = "username", minlength = "3", maxlength = "100", required = "required", pattern = "[A-Za-z0-9._-]{3,100}", placeholder = "Nhập tên đăng nhập" })
+            @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "field-validation-error" })
+        </div>
+        <div class="account-field">
+            @Html.LabelFor(m => m.Password)
+            @Html.PasswordFor(m => m.Password, new { @class = "filter-input", autocomplete = "current-password", maxlength = "128", required = "required", placeholder = "Nhập mật khẩu" })
+            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "field-validation-error" })
+        </div>
+        <div class="account-form-actions"><a href="@Url.Action("Forgot", "Account")">Quên mật khẩu?</a></div>
+        <button class="mn-btn mn-btn-primary" type="submit">ĐĂNG NHẬP</button>
+    }
+    <p class="account-form-footer">Chưa có tài khoản? @Html.ActionLink("Đăng ký ngay", "Register")</p>
+</section>
+@section scripts { @Scripts.Render("~/bundles/jqueryval") }

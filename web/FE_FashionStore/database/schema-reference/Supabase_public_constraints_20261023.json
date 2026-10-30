@@ -1,0 +1,326 @@
+[
+    {
+        "definition": "FOREIGN KEY (manv) REFERENCES nhanvien(manv)",
+        "table_name": "baocaodoanhthu",
+        "constraint_name": "BaoCaoDoanhThu_MaNV_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "PRIMARY KEY (mabaocao)",
+        "table_name": "baocaodoanhthu",
+        "constraint_name": "BaoCaoDoanhThu_pkey",
+        "constraint_type": "p"
+    },
+    {
+        "definition": "FOREIGN KEY (manv) REFERENCES nhanvien(manv)",
+        "table_name": "bienbanxulyhangloi",
+        "constraint_name": "BienBanXuLyHangLoi_MaNV_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "FOREIGN KEY (masku) REFERENCES sanpham(masku)",
+        "table_name": "bienbanxulyhangloi",
+        "constraint_name": "BienBanXuLyHangLoi_MaSKU_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "PRIMARY KEY (mabienbanxl)",
+        "table_name": "bienbanxulyhangloi",
+        "constraint_name": "BienBanXuLyHangLoi_pkey",
+        "constraint_type": "p"
+    },
+    {
+        "definition": "FOREIGN KEY (mabaocao) REFERENCES baocaodoanhthu(mabaocao) ON DELETE CASCADE",
+        "table_name": "chitietbaocaodoanhthu",
+        "constraint_name": "ChiTietBaoCaoDoanhThu_MaBaoCao_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "FOREIGN KEY (masku) REFERENCES sanpham(masku)",
+        "table_name": "chitietbaocaodoanhthu",
+        "constraint_name": "ChiTietBaoCaoDoanhThu_MaSKU_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "PRIMARY KEY (mabaocao, masku)",
+        "table_name": "chitietbaocaodoanhthu",
+        "constraint_name": "ChiTietBaoCaoDoanhThu_pkey",
+        "constraint_type": "p"
+    },
+    {
+        "definition": "FOREIGN KEY (maskudoi) REFERENCES sanpham(masku)",
+        "table_name": "chitietdoitra",
+        "constraint_name": "ChiTietDoiTra_MaSKUDoi_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "FOREIGN KEY (masku) REFERENCES sanpham(masku)",
+        "table_name": "chitietdoitra",
+        "constraint_name": "ChiTietDoiTra_MaSKU_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "CHECK ((soluong > 0))",
+        "table_name": "chitietdoitra",
+        "constraint_name": "ChiTietDoiTra_SoLuong_check",
+        "constraint_type": "c"
+    },
+    {
+        "definition": "FOREIGN KEY (sophieudt) REFERENCES phieudoitra(sophieudt) ON DELETE CASCADE",
+        "table_name": "chitietdoitra",
+        "constraint_name": "ChiTietDoiTra_SoPhieuDT_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "PRIMARY KEY (sophieudt, masku)",
+        "table_name": "chitietdoitra",
+        "constraint_name": "ChiTietDoiTra_pkey",
+        "constraint_type": "p"
+    },
+    {
+        "definition": "FOREIGN KEY (masku) REFERENCES sanpham(masku)",
+        "table_name": "chitiethoadon",
+        "constraint_name": "ChiTietHoaDon_MaSKU_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "FOREIGN KEY (sohd) REFERENCES hoadon(sohd) ON DELETE CASCADE",
+        "table_name": "chitiethoadon",
+        "constraint_name": "ChiTietHoaDon_SoHD_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "CHECK ((soluong > 0))",
+        "table_name": "chitiethoadon",
+        "constraint_name": "ChiTietHoaDon_SoLuong_check",
+        "constraint_type": "c"
+    },
+    {
+        "definition": "PRIMARY KEY (sohd, masku)",
+        "table_name": "chitiethoadon",
+        "constraint_name": "ChiTietHoaDon_pkey",
+        "constraint_type": "p"
+    },
+    {
+        "definition": "FOREIGN KEY (masku) REFERENCES sanpham(masku)",
+        "table_name": "chitietnhapkho",
+        "constraint_name": "ChiTietNhapKho_MaSKU_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "CHECK ((soluong > 0))",
+        "table_name": "chitietnhapkho",
+        "constraint_name": "ChiTietNhapKho_SoLuong_check",
+        "constraint_type": "c"
+    },
+    {
+        "definition": "FOREIGN KEY (sophieunk) REFERENCES phieunhapkho(sophieunk) ON DELETE CASCADE",
+        "table_name": "chitietnhapkho",
+        "constraint_name": "ChiTietNhapKho_SoPhieuNK_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "PRIMARY KEY (sophieunk, masku)",
+        "table_name": "chitietnhapkho",
+        "constraint_name": "ChiTietNhapKho_pkey",
+        "constraint_type": "p"
+    },
+    {
+        "definition": "FOREIGN KEY (makh) REFERENCES khachhang(makh)",
+        "table_name": "hoadon",
+        "constraint_name": "HoaDon_MaKH_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "FOREIGN KEY (makm) REFERENCES khuyenmai(makm)",
+        "table_name": "hoadon",
+        "constraint_name": "HoaDon_MaKM_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "FOREIGN KEY (manv) REFERENCES nhanvien(manv)",
+        "table_name": "hoadon",
+        "constraint_name": "HoaDon_MaNV_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "PRIMARY KEY (sohd)",
+        "table_name": "hoadon",
+        "constraint_name": "HoaDon_pkey",
+        "constraint_type": "p"
+    },
+    {
+        "definition": "CHECK ((diemtichluy >= 0))",
+        "table_name": "khachhang",
+        "constraint_name": "KhachHang_DiemTichLuy_check",
+        "constraint_type": "c"
+    },
+    {
+        "definition": "UNIQUE (sodienthoai)",
+        "table_name": "khachhang",
+        "constraint_name": "KhachHang_SoDienThoai_key",
+        "constraint_type": "u"
+    },
+    {
+        "definition": "PRIMARY KEY (makh)",
+        "table_name": "khachhang",
+        "constraint_name": "KhachHang_pkey",
+        "constraint_type": "p"
+    },
+    {
+        "definition": "CHECK ((giatridonhangtoithieu >= (0)::numeric))",
+        "table_name": "khuyenmai",
+        "constraint_name": "KhuyenMai_GiaTriDonHangToiThieu_check",
+        "constraint_type": "c"
+    },
+    {
+        "definition": "CHECK ((giatrigiam > (0)::numeric))",
+        "table_name": "khuyenmai",
+        "constraint_name": "KhuyenMai_GiaTriGiam_check",
+        "constraint_type": "c"
+    },
+    {
+        "definition": "CHECK ((ngayketthuc >= ngaybatdau))",
+        "table_name": "khuyenmai",
+        "constraint_name": "KhuyenMai_check",
+        "constraint_type": "c"
+    },
+    {
+        "definition": "PRIMARY KEY (makm)",
+        "table_name": "khuyenmai",
+        "constraint_name": "KhuyenMai_pkey",
+        "constraint_type": "p"
+    },
+    {
+        "definition": "UNIQUE (tenloai)",
+        "table_name": "loaisanpham",
+        "constraint_name": "LoaiSanPham_TenLoai_key",
+        "constraint_type": "u"
+    },
+    {
+        "definition": "PRIMARY KEY (maloai)",
+        "table_name": "loaisanpham",
+        "constraint_name": "LoaiSanPham_pkey",
+        "constraint_type": "p"
+    },
+    {
+        "definition": "FOREIGN KEY (maquyen) REFERENCES phanquyen(maquyen)",
+        "table_name": "nhanvien",
+        "constraint_name": "NhanVien_MaQuyen_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "UNIQUE (sodienthoai)",
+        "table_name": "nhanvien",
+        "constraint_name": "NhanVien_SoDienThoai_key",
+        "constraint_type": "u"
+    },
+    {
+        "definition": "UNIQUE (tendangnhap)",
+        "table_name": "nhanvien",
+        "constraint_name": "NhanVien_TenDangNhap_key",
+        "constraint_type": "u"
+    },
+    {
+        "definition": "PRIMARY KEY (manv)",
+        "table_name": "nhanvien",
+        "constraint_name": "NhanVien_pkey",
+        "constraint_type": "p"
+    },
+    {
+        "definition": "UNIQUE (masothue)",
+        "table_name": "nhasanxuat",
+        "constraint_name": "NhaSanXuat_MaSoThue_key",
+        "constraint_type": "u"
+    },
+    {
+        "definition": "PRIMARY KEY (mansx)",
+        "table_name": "nhasanxuat",
+        "constraint_name": "NhaSanXuat_pkey",
+        "constraint_type": "p"
+    },
+    {
+        "definition": "UNIQUE (tenquyen)",
+        "table_name": "phanquyen",
+        "constraint_name": "PhanQuyen_TenQuyen_key",
+        "constraint_type": "u"
+    },
+    {
+        "definition": "PRIMARY KEY (maquyen)",
+        "table_name": "phanquyen",
+        "constraint_name": "PhanQuyen_pkey",
+        "constraint_type": "p"
+    },
+    {
+        "definition": "FOREIGN KEY (manv) REFERENCES nhanvien(manv)",
+        "table_name": "phieudoitra",
+        "constraint_name": "PhieuDoiTra_MaNV_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "FOREIGN KEY (sohd) REFERENCES hoadon(sohd)",
+        "table_name": "phieudoitra",
+        "constraint_name": "PhieuDoiTra_SoHD_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "PRIMARY KEY (sophieudt)",
+        "table_name": "phieudoitra",
+        "constraint_name": "PhieuDoiTra_pkey",
+        "constraint_type": "p"
+    },
+    {
+        "definition": "FOREIGN KEY (mansx) REFERENCES nhasanxuat(mansx)",
+        "table_name": "phieunhapkho",
+        "constraint_name": "PhieuNhapKho_MaNSX_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "FOREIGN KEY (manv) REFERENCES nhanvien(manv)",
+        "table_name": "phieunhapkho",
+        "constraint_name": "PhieuNhapKho_MaNV_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "PRIMARY KEY (sophieunk)",
+        "table_name": "phieunhapkho",
+        "constraint_name": "PhieuNhapKho_pkey",
+        "constraint_type": "p"
+    },
+    {
+        "definition": "CHECK ((dongia > (0)::numeric))",
+        "table_name": "sanpham",
+        "constraint_name": "SanPham_DonGia_check",
+        "constraint_type": "c"
+    },
+    {
+        "definition": "FOREIGN KEY (maloai) REFERENCES loaisanpham(maloai)",
+        "table_name": "sanpham",
+        "constraint_name": "SanPham_MaLoai_fkey",
+        "constraint_type": "f"
+    },
+    {
+        "definition": "UNIQUE (masku)",
+        "table_name": "sanpham",
+        "constraint_name": "SanPham_MaSKU_key",
+        "constraint_type": "u"
+    },
+    {
+        "definition": "CHECK ((soluongtonkho >= 0))",
+        "table_name": "sanpham",
+        "constraint_name": "SanPham_SoLuongTonKho_check",
+        "constraint_type": "c"
+    },
+    {
+        "definition": "CHECK ((soluong >= 0))",
+        "table_name": "sanpham",
+        "constraint_name": "SanPham_SoLuong_check",
+        "constraint_type": "c"
+    },
+    {
+        "definition": "PRIMARY KEY (masp)",
+        "table_name": "sanpham",
+        "constraint_name": "SanPham_pkey",
+        "constraint_type": "p"
+    }
+]

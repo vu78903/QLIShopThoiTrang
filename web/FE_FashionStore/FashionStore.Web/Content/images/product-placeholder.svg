@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 780" role="img" aria-label="Sản phẩm chưa có hình ảnh">
+  <rect width="640" height="780" fill="#FAFAF9"/>
+  <rect x="28" y="28" width="584" height="724" rx="4" fill="#FFFFFF" stroke="#D6D3D1"/>
+  <path d="M276 305c-7-14-10-25-10-34 0-30 24-54 54-54s54 24 54 54c0 23-16 42-39 50v18l146 95c9 6 12 16 8 24-3 8-11 12-22 12H172c-11 0-19-4-22-12-4-8-1-18 8-24l146-95v-19" fill="none" stroke="#44403C" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M143 549h354" stroke="#D6D3D1" stroke-width="2"/>
+  <text x="320" y="613" fill="#1C1917" font-size="28" letter-spacing="8" text-anchor="middle" font-family="serif">YODY</text>
+  <text x="320" y="651" fill="#44403C" font-size="15" text-anchor="middle" font-family="sans-serif">HÌNH ẢNH ĐANG CẬP NHẬT</text>
+</svg>

@@ -1,0 +1,16 @@
+@model System.Collections.Generic.List<FashionStore.Web.Models.OrderSummaryModel>
+@using FashionStore.Web.Helpers
+@{ Layout = "~/Views/Shared/_AdminLayout.cshtml"; ViewBag.Title = "Quản lý đơn hàng"; }
+<div class="admin-shell"><aside class="admin-sidebar">
+<a class="admin-wordmark" href="@Url.Action("Index","Admin")">MỘC <strong>NHIÊN</strong><small>CỔNG QUẢN TRỊ</small></a>
+<div class="admin-menu-caption">QUẢN LÝ CỬA HÀNG</div><nav class="admin-nav" aria-label="Menu quản trị">
+<a href="@Url.Action("Index","Admin")">▦ &nbsp; Tổng quan</a>
+<a class="active" aria-current="page" href="@Url.Action("Orders","Admin")">▤ &nbsp; Đơn hàng</a>
+<span>◫ &nbsp; Sản phẩm <small>Sắp có</small></span><span>♙ &nbsp; Khách hàng <small>Sắp có</small></span><span>◈ &nbsp; Khuyến mãi <small>Sắp có</small></span>
+</nav><a class="admin-back-link" href="@Url.Action("Index","Home")">← Quay lại cửa hàng</a></aside>
+<main class="admin-main" id="main-content"><header class="admin-topbar"><div><span class="admin-eyebrow">QUẢN TRỊ CỬA HÀNG</span><h1>Đơn hàng trực tuyến</h1><p>100 đơn trực tuyến mới nhất từ SQL Server.</p></div></header>
+<section class="admin-panel"><header><h2>Danh sách đơn</h2><span>Chọn mã đơn để xử lý</span></header>
+<div class="admin-table-scroll"><table class="admin-table"><thead><tr><th>Mã đơn</th><th>Khách nhận</th><th>Ngày tạo</th><th>Trạng thái</th><th>Thanh toán</th><th>Tổng tiền</th></tr></thead><tbody>
+@if (Model == null || Model.Count == 0) { <tr><td colspan="6" class="admin-empty">Chưa có đơn trực tuyến.</td></tr> }
+else { foreach(var item in Model) { <tr><td><a href="@Url.Action("Order","Admin",new{id=item.OrderId})"><strong>@item.OrderId</strong></a></td><td>@item.Recipient</td><td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td><td><span class="admin-status">@FashionStore.Web.Helpers.CustomerViewHelper.Status(item.Status)</span></td><td>@FashionStore.Web.Helpers.CustomerViewHelper.Status(item.PaymentStatus)</td><td>@CatalogViewHelper.Vnd(item.Total)</td></tr> } }
+</tbody></table></div></section></main></div>

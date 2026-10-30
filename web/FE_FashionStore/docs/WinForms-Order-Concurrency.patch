@@ -1,0 +1,29 @@
+--- a/api/QLIShopThoiTrang.Api/Data/StoreRepository.cs
++++ b/api/QLIShopThoiTrang.Api/Data/StoreRepository.cs
+@@ -606,7 +606,7 @@
+     {
+         await using var connection = db.CreateConnection();
+         await connection.OpenAsync();
+-        await using var tx = (NpgsqlTransaction)await connection.BeginTransactionAsync();
++        await using var tx = (NpgsqlTransaction)await connection.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+ 
+         if (await ScalarLongAsync(connection, tx, "SELECT COUNT(*) FROM HoaDon WHERE SoHD=@id", ("@id", input.Id)) > 0)
+             throw new InvalidOperationException("Mã hóa đơn đã tồn tại.");
+@@ -679,7 +679,7 @@
+     {
+         await using var connection = db.CreateConnection();
+         await connection.OpenAsync();
+-        await using var tx = (NpgsqlTransaction)await connection.BeginTransactionAsync();
++        await using var tx = (NpgsqlTransaction)await connection.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+         await using var command = NewCommand(connection, tx, """
+             SELECT TrangThaiGiaoHang,MaKH,KhachPhaiTra,UPPER(LoaiHoaDon)
+             FROM HoaDon
+@@ -725,7 +725,7 @@
+     {
+         await using var connection = db.CreateConnection();
+         await connection.OpenAsync();
+-        await using var tx = (NpgsqlTransaction)await connection.BeginTransactionAsync();
++        await using var tx = (NpgsqlTransaction)await connection.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+         var exists = await ScalarLongAsync(connection, tx, """
+             SELECT COUNT(*) FROM HoaDon
+             WHERE SoHD=@id AND UPPER(LoaiHoaDon) IN ('COD','WEB_COD') AND COALESCE(TrangThaiGiaoHang,'')<>'Hàng giao thành công'

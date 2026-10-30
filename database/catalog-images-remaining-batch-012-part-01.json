@@ -1,0 +1,72 @@
+{
+  "batchId": "catalog-ai-remaining-batch-012-part-01",
+  "skuCount": 4,
+  "imageCount": 12,
+  "assetDirectory": "winform/qlicuahang/assets/catalog-ai-remaining-batch-012",
+  "items": [
+    {
+      "id": "SP-081-den",
+      "productId": "SP-081",
+      "name": "Nón lưỡi trai",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Đen",
+      "files": [
+        "SP-081-den-01.jpg",
+        "SP-081-den-02.jpg",
+        "SP-081-den-03.jpg"
+      ],
+      "skus": [
+        "NON-081-DEN-FS"
+      ]
+    },
+    {
+      "id": "SP-081-do",
+      "productId": "SP-081",
+      "name": "Nón lưỡi trai",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Đỏ",
+      "files": [
+        "SP-081-do-01.jpg",
+        "SP-081-do-02.jpg",
+        "SP-081-do-03.jpg"
+      ],
+      "skus": [
+        "NON-081-DO-FS"
+      ]
+    },
+    {
+      "id": "SP-081-trang",
+      "productId": "SP-081",
+      "name": "Nón lưỡi trai",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Trắng",
+      "files": [
+        "SP-081-trang-01.jpg",
+        "SP-081-trang-02.jpg",
+        "SP-081-trang-03.jpg"
+      ],
+      "skus": [
+        "NON-081-TRANG-FS"
+      ]
+    },
+    {
+      "id": "SP-082-den",
+      "productId": "SP-082",
+      "name": "Nón bucket",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Đen",
+      "files": [
+        "SP-082-den-01.jpg",
+        "SP-082-den-02.jpg",
+        "SP-082-den-03.jpg"
+      ],
+      "skus": [
+        "NON-082-DEN-FS"
+      ]
+    }
+  ]
+}

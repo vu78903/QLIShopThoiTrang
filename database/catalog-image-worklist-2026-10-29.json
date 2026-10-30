@@ -1,0 +1,3895 @@
+{
+  "generatedAt": "2026-10-29T17:57:42",
+  "totalSkus": 991,
+  "totalGroups": 271,
+  "completedGroups": 50,
+  "remainingGroups": 221,
+  "remainingSkus": 791,
+  "groups": [
+    {
+      "id": "SP-017-đen",
+      "productId": "SP-017",
+      "name": "Áo hoodie nam khóa kéo",
+      "type": "Áo hoodie nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "HD-017-DEN-S",
+        "VAY-017-DEN-L",
+        "VAY-017-DEN-M",
+        "VAY-017-DEN-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-017-trắng",
+      "productId": "SP-017",
+      "name": "Áo hoodie nam khóa kéo",
+      "type": "Áo hoodie nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "VAY-017-TRANG-L",
+        "VAY-017-TRANG-M",
+        "VAY-017-TRANG-S",
+        "VAY-017-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-019-đen",
+      "productId": "SP-019",
+      "name": "Áo hoodie nam nỉ bông",
+      "type": "Áo hoodie nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "DAM-019-DEN-L",
+        "DAM-019-DEN-M",
+        "DAM-019-DEN-S",
+        "DAM-019-DEN-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-019-trắng",
+      "productId": "SP-019",
+      "name": "Áo hoodie nam nỉ bông",
+      "type": "Áo hoodie nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "DAM-019-TRANG-L",
+        "DAM-019-TRANG-M",
+        "DAM-019-TRANG-S",
+        "DAM-019-TRANG-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-020-đen",
+      "productId": "SP-020",
+      "name": "Áo hoodie nam oversize",
+      "type": "Áo hoodie nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "DAM-020-DEN-L",
+        "DAM-020-DEN-S",
+        "DAM-020-DEN-XL",
+        "HD-020-DEN-M"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-020-đỏ",
+      "productId": "SP-020",
+      "name": "Áo hoodie nam oversize",
+      "type": "Áo hoodie nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "DAM-020-DO-L",
+        "DAM-020-DO-M",
+        "DAM-020-DO-S",
+        "DAM-020-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-020-trắng",
+      "productId": "SP-020",
+      "name": "Áo hoodie nam oversize",
+      "type": "Áo hoodie nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "DAM-020-TRANG-L",
+        "DAM-020-TRANG-M",
+        "DAM-020-TRANG-S",
+        "DAM-020-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-018-đỏ",
+      "productId": "SP-018",
+      "name": "Áo hoodie nam phối màu",
+      "type": "Áo hoodie nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "VAY-018-DO-L",
+        "VAY-018-DO-M",
+        "VAY-018-DO-S",
+        "VAY-018-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-018-trắng",
+      "productId": "SP-018",
+      "name": "Áo hoodie nam phối màu",
+      "type": "Áo hoodie nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "VAY-018-TRANG-L",
+        "VAY-018-TRANG-M",
+        "VAY-018-TRANG-S",
+        "VAY-018-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-016-đen",
+      "productId": "SP-016",
+      "name": "Áo hoodie nam trơn",
+      "type": "Áo hoodie nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "HD-016-DEN-L",
+        "HD-016-DEN-M",
+        "HD-016-DEN-S",
+        "HD-016-DEN-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-016-đỏ",
+      "productId": "SP-016",
+      "name": "Áo hoodie nam trơn",
+      "type": "Áo hoodie nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "HD-016-DO-L",
+        "HD-016-DO-M",
+        "HD-016-DO-S",
+        "HD-016-DO-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-016-trắng",
+      "productId": "SP-016",
+      "name": "Áo hoodie nam trơn",
+      "type": "Áo hoodie nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "HD-016-TRANG-L",
+        "HD-016-TRANG-M",
+        "HD-016-TRANG-S",
+        "HD-016-TRANG-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-027-đen",
+      "productId": "SP-027",
+      "name": "Áo khoác bomber nam",
+      "type": "Áo khoác nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "AK-027-DEN-L",
+        "AK-027-DEN-M",
+        "AK-027-DEN-S",
+        "AK-027-DEN-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-027-trắng",
+      "productId": "SP-027",
+      "name": "Áo khoác bomber nam",
+      "type": "Áo khoác nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AK-027-TRANG-L",
+        "AK-027-TRANG-M",
+        "AK-027-TRANG-S",
+        "AK-027-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-028-đỏ",
+      "productId": "SP-028",
+      "name": "Áo khoác denim nam",
+      "type": "Áo khoác nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "AK-028-DO-L",
+        "AK-028-DO-M",
+        "AK-028-DO-S",
+        "AK-028-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-028-trắng",
+      "productId": "SP-028",
+      "name": "Áo khoác denim nam",
+      "type": "Áo khoác nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AK-028-TRANG-L",
+        "AK-028-TRANG-M",
+        "AK-028-TRANG-S",
+        "AK-028-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-029-đỏ",
+      "productId": "SP-029",
+      "name": "Áo khoác dù nam",
+      "type": "Áo khoác nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "AK-029-DO-L",
+        "AK-029-DO-M",
+        "AK-029-DO-S",
+        "AK-029-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-029-trắng",
+      "productId": "SP-029",
+      "name": "Áo khoác dù nam",
+      "type": "Áo khoác nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AK-029-TRANG-L",
+        "AK-029-TRANG-M",
+        "AK-029-TRANG-S",
+        "AK-029-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-026-đen",
+      "productId": "SP-026",
+      "name": "Áo khoác gió nam",
+      "type": "Áo khoác nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "AK-026-DEN-L",
+        "AK-026-DEN-M",
+        "AK-026-DEN-S",
+        "AK-026-DEN-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-026-đỏ",
+      "productId": "SP-026",
+      "name": "Áo khoác gió nam",
+      "type": "Áo khoác nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "AK-026-DO-L",
+        "AK-026-DO-M",
+        "AK-026-DO-S",
+        "AK-026-DO-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-026-trắng",
+      "productId": "SP-026",
+      "name": "Áo khoác gió nam",
+      "type": "Áo khoác nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AK-026-TRANG-L",
+        "AK-026-TRANG-M",
+        "AK-026-TRANG-S",
+        "AK-026-TRANG-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-030-đen",
+      "productId": "SP-030",
+      "name": "Áo khoác túi hộp nam",
+      "type": "Áo khoác nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "AK-030-DEN-L",
+        "AK-030-DEN-M",
+        "AK-030-DEN-S",
+        "AK-030-DEN-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-030-đỏ",
+      "productId": "SP-030",
+      "name": "Áo khoác túi hộp nam",
+      "type": "Áo khoác nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "AK-030-DO-L",
+        "AK-030-DO-M",
+        "AK-030-DO-S",
+        "AK-030-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-030-trắng",
+      "productId": "SP-030",
+      "name": "Áo khoác túi hộp nam",
+      "type": "Áo khoác nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AK-030-TRANG-L",
+        "AK-030-TRANG-M",
+        "AK-030-TRANG-S",
+        "AK-030-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-004-đen",
+      "productId": "SP-004",
+      "name": "Áo thun nam cổ V",
+      "type": "Áo thun nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "AK-004-DEN-M",
+        "AK-004-DEN-S",
+        "AK-004-DEN-XL",
+        "AT-004-DEN-L"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-004-đỏ",
+      "productId": "SP-004",
+      "name": "Áo thun nam cổ V",
+      "type": "Áo thun nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "AK-004-DO-L",
+        "AK-004-DO-M",
+        "AK-004-DO-S",
+        "AK-004-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-004-trắng",
+      "productId": "SP-004",
+      "name": "Áo thun nam cổ V",
+      "type": "Áo thun nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AT-004-TRANG-L",
+        "AT-004-TRANG-M",
+        "AT-004-TRANG-S",
+        "AT-004-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-005-đen",
+      "productId": "SP-005",
+      "name": "Áo thun nam oversize",
+      "type": "Áo thun nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "HD-005-DEN-L",
+        "HD-005-DEN-M",
+        "HD-005-DEN-S",
+        "HD-005-DEN-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-005-đỏ",
+      "productId": "SP-005",
+      "name": "Áo thun nam oversize",
+      "type": "Áo thun nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "HD-005-DO-L",
+        "HD-005-DO-M",
+        "HD-005-DO-S",
+        "HD-005-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-005-trắng",
+      "productId": "SP-005",
+      "name": "Áo thun nam oversize",
+      "type": "Áo thun nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "HD-005-TRANG-L",
+        "HD-005-TRANG-M",
+        "HD-005-TRANG-S",
+        "HD-005-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-003-đỏ",
+      "productId": "SP-003",
+      "name": "Áo thun nam tay dài",
+      "type": "Áo thun nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "AP-003-DO-L",
+        "AP-003-DO-M",
+        "AP-003-DO-S",
+        "AP-003-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-003-trắng",
+      "productId": "SP-003",
+      "name": "Áo thun nam tay dài",
+      "type": "Áo thun nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AP-003-TRANG-L",
+        "AP-003-TRANG-M",
+        "AP-003-TRANG-S",
+        "AP-003-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-001-đen",
+      "productId": "SP-001",
+      "name": "Áo thun sọc nam",
+      "type": "Áo thun nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "AT-001-DEN-L",
+        "AT-001-DEN-S",
+        "AT-001-DEN-XL",
+        "SP-001"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-001-đỏ",
+      "productId": "SP-001",
+      "name": "Áo thun sọc nam",
+      "type": "Áo thun nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "AT-001-DO-L",
+        "AT-001-DO-M",
+        "AT-001-DO-S",
+        "AT-001-DO-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-002-đỏ",
+      "productId": "SP-002",
+      "name": "Áo thun trơn nam",
+      "type": "Áo thun nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "AT-002-DO-L",
+        "AT-002-DO-M",
+        "AT-002-DO-S",
+        "AT-002-DO-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-002-trắng",
+      "productId": "SP-002",
+      "name": "Áo thun trơn nam",
+      "type": "Áo thun nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "ASM-002-TRANG-M",
+        "ASM-002-TRANG-S",
+        "ASM-002-TRANG-XL",
+        "SP-002"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-091-trắng",
+      "productId": "SP-091",
+      "name": "Test",
+      "type": "Áo thun nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 1,
+      "skus": [
+        "T-091-TRANG-M"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-036-đen",
+      "productId": "SP-036",
+      "name": "Áo vest nam cổ điển",
+      "type": "Áo vest nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "AV-036-DEN-L",
+        "AV-036-DEN-M",
+        "AV-036-DEN-S",
+        "AV-036-DEN-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-036-trắng",
+      "productId": "SP-036",
+      "name": "Áo vest nam cổ điển",
+      "type": "Áo vest nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AV-036-TRANG-L",
+        "AV-036-TRANG-M",
+        "AV-036-TRANG-S",
+        "AV-036-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-040-đen",
+      "productId": "SP-040",
+      "name": "Áo vest nam hai hàng khuy",
+      "type": "Áo vest nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "AV-040-DEN-L",
+        "AV-040-DEN-M",
+        "AV-040-DEN-S",
+        "AV-040-DEN-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-040-đỏ",
+      "productId": "SP-040",
+      "name": "Áo vest nam hai hàng khuy",
+      "type": "Áo vest nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "AV-040-DO-L",
+        "AV-040-DO-M",
+        "AV-040-DO-S",
+        "AV-040-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-040-trắng",
+      "productId": "SP-040",
+      "name": "Áo vest nam hai hàng khuy",
+      "type": "Áo vest nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AV-040-TRANG-L",
+        "AV-040-TRANG-M",
+        "AV-040-TRANG-S",
+        "AV-040-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-039-đen",
+      "productId": "SP-039",
+      "name": "Áo vest nam kẻ caro",
+      "type": "Áo vest nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "AV-039-DEN-L",
+        "AV-039-DEN-M",
+        "AV-039-DEN-S",
+        "AV-039-DEN-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-039-đỏ",
+      "productId": "SP-039",
+      "name": "Áo vest nam kẻ caro",
+      "type": "Áo vest nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "AV-039-DO-L",
+        "AV-039-DO-M",
+        "AV-039-DO-S",
+        "AV-039-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-039-trắng",
+      "productId": "SP-039",
+      "name": "Áo vest nam kẻ caro",
+      "type": "Áo vest nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AV-039-TRANG-L",
+        "AV-039-TRANG-M",
+        "AV-039-TRANG-S",
+        "AV-039-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-037-đỏ",
+      "productId": "SP-037",
+      "name": "Áo vest nam slim fit",
+      "type": "Áo vest nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "AV-037-DO-L",
+        "AV-037-DO-M",
+        "AV-037-DO-S",
+        "AV-037-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-037-trắng",
+      "productId": "SP-037",
+      "name": "Áo vest nam slim fit",
+      "type": "Áo vest nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AV-037-TRANG-L",
+        "AV-037-TRANG-M",
+        "AV-037-TRANG-S",
+        "AV-037-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-038-đỏ",
+      "productId": "SP-038",
+      "name": "Áo vest nam tuxedo",
+      "type": "Áo vest nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "AV-038-DO-L",
+        "AV-038-DO-M",
+        "AV-038-DO-S",
+        "AV-038-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-038-trắng",
+      "productId": "SP-038",
+      "name": "Áo vest nam tuxedo",
+      "type": "Áo vest nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AV-038-TRANG-L",
+        "AV-038-TRANG-M",
+        "AV-038-TRANG-S",
+        "AV-038-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-021-đen",
+      "productId": "SP-021",
+      "name": "Boxer nam cotton",
+      "type": "Đồ lót nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "A-021-DEN-L",
+        "A-021-DEN-M",
+        "A-021-DEN-S",
+        "A-021-DEN-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-021-xám",
+      "productId": "SP-021",
+      "name": "Boxer nam cotton",
+      "type": "Đồ lót nam",
+      "audience": "NAM",
+      "color": "Xám",
+      "skuCount": 4,
+      "skus": [
+        "BX-021-XAM-L",
+        "BX-021-XAM-M",
+        "BX-021-XAM-S",
+        "BX-021-XAM-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-022-trắng",
+      "productId": "SP-022",
+      "name": "Boxer nam modal",
+      "type": "Đồ lót nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BX-022-TRANG-L",
+        "HD-022-TRANG-M",
+        "HD-022-TRANG-S",
+        "HD-022-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-022-xám",
+      "productId": "SP-022",
+      "name": "Boxer nam modal",
+      "type": "Đồ lót nam",
+      "audience": "NAM",
+      "color": "Xám",
+      "skuCount": 4,
+      "skus": [
+        "HD-022-XAM-L",
+        "HD-022-XAM-M",
+        "HD-022-XAM-S",
+        "HD-022-XAM-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-023-trắng",
+      "productId": "SP-023",
+      "name": "Boxer nam thể thao",
+      "type": "Đồ lót nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BX-023-TRANG-L",
+        "BX-023-TRANG-M",
+        "BX-023-TRANG-S",
+        "BX-023-TRANG-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-023-xám",
+      "productId": "SP-023",
+      "name": "Boxer nam thể thao",
+      "type": "Đồ lót nam",
+      "audience": "NAM",
+      "color": "Xám",
+      "skuCount": 4,
+      "skus": [
+        "BX-023-XAM-L",
+        "BX-023-XAM-M",
+        "BX-023-XAM-S",
+        "BX-023-XAM-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-025-trắng",
+      "productId": "SP-025",
+      "name": "Boxer nam thoáng khí",
+      "type": "Đồ lót nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BX-025-TRANG-L",
+        "BX-025-TRANG-M",
+        "BX-025-TRANG-S",
+        "BX-025-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-025-xám",
+      "productId": "SP-025",
+      "name": "Boxer nam thoáng khí",
+      "type": "Đồ lót nam",
+      "audience": "NAM",
+      "color": "Xám",
+      "skuCount": 4,
+      "skus": [
+        "BX-025-XAM-L",
+        "BX-025-XAM-M",
+        "BX-025-XAM-S",
+        "BX-025-XAM-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-024-trắng",
+      "productId": "SP-024",
+      "name": "Quần lót nam brief",
+      "type": "Đồ lót nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "1-024-DEN-S",
+        "QL-024-TRANG-L",
+        "QL-024-TRANG-S",
+        "QL-024-TRANG-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-024-xám",
+      "productId": "SP-024",
+      "name": "Quần lót nam brief",
+      "type": "Đồ lót nam",
+      "audience": "NAM",
+      "color": "Xám",
+      "skuCount": 4,
+      "skus": [
+        "QL-024-XAM-L",
+        "QL-024-XAM-M",
+        "QL-024-XAM-S",
+        "QL-024-XAM-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-031-đen",
+      "productId": "SP-031",
+      "name": "Bộ thể thao nam chạy bộ",
+      "type": "Đồ thể thao nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "BTT-031-DEN-L",
+        "BTT-031-DEN-M",
+        "BTT-031-DEN-S",
+        "BTT-031-DEN-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-031-trắng",
+      "productId": "SP-031",
+      "name": "Bộ thể thao nam chạy bộ",
+      "type": "Đồ thể thao nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BTT-031-TRANG-L",
+        "BTT-031-TRANG-M",
+        "BTT-031-TRANG-S",
+        "BTT-031-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-032-đỏ",
+      "productId": "SP-032",
+      "name": "Bộ thể thao nam gym",
+      "type": "Đồ thể thao nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "BTT-032-DO-L",
+        "BTT-032-DO-M",
+        "BTT-032-DO-S",
+        "BTT-032-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-032-trắng",
+      "productId": "SP-032",
+      "name": "Bộ thể thao nam gym",
+      "type": "Đồ thể thao nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BTT-032-TRANG-L",
+        "BTT-032-TRANG-M",
+        "BTT-032-TRANG-S",
+        "BTT-032-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-033-đỏ",
+      "productId": "SP-033",
+      "name": "Bộ thể thao nam jogger",
+      "type": "Đồ thể thao nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "BTT-033-DO-L",
+        "BTT-033-DO-M",
+        "BTT-033-DO-S",
+        "BTT-033-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-033-trắng",
+      "productId": "SP-033",
+      "name": "Bộ thể thao nam jogger",
+      "type": "Đồ thể thao nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BTT-033-TRANG-L",
+        "BTT-033-TRANG-M",
+        "BTT-033-TRANG-S",
+        "BTT-033-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-034-đen",
+      "productId": "SP-034",
+      "name": "Bộ thể thao nam tennis",
+      "type": "Đồ thể thao nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "BTT-034-DEN-L",
+        "BTT-034-DEN-M",
+        "BTT-034-DEN-S",
+        "BTT-034-DEN-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-034-đỏ",
+      "productId": "SP-034",
+      "name": "Bộ thể thao nam tennis",
+      "type": "Đồ thể thao nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "BTT-034-DO-L",
+        "BTT-034-DO-M",
+        "BTT-034-DO-S",
+        "BTT-034-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-034-trắng",
+      "productId": "SP-034",
+      "name": "Bộ thể thao nam tennis",
+      "type": "Đồ thể thao nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BTT-034-TRANG-L",
+        "BTT-034-TRANG-M",
+        "BTT-034-TRANG-S",
+        "BTT-034-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-035-đen",
+      "productId": "SP-035",
+      "name": "Bộ thể thao nam training",
+      "type": "Đồ thể thao nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "BTT-035-DEN-L",
+        "BTT-035-DEN-M",
+        "BTT-035-DEN-S",
+        "BTT-035-DEN-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-035-đỏ",
+      "productId": "SP-035",
+      "name": "Bộ thể thao nam training",
+      "type": "Đồ thể thao nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "BTT-035-DO-L",
+        "BTT-035-DO-M",
+        "BTT-035-DO-S",
+        "BTT-035-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-035-trắng",
+      "productId": "SP-035",
+      "name": "Bộ thể thao nam training",
+      "type": "Đồ thể thao nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BTT-035-TRANG-L",
+        "BTT-035-TRANG-M",
+        "BTT-035-TRANG-S",
+        "BTT-035-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-011-đen",
+      "productId": "SP-011",
+      "name": "Quần jeans nam ống đứng",
+      "type": "Quần jeans nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "QJ-011-DEN-28",
+        "QJ-011-DEN-30",
+        "QJ-011-DEN-32",
+        "QJ-011-DEN-34"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-011-trắng",
+      "productId": "SP-011",
+      "name": "Quần jeans nam ống đứng",
+      "type": "Quần jeans nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QJ-011-TRANG-28",
+        "QJ-011-TRANG-30",
+        "QJ-011-TRANG-32",
+        "QJ-011-TRANG-34"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-011-xanh-jeans",
+      "productId": "SP-011",
+      "name": "Quần jeans nam ống đứng",
+      "type": "Quần jeans nam",
+      "audience": "NAM",
+      "color": "Xanh jeans",
+      "skuCount": 4,
+      "skus": [
+        "QJ-011-XANHJ-28",
+        "QJ-011-XANHJ-30",
+        "QJ-011-XANHJ-32",
+        "QJ-011-XANHJ-34"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-014-trắng",
+      "productId": "SP-014",
+      "name": "Quần jeans nam ống rộng",
+      "type": "Quần jeans nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QJ-014-TRANG-28",
+        "QJ-014-TRANG-30",
+        "QJ-014-TRANG-32",
+        "QJ-014-TRANG-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-014-xanh-jeans",
+      "productId": "SP-014",
+      "name": "Quần jeans nam ống rộng",
+      "type": "Quần jeans nam",
+      "audience": "NAM",
+      "color": "Xanh jeans",
+      "skuCount": 4,
+      "skus": [
+        "QJ-014-XANHJ-28",
+        "QJ-014-XANHJ-30",
+        "QJ-014-XANHJ-32",
+        "QJ-014-XANHJ-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-013-trắng",
+      "productId": "SP-013",
+      "name": "Quần jeans nam rách gối",
+      "type": "Quần jeans nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QJ-013-TRANG-28",
+        "QJ-013-TRANG-30",
+        "QJ-013-TRANG-32",
+        "QJ-013-TRANG-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-013-xanh-jeans",
+      "productId": "SP-013",
+      "name": "Quần jeans nam rách gối",
+      "type": "Quần jeans nam",
+      "audience": "NAM",
+      "color": "Xanh jeans",
+      "skuCount": 4,
+      "skus": [
+        "QJ-013-XANHJ-28",
+        "QJ-013-XANHJ-30",
+        "QJ-013-XANHJ-32",
+        "QJ-013-XANHJ-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-012-trắng",
+      "productId": "SP-012",
+      "name": "Quần jeans nam slim fit",
+      "type": "Quần jeans nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QJ-012-TRANG-28",
+        "QJ-012-TRANG-30",
+        "QJ-012-TRANG-32",
+        "QJ-012-TRANG-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-012-xanh-jeans",
+      "productId": "SP-012",
+      "name": "Quần jeans nam slim fit",
+      "type": "Quần jeans nam",
+      "audience": "NAM",
+      "color": "Xanh jeans",
+      "skuCount": 4,
+      "skus": [
+        "QJ-012-XANHJ-28",
+        "QJ-012-XANHJ-30",
+        "QJ-012-XANHJ-32",
+        "QJ-012-XANHJ-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-015-đen",
+      "productId": "SP-015",
+      "name": "Quần jeans nam wash bạc",
+      "type": "Quần jeans nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "QJ-015-DEN-28",
+        "QJ-015-DEN-30",
+        "QJ-015-DEN-32",
+        "QJ-015-DEN-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-015-trắng",
+      "productId": "SP-015",
+      "name": "Quần jeans nam wash bạc",
+      "type": "Quần jeans nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QJ-015-TRANG-28",
+        "QJ-015-TRANG-30",
+        "QJ-015-TRANG-32",
+        "QJ-015-TRANG-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-015-xanh-jeans",
+      "productId": "SP-015",
+      "name": "Quần jeans nam wash bạc",
+      "type": "Quần jeans nam",
+      "audience": "NAM",
+      "color": "Xanh jeans",
+      "skuCount": 4,
+      "skus": [
+        "QJ-015-XANHJ-28",
+        "QJ-015-XANHJ-30",
+        "QJ-015-XANHJ-32",
+        "QJ-015-XANHJ-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-009-đen",
+      "productId": "SP-009",
+      "name": "Quần tây nam co giãn",
+      "type": "Quần tây nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "QK-009-DEN-28",
+        "QK-009-DEN-32",
+        "QK-009-DEN-34",
+        "QT-009-DEN-30"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-009-đỏ",
+      "productId": "SP-009",
+      "name": "Quần tây nam co giãn",
+      "type": "Quần tây nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "QT-009-DO-28",
+        "QT-009-DO-30",
+        "QT-009-DO-32",
+        "QT-009-DO-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-009-trắng",
+      "productId": "SP-009",
+      "name": "Quần tây nam co giãn",
+      "type": "Quần tây nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QT-009-TRANG-28",
+        "QT-009-TRANG-30",
+        "QT-009-TRANG-32",
+        "QT-009-TRANG-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-010-đen",
+      "productId": "SP-010",
+      "name": "Quần tây nam công sở",
+      "type": "Quần tây nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "QJ-010-DEN-28",
+        "QJ-010-DEN-30",
+        "QJ-010-DEN-32",
+        "QJ-010-DEN-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-010-đỏ",
+      "productId": "SP-010",
+      "name": "Quần tây nam công sở",
+      "type": "Quần tây nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "QT-010-DO-28",
+        "QT-010-DO-30",
+        "QT-010-DO-32",
+        "QT-010-DO-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-010-trắng",
+      "productId": "SP-010",
+      "name": "Quần tây nam công sở",
+      "type": "Quần tây nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QJ-010-TRANG-28",
+        "QJ-010-TRANG-30",
+        "QJ-010-TRANG-32",
+        "QJ-010-TRANG-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-007-đen",
+      "productId": "SP-007",
+      "name": "Quần tây nam ống đứng",
+      "type": "Quần tây nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "QK-007-DEN-28",
+        "QK-007-DEN-30",
+        "QK-007-DEN-32",
+        "QK-007-DEN-34"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-007-trắng",
+      "productId": "SP-007",
+      "name": "Quần tây nam ống đứng",
+      "type": "Quần tây nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QT-007-TRANG-28",
+        "QT-007-TRANG-30",
+        "QT-007-TRANG-32",
+        "QT-007-TRANG-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-006-đen",
+      "productId": "SP-006",
+      "name": "Quần tây nam slim fit",
+      "type": "Quần tây nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "QT-006-DEN-28",
+        "QT-006-DEN-30",
+        "QT-006-DEN-32",
+        "QT-006-DEN-34"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-006-trắng",
+      "productId": "SP-006",
+      "name": "Quần tây nam slim fit",
+      "type": "Quần tây nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QT-006-TRANG-28",
+        "QT-006-TRANG-30",
+        "QT-006-TRANG-32",
+        "QT-006-TRANG-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-008-đen",
+      "productId": "SP-008",
+      "name": "Quần tây nam xếp ly",
+      "type": "Quần tây nam",
+      "audience": "NAM",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "QJ-008-DEN-28",
+        "QJ-008-DEN-30",
+        "QJ-008-DEN-32",
+        "QJ-008-DEN-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-008-đỏ",
+      "productId": "SP-008",
+      "name": "Quần tây nam xếp ly",
+      "type": "Quần tây nam",
+      "audience": "NAM",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "QT-008-DO-28",
+        "QT-008-DO-30",
+        "QT-008-DO-32",
+        "QT-008-DO-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-008-trắng",
+      "productId": "SP-008",
+      "name": "Quần tây nam xếp ly",
+      "type": "Quần tây nam",
+      "audience": "NAM",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QJ-008-TRANG-28",
+        "QJ-008-TRANG-30",
+        "QJ-008-TRANG-32",
+        "QJ-008-TRANG-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-067-đỏ",
+      "productId": "SP-067",
+      "name": "Áo khoác blazer nữ",
+      "type": "Áo khoác nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "AK-067-DO-L",
+        "AK-067-DO-M",
+        "AK-067-DO-S",
+        "AK-067-DO-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-067-trắng",
+      "productId": "SP-067",
+      "name": "Áo khoác blazer nữ",
+      "type": "Áo khoác nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AK-067-TRANG-L",
+        "AK-067-TRANG-M",
+        "AK-067-TRANG-S",
+        "AK-067-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-069-đen",
+      "productId": "SP-069",
+      "name": "Áo khoác bomber nữ",
+      "type": "Áo khoác nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "AK-069-DEN-L",
+        "AK-069-DEN-M",
+        "AK-069-DEN-S",
+        "AK-069-DEN-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-069-đỏ",
+      "productId": "SP-069",
+      "name": "Áo khoác bomber nữ",
+      "type": "Áo khoác nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "AK-069-DO-L",
+        "AK-069-DO-M",
+        "AK-069-DO-S",
+        "AK-069-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-069-trắng",
+      "productId": "SP-069",
+      "name": "Áo khoác bomber nữ",
+      "type": "Áo khoác nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AK-069-TRANG-L",
+        "AK-069-TRANG-M",
+        "AK-069-TRANG-S",
+        "AK-069-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-068-đỏ",
+      "productId": "SP-068",
+      "name": "Áo khoác cardigan nữ",
+      "type": "Áo khoác nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "AK-068-DO-L",
+        "AK-068-DO-M",
+        "AK-068-DO-S",
+        "AK-068-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-068-trắng",
+      "productId": "SP-068",
+      "name": "Áo khoác cardigan nữ",
+      "type": "Áo khoác nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AK-068-TRANG-L",
+        "AK-068-TRANG-M",
+        "AK-068-TRANG-S",
+        "AK-068-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-066-đen",
+      "productId": "SP-066",
+      "name": "Áo khoác lông nữ",
+      "type": "Áo khoác nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "AK-066-DEN-L",
+        "AK-066-DEN-M",
+        "AK-066-DEN-S",
+        "AK-066-DEN-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-066-trắng",
+      "productId": "SP-066",
+      "name": "Áo khoác lông nữ",
+      "type": "Áo khoác nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AK-066-TRANG-L",
+        "AK-066-TRANG-M",
+        "AK-066-TRANG-S",
+        "AK-066-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-070-đen",
+      "productId": "SP-070",
+      "name": "Áo khoác trench coat nữ",
+      "type": "Áo khoác nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "AK-070-DEN-L",
+        "AK-070-DEN-M",
+        "AK-070-DEN-S",
+        "AK-070-DEN-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-070-đỏ",
+      "productId": "SP-070",
+      "name": "Áo khoác trench coat nữ",
+      "type": "Áo khoác nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "AK-070-DO-L",
+        "AK-070-DO-M",
+        "AK-070-DO-S",
+        "AK-070-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-070-trắng",
+      "productId": "SP-070",
+      "name": "Áo khoác trench coat nữ",
+      "type": "Áo khoác nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AK-070-TRANG-L",
+        "AK-070-TRANG-M",
+        "AK-070-TRANG-S",
+        "AK-070-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-044-đen",
+      "productId": "SP-044",
+      "name": "Baby tee nữ crop",
+      "type": "Áo thun baby tee nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "BT-044-DEN-L",
+        "BT-044-DEN-M",
+        "BT-044-DEN-S",
+        "BT-044-DEN-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-044-đỏ",
+      "productId": "SP-044",
+      "name": "Baby tee nữ crop",
+      "type": "Áo thun baby tee nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "BT-044-DO-L",
+        "BT-044-DO-M",
+        "BT-044-DO-S",
+        "BT-044-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-044-trắng",
+      "productId": "SP-044",
+      "name": "Baby tee nữ crop",
+      "type": "Áo thun baby tee nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BT-044-TRANG-L",
+        "BT-044-TRANG-M",
+        "BT-044-TRANG-S",
+        "BT-044-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-042-đỏ",
+      "productId": "SP-042",
+      "name": "Baby tee nữ gân",
+      "type": "Áo thun baby tee nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "BT-042-DO-L",
+        "BT-042-DO-M",
+        "BT-042-DO-S",
+        "BT-042-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-042-trắng",
+      "productId": "SP-042",
+      "name": "Baby tee nữ gân",
+      "type": "Áo thun baby tee nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BT-042-TRANG-L",
+        "BT-042-TRANG-M",
+        "BT-042-TRANG-S",
+        "BT-042-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-043-đỏ",
+      "productId": "SP-043",
+      "name": "Baby tee nữ họa tiết",
+      "type": "Áo thun baby tee nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "BT-043-DO-L",
+        "BT-043-DO-M",
+        "BT-043-DO-S",
+        "BT-043-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-043-trắng",
+      "productId": "SP-043",
+      "name": "Baby tee nữ họa tiết",
+      "type": "Áo thun baby tee nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BT-043-TRANG-L",
+        "BT-043-TRANG-M",
+        "BT-043-TRANG-S",
+        "BT-043-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-045-đen",
+      "productId": "SP-045",
+      "name": "Baby tee nữ tay dài",
+      "type": "Áo thun baby tee nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "BT-045-DEN-L",
+        "BT-045-DEN-M",
+        "BT-045-DEN-S",
+        "BT-045-DEN-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-045-đỏ",
+      "productId": "SP-045",
+      "name": "Baby tee nữ tay dài",
+      "type": "Áo thun baby tee nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "BT-045-DO-L",
+        "BT-045-DO-M",
+        "BT-045-DO-S",
+        "BT-045-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-045-trắng",
+      "productId": "SP-045",
+      "name": "Baby tee nữ tay dài",
+      "type": "Áo thun baby tee nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BT-045-TRANG-L",
+        "BT-045-TRANG-M",
+        "BT-045-TRANG-S",
+        "BT-045-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-041-đen",
+      "productId": "SP-041",
+      "name": "Baby tee nữ trơn",
+      "type": "Áo thun baby tee nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "BT-041-DEN-L",
+        "BT-041-DEN-M",
+        "BT-041-DEN-S",
+        "BT-041-DEN-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-041-trắng",
+      "productId": "SP-041",
+      "name": "Baby tee nữ trơn",
+      "type": "Áo thun baby tee nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BT-041-TRANG-L",
+        "BT-041-TRANG-M",
+        "BT-041-TRANG-S",
+        "BT-041-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-057-đen",
+      "productId": "SP-057",
+      "name": "Đầm nữ maxi",
+      "type": "Đầm",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "DAM-057-DEN-L",
+        "DAM-057-DEN-M",
+        "DAM-057-DEN-S",
+        "DAM-057-DEN-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-057-đỏ",
+      "productId": "SP-057",
+      "name": "Đầm nữ maxi",
+      "type": "Đầm",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "DAM-057-DO-L",
+        "DAM-057-DO-M",
+        "DAM-057-DO-S",
+        "DAM-057-DO-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-057-trắng",
+      "productId": "SP-057",
+      "name": "Đầm nữ maxi",
+      "type": "Đầm",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "DAM-057-TRANG-L",
+        "DAM-057-TRANG-M",
+        "DAM-057-TRANG-S",
+        "DAM-057-TRANG-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-058-đỏ",
+      "productId": "SP-058",
+      "name": "Đầm nữ ôm body",
+      "type": "Đầm",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "DAM-058-DO-L",
+        "DAM-058-DO-M",
+        "DAM-058-DO-S",
+        "DAM-058-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-058-trắng",
+      "productId": "SP-058",
+      "name": "Đầm nữ ôm body",
+      "type": "Đầm",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "DAM-058-TRANG-L",
+        "DAM-058-TRANG-M",
+        "DAM-058-TRANG-S",
+        "DAM-058-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-059-đỏ",
+      "productId": "SP-059",
+      "name": "Đầm nữ quấn",
+      "type": "Đầm",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "DAM-059-DO-L",
+        "DAM-059-DO-M",
+        "DAM-059-DO-S",
+        "DAM-059-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-059-trắng",
+      "productId": "SP-059",
+      "name": "Đầm nữ quấn",
+      "type": "Đầm",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "DAM-059-TRANG-L",
+        "DAM-059-TRANG-M",
+        "DAM-059-TRANG-S",
+        "DAM-059-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-056-đỏ",
+      "productId": "SP-056",
+      "name": "Đầm nữ suông",
+      "type": "Đầm",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "DAM-056-DO-L",
+        "DAM-056-DO-M",
+        "DAM-056-DO-S",
+        "DAM-056-DO-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-056-trắng",
+      "productId": "SP-056",
+      "name": "Đầm nữ suông",
+      "type": "Đầm",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "DAM-056-TRANG-L",
+        "DAM-056-TRANG-M",
+        "DAM-056-TRANG-S",
+        "DAM-056-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-060-đen",
+      "productId": "SP-060",
+      "name": "Đầm nữ xếp ly",
+      "type": "Đầm",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "DAM-060-DEN-L",
+        "DAM-060-DEN-M",
+        "DAM-060-DEN-S",
+        "DAM-060-DEN-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-060-đỏ",
+      "productId": "SP-060",
+      "name": "Đầm nữ xếp ly",
+      "type": "Đầm",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "DAM-060-DO-L",
+        "DAM-060-DO-M",
+        "DAM-060-DO-S",
+        "DAM-060-DO-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-060-trắng",
+      "productId": "SP-060",
+      "name": "Đầm nữ xếp ly",
+      "type": "Đầm",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "DAM-060-TRANG-L",
+        "DAM-060-TRANG-M",
+        "DAM-060-TRANG-S",
+        "DAM-060-TRANG-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-071-be",
+      "productId": "SP-071",
+      "name": "Áo lót nữ cotton",
+      "type": "Đồ lót nữ",
+      "audience": "NU",
+      "color": "Be",
+      "skuCount": 4,
+      "skus": [
+        "AL-071-BE-L",
+        "AL-071-BE-M",
+        "AL-071-BE-S",
+        "AL-071-BE-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-071-trắng",
+      "productId": "SP-071",
+      "name": "Áo lót nữ cotton",
+      "type": "Đồ lót nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AL-071-TRANG-L",
+        "AL-071-TRANG-M",
+        "AL-071-TRANG-S",
+        "AL-071-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-072-đen",
+      "productId": "SP-072",
+      "name": "Áo lót nữ không đường may",
+      "type": "Đồ lót nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "AL-072-DEN-L",
+        "AL-072-DEN-M",
+        "AL-072-DEN-S",
+        "AL-072-DEN-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-072-trắng",
+      "productId": "SP-072",
+      "name": "Áo lót nữ không đường may",
+      "type": "Đồ lót nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "AL-072-TRANG-L",
+        "AL-072-TRANG-M",
+        "AL-072-TRANG-S",
+        "AL-072-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-075-đen",
+      "productId": "SP-075",
+      "name": "Bộ đồ ngủ nữ",
+      "type": "Đồ lót nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "BDN-075-DEN-L",
+        "BDN-075-DEN-M",
+        "BDN-075-DEN-S",
+        "BDN-075-DEN-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-075-trắng",
+      "productId": "SP-075",
+      "name": "Bộ đồ ngủ nữ",
+      "type": "Đồ lót nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BDN-075-TRANG-L",
+        "BDN-075-TRANG-M",
+        "BDN-075-TRANG-S",
+        "BDN-075-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-073-đen",
+      "productId": "SP-073",
+      "name": "Quần lót nữ cotton",
+      "type": "Đồ lót nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "QL-073-DEN-L",
+        "QL-073-DEN-M",
+        "QL-073-DEN-S",
+        "QL-073-DEN-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-073-trắng",
+      "productId": "SP-073",
+      "name": "Quần lót nữ cotton",
+      "type": "Đồ lót nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QL-073-TRANG-L",
+        "QL-073-TRANG-M",
+        "QL-073-TRANG-S",
+        "QL-073-TRANG-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-074-be",
+      "productId": "SP-074",
+      "name": "Quần lót nữ không đường may",
+      "type": "Đồ lót nữ",
+      "audience": "NU",
+      "color": "Be",
+      "skuCount": 4,
+      "skus": [
+        "QL-074-BE-L",
+        "QL-074-BE-M",
+        "QL-074-BE-S",
+        "QL-074-BE-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-074-trắng",
+      "productId": "SP-074",
+      "name": "Quần lót nữ không đường may",
+      "type": "Đồ lót nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QL-074-TRANG-L",
+        "QL-074-TRANG-M",
+        "QL-074-TRANG-S",
+        "QL-074-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-077-đỏ",
+      "productId": "SP-077",
+      "name": "Bộ thể thao nữ chạy bộ",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "BTT-077-DO-L",
+        "BTT-077-DO-M",
+        "BTT-077-DO-S",
+        "BTT-077-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-077-trắng",
+      "productId": "SP-077",
+      "name": "Bộ thể thao nữ chạy bộ",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BTT-077-TRANG-L",
+        "BTT-077-TRANG-M",
+        "BTT-077-TRANG-S",
+        "BTT-077-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-080-đen",
+      "productId": "SP-080",
+      "name": "Bộ thể thao nữ đạp xe",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "BTT-080-DEN-L",
+        "BTT-080-DEN-M",
+        "BTT-080-DEN-S",
+        "BTT-080-DEN-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-080-đỏ",
+      "productId": "SP-080",
+      "name": "Bộ thể thao nữ đạp xe",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "BTT-080-DO-L",
+        "BTT-080-DO-M",
+        "BTT-080-DO-S",
+        "BTT-080-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-080-trắng",
+      "productId": "SP-080",
+      "name": "Bộ thể thao nữ đạp xe",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BTT-080-TRANG-L",
+        "BTT-080-TRANG-M",
+        "BTT-080-TRANG-S",
+        "BTT-080-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-079-đen",
+      "productId": "SP-079",
+      "name": "Bộ thể thao nữ gym",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "BTT-079-DEN-L",
+        "BTT-079-DEN-M",
+        "BTT-079-DEN-S",
+        "BTT-079-DEN-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-079-đỏ",
+      "productId": "SP-079",
+      "name": "Bộ thể thao nữ gym",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "BTT-079-DO-L",
+        "BTT-079-DO-M",
+        "BTT-079-DO-S",
+        "BTT-079-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-079-trắng",
+      "productId": "SP-079",
+      "name": "Bộ thể thao nữ gym",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BTT-079-TRANG-L",
+        "BTT-079-TRANG-M",
+        "BTT-079-TRANG-S",
+        "BTT-079-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-078-đỏ",
+      "productId": "SP-078",
+      "name": "Bộ thể thao nữ tennis",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "BTT-078-DO-L",
+        "BTT-078-DO-M",
+        "BTT-078-DO-S",
+        "BTT-078-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-078-trắng",
+      "productId": "SP-078",
+      "name": "Bộ thể thao nữ tennis",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BTT-078-TRANG-L",
+        "BTT-078-TRANG-M",
+        "BTT-078-TRANG-S",
+        "BTT-078-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-076-đen",
+      "productId": "SP-076",
+      "name": "Bộ thể thao nữ yoga",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "BTT-076-DEN-L",
+        "BTT-076-DEN-M",
+        "BTT-076-DEN-S",
+        "BTT-076-DEN-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-076-trắng",
+      "productId": "SP-076",
+      "name": "Bộ thể thao nữ yoga",
+      "type": "Đồ thể thao nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "BTT-076-TRANG-L",
+        "BTT-076-TRANG-M",
+        "BTT-076-TRANG-S",
+        "BTT-076-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-051-đen",
+      "productId": "SP-051",
+      "name": "Quần jeans nữ lưng cao",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "QJ-051-DEN-28",
+        "QJ-051-DEN-30",
+        "QJ-051-DEN-32",
+        "QJ-051-DEN-34"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-051-xanh-jeans",
+      "productId": "SP-051",
+      "name": "Quần jeans nữ lưng cao",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Xanh jeans",
+      "skuCount": 4,
+      "skus": [
+        "QJ-051-XANHJ-28",
+        "QJ-051-XANHJ-30",
+        "QJ-051-XANHJ-32",
+        "QJ-051-XANHJ-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-052-trắng",
+      "productId": "SP-052",
+      "name": "Quần jeans nữ ống đứng",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QJ-052-TRANG-28",
+        "QJ-052-TRANG-30",
+        "QJ-052-TRANG-32",
+        "QJ-052-TRANG-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-052-xanh-jeans",
+      "productId": "SP-052",
+      "name": "Quần jeans nữ ống đứng",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Xanh jeans",
+      "skuCount": 4,
+      "skus": [
+        "QJ-052-XANHJ-28",
+        "QJ-052-XANHJ-30",
+        "QJ-052-XANHJ-32",
+        "QJ-052-XANHJ-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-054-đen",
+      "productId": "SP-054",
+      "name": "Quần jeans nữ ống loe",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "QJ-054-DEN-28",
+        "QJ-054-DEN-30",
+        "QJ-054-DEN-32",
+        "QJ-054-DEN-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-054-trắng",
+      "productId": "SP-054",
+      "name": "Quần jeans nữ ống loe",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QJ-054-TRANG-28",
+        "QJ-054-TRANG-30",
+        "QJ-054-TRANG-32",
+        "QJ-054-TRANG-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-054-xanh-jeans",
+      "productId": "SP-054",
+      "name": "Quần jeans nữ ống loe",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Xanh jeans",
+      "skuCount": 4,
+      "skus": [
+        "QJ-054-XANHJ-28",
+        "QJ-054-XANHJ-30",
+        "QJ-054-XANHJ-32",
+        "QJ-054-XANHJ-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-053-trắng",
+      "productId": "SP-053",
+      "name": "Quần jeans nữ ống rộng",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QJ-053-TRANG-28",
+        "QJ-053-TRANG-30",
+        "QJ-053-TRANG-32",
+        "QJ-053-TRANG-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-053-xanh-jeans",
+      "productId": "SP-053",
+      "name": "Quần jeans nữ ống rộng",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Xanh jeans",
+      "skuCount": 4,
+      "skus": [
+        "QJ-053-XANHJ-28",
+        "QJ-053-XANHJ-30",
+        "QJ-053-XANHJ-32",
+        "QJ-053-XANHJ-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-055-đen",
+      "productId": "SP-055",
+      "name": "Quần jeans nữ rách nhẹ",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "QJ-055-DEN-28",
+        "QJ-055-DEN-30",
+        "QJ-055-DEN-32",
+        "QJ-055-DEN-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-055-trắng",
+      "productId": "SP-055",
+      "name": "Quần jeans nữ rách nhẹ",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QJ-055-TRANG-28",
+        "QJ-055-TRANG-30",
+        "QJ-055-TRANG-32",
+        "QJ-055-TRANG-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-055-xanh-jeans",
+      "productId": "SP-055",
+      "name": "Quần jeans nữ rách nhẹ",
+      "type": "Quần jeans nữ",
+      "audience": "NU",
+      "color": "Xanh jeans",
+      "skuCount": 4,
+      "skus": [
+        "QJ-055-XANHJ-28",
+        "QJ-055-XANHJ-30",
+        "QJ-055-XANHJ-32",
+        "QJ-055-XANHJ-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-049-đen",
+      "productId": "SP-049",
+      "name": "Quần tây nữ công sở",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "QT-049-DEN-28",
+        "QT-049-DEN-30",
+        "QT-049-DEN-32",
+        "QT-049-DEN-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-049-đỏ",
+      "productId": "SP-049",
+      "name": "Quần tây nữ công sở",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "QT-049-DO-28",
+        "QT-049-DO-30",
+        "QT-049-DO-32",
+        "QT-049-DO-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-049-trắng",
+      "productId": "SP-049",
+      "name": "Quần tây nữ công sở",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QT-049-TRANG-28",
+        "QT-049-TRANG-30",
+        "QT-049-TRANG-32",
+        "QT-049-TRANG-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-050-đen",
+      "productId": "SP-050",
+      "name": "Quần tây nữ lưng cao",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "QT-050-DEN-28",
+        "QT-050-DEN-30",
+        "QT-050-DEN-32",
+        "QT-050-DEN-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-050-đỏ",
+      "productId": "SP-050",
+      "name": "Quần tây nữ lưng cao",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "QT-050-DO-28",
+        "QT-050-DO-30",
+        "QT-050-DO-32",
+        "QT-050-DO-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-050-trắng",
+      "productId": "SP-050",
+      "name": "Quần tây nữ lưng cao",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QT-050-TRANG-28",
+        "QT-050-TRANG-30",
+        "QT-050-TRANG-32",
+        "QT-050-TRANG-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-046-đen",
+      "productId": "SP-046",
+      "name": "Quần tây nữ ống rộng",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "QT-046-DEN-28",
+        "QT-046-DEN-30",
+        "QT-046-DEN-32",
+        "QT-046-DEN-34"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-046-trắng",
+      "productId": "SP-046",
+      "name": "Quần tây nữ ống rộng",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QT-046-TRANG-28",
+        "QT-046-TRANG-30",
+        "QT-046-TRANG-32",
+        "QT-046-TRANG-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-047-đỏ",
+      "productId": "SP-047",
+      "name": "Quần tây nữ slim fit",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "QT-047-DO-28",
+        "QT-047-DO-30",
+        "QT-047-DO-32",
+        "QT-047-DO-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-047-trắng",
+      "productId": "SP-047",
+      "name": "Quần tây nữ slim fit",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QT-047-TRANG-28",
+        "QT-047-TRANG-30",
+        "QT-047-TRANG-32",
+        "QT-047-TRANG-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-048-đen",
+      "productId": "SP-048",
+      "name": "Quần tây nữ xếp ly",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "QT-048-DEN-28",
+        "QT-048-DEN-30",
+        "QT-048-DEN-32",
+        "QT-048-DEN-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-048-đỏ",
+      "productId": "SP-048",
+      "name": "Quần tây nữ xếp ly",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "QT-048-DO-28",
+        "QT-048-DO-30",
+        "QT-048-DO-32",
+        "QT-048-DO-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-048-trắng",
+      "productId": "SP-048",
+      "name": "Quần tây nữ xếp ly",
+      "type": "Quần tây nữ",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "QT-048-TRANG-28",
+        "QT-048-TRANG-30",
+        "QT-048-TRANG-32",
+        "QT-048-TRANG-34"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-064-đỏ",
+      "productId": "SP-064",
+      "name": "Váy nữ bút chì",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "VAY-064-DO-L",
+        "VAY-064-DO-M",
+        "VAY-064-DO-S",
+        "VAY-064-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-064-trắng",
+      "productId": "SP-064",
+      "name": "Váy nữ bút chì",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "VAY-064-TRANG-L",
+        "VAY-064-TRANG-M",
+        "VAY-064-TRANG-S",
+        "VAY-064-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-061-đen",
+      "productId": "SP-061",
+      "name": "Váy nữ chữ A",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "VAY-061-DEN-L",
+        "VAY-061-DEN-M",
+        "VAY-061-DEN-S",
+        "VAY-061-DEN-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-061-đỏ",
+      "productId": "SP-061",
+      "name": "Váy nữ chữ A",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "VAY-061-DO-L",
+        "VAY-061-DO-M",
+        "VAY-061-DO-S",
+        "VAY-061-DO-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-061-trắng",
+      "productId": "SP-061",
+      "name": "Váy nữ chữ A",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "VAY-061-TRANG-L",
+        "VAY-061-TRANG-M",
+        "VAY-061-TRANG-S",
+        "VAY-061-TRANG-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-065-đỏ",
+      "productId": "SP-065",
+      "name": "Váy nữ denim",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "VAY-065-DO-L",
+        "VAY-065-DO-M",
+        "VAY-065-DO-S",
+        "VAY-065-DO-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-065-trắng",
+      "productId": "SP-065",
+      "name": "Váy nữ denim",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "VAY-065-TRANG-L",
+        "VAY-065-TRANG-M",
+        "VAY-065-TRANG-S",
+        "VAY-065-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-062-đen",
+      "productId": "SP-062",
+      "name": "Váy nữ maxi",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Đen",
+      "skuCount": 4,
+      "skus": [
+        "VAY-062-DEN-L",
+        "VAY-062-DEN-M",
+        "VAY-062-DEN-S",
+        "VAY-062-DEN-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-062-đỏ",
+      "productId": "SP-062",
+      "name": "Váy nữ maxi",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "VAY-062-DO-L",
+        "VAY-062-DO-M",
+        "VAY-062-DO-S",
+        "VAY-062-DO-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-062-trắng",
+      "productId": "SP-062",
+      "name": "Váy nữ maxi",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "VAY-062-TRANG-L",
+        "VAY-062-TRANG-M",
+        "VAY-062-TRANG-S",
+        "VAY-062-TRANG-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-063-đỏ",
+      "productId": "SP-063",
+      "name": "Váy nữ xếp ly",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Đỏ",
+      "skuCount": 4,
+      "skus": [
+        "VAY-063-DO-L",
+        "VAY-063-DO-M",
+        "VAY-063-DO-S",
+        "VAY-063-DO-XL"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-063-trắng",
+      "productId": "SP-063",
+      "name": "Váy nữ xếp ly",
+      "type": "Váy",
+      "audience": "NU",
+      "color": "Trắng",
+      "skuCount": 4,
+      "skus": [
+        "VAY-063-TRANG-L",
+        "VAY-063-TRANG-M",
+        "VAY-063-TRANG-S",
+        "VAY-063-TRANG-XL"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-085-đen",
+      "productId": "SP-085",
+      "name": "Nón beret",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Đen",
+      "skuCount": 1,
+      "skus": [
+        "NON-085-DEN-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-085-đỏ",
+      "productId": "SP-085",
+      "name": "Nón beret",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Đỏ",
+      "skuCount": 1,
+      "skus": [
+        "NON-085-DO-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-085-trắng",
+      "productId": "SP-085",
+      "name": "Nón beret",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Trắng",
+      "skuCount": 1,
+      "skus": [
+        "NON-085-TRANG-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-082-đen",
+      "productId": "SP-082",
+      "name": "Nón bucket",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Đen",
+      "skuCount": 1,
+      "skus": [
+        "NON-082-DEN-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-082-đỏ",
+      "productId": "SP-082",
+      "name": "Nón bucket",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Đỏ",
+      "skuCount": 1,
+      "skus": [
+        "NON-082-DO-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-082-trắng",
+      "productId": "SP-082",
+      "name": "Nón bucket",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Trắng",
+      "skuCount": 1,
+      "skus": [
+        "NON-082-TRANG-FS"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-083-đen",
+      "productId": "SP-083",
+      "name": "Nón len",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Đen",
+      "skuCount": 1,
+      "skus": [
+        "NON-083-DEN-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-083-đỏ",
+      "productId": "SP-083",
+      "name": "Nón len",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Đỏ",
+      "skuCount": 1,
+      "skus": [
+        "NON-083-DO-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-083-trắng",
+      "productId": "SP-083",
+      "name": "Nón len",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Trắng",
+      "skuCount": 1,
+      "skus": [
+        "NON-083-TRANG-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-081-đen",
+      "productId": "SP-081",
+      "name": "Nón lưỡi trai",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Đen",
+      "skuCount": 1,
+      "skus": [
+        "NON-081-DEN-FS"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-081-đỏ",
+      "productId": "SP-081",
+      "name": "Nón lưỡi trai",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Đỏ",
+      "skuCount": 1,
+      "skus": [
+        "NON-081-DO-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-081-trắng",
+      "productId": "SP-081",
+      "name": "Nón lưỡi trai",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Trắng",
+      "skuCount": 1,
+      "skus": [
+        "NON-081-TRANG-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-084-đen",
+      "productId": "SP-084",
+      "name": "Nón vành rộng",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Đen",
+      "skuCount": 1,
+      "skus": [
+        "NON-084-DEN-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-084-đỏ",
+      "productId": "SP-084",
+      "name": "Nón vành rộng",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Đỏ",
+      "skuCount": 1,
+      "skus": [
+        "NON-084-DO-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-084-trắng",
+      "productId": "SP-084",
+      "name": "Nón vành rộng",
+      "type": "Nón",
+      "audience": "PHU_KIEN",
+      "color": "Trắng",
+      "skuCount": 1,
+      "skus": [
+        "NON-084-TRANG-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-089-đen",
+      "productId": "SP-089",
+      "name": "Vớ cổ cao",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Đen",
+      "skuCount": 1,
+      "skus": [
+        "VO-089-DEN-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-089-đỏ",
+      "productId": "SP-089",
+      "name": "Vớ cổ cao",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Đỏ",
+      "skuCount": 1,
+      "skus": [
+        "VO-089-DO-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-089-trắng",
+      "productId": "SP-089",
+      "name": "Vớ cổ cao",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Trắng",
+      "skuCount": 1,
+      "skus": [
+        "VO-089-TRANG-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-087-đen",
+      "productId": "SP-087",
+      "name": "Vớ cổ ngắn",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Đen",
+      "skuCount": 1,
+      "skus": [
+        "VO-087-DEN-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-087-đỏ",
+      "productId": "SP-087",
+      "name": "Vớ cổ ngắn",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Đỏ",
+      "skuCount": 1,
+      "skus": [
+        "VO-087-DO-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-087-trắng",
+      "productId": "SP-087",
+      "name": "Vớ cổ ngắn",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Trắng",
+      "skuCount": 1,
+      "skus": [
+        "VO-087-TRANG-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-086-đen",
+      "productId": "SP-086",
+      "name": "Vớ cổ trung",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Đen",
+      "skuCount": 1,
+      "skus": [
+        "VO-086-DEN-FS"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-086-đỏ",
+      "productId": "SP-086",
+      "name": "Vớ cổ trung",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Đỏ",
+      "skuCount": 1,
+      "skus": [
+        "VO-086-DO-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-086-trắng",
+      "productId": "SP-086",
+      "name": "Vớ cổ trung",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Trắng",
+      "skuCount": 1,
+      "skus": [
+        "VO-086-TRANG-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-090-đen",
+      "productId": "SP-090",
+      "name": "Vớ lười",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Đen",
+      "skuCount": 1,
+      "skus": [
+        "VO-090-DEN-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-090-đỏ",
+      "productId": "SP-090",
+      "name": "Vớ lười",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Đỏ",
+      "skuCount": 1,
+      "skus": [
+        "VO-090-DO-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-090-trắng",
+      "productId": "SP-090",
+      "name": "Vớ lười",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Trắng",
+      "skuCount": 1,
+      "skus": [
+        "VO-090-TRANG-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-088-đen",
+      "productId": "SP-088",
+      "name": "Vớ thể thao",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Đen",
+      "skuCount": 1,
+      "skus": [
+        "VO-088-DEN-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-088-đỏ",
+      "productId": "SP-088",
+      "name": "Vớ thể thao",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Đỏ",
+      "skuCount": 1,
+      "skus": [
+        "VO-088-DO-FS"
+      ],
+      "minImageCount": 0,
+      "consistent": true,
+      "completed": false
+    },
+    {
+      "id": "SP-088-trắng",
+      "productId": "SP-088",
+      "name": "Vớ thể thao",
+      "type": "Vớ",
+      "audience": "PHU_KIEN",
+      "color": "Trắng",
+      "skuCount": 1,
+      "skus": [
+        "VO-088-TRANG-FS"
+      ],
+      "minImageCount": 1,
+      "consistent": true,
+      "completed": false
+    }
+  ]
+}
