@@ -146,58 +146,154 @@
         function renderProducts() {
             const tbody = document.querySelector("#view-products tbody");
             if (!tbody) return;
-
-            const searchInput = document.getElementById("productSearchInput");
-            const searchText = searchInput?.value || "";
-            const audience = document.getElementById("productAudienceFilter")?.value || "";
-            const categoryProducts = productsData.filter(product => !audience || getProductAudience(product) === audience);
-            const filteredProducts = categoryProducts.filter(product => matchesProductSearch(product, searchText));
-            const summary = document.getElementById("productSearchSummary");
-            const clearButton = document.getElementById("productSearchClear");
-            const isSearching = Boolean(searchText.trim());
-            if (summary) {
-                summary.textContent = isSearching
-                    ? `Tìm thấy ${filteredProducts.length}/${categoryProducts.length} SKU`
-                    : `${filteredProducts.length} SKU`;
+            const colorSelect = document.getElementById("productColorFilter");
+            if (colorSelect) {
+                const selected = colorSelect.value;
+                const colors = [...new Set(productsData.map(p => p.color).filter(Boolean))].sort((a,b) => a.localeCompare(b, 'vi'));
+                colorSelect.innerHTML = '<option value="">Tất cả màu</option>' + colors.map(color => `<option value="${escapeHtml(color)}">${escapeHtml(color)}</option>`).join('');
+                colorSelect.value = colors.includes(selected) ? selected : '';
             }
-            if (clearButton) clearButton.style.display = isSearching ? "inline-flex" : "none";
-
-            if (productsData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:30px; color:#94a3b8;">Chưa có sản phẩm nào. Hãy bấm "+ Thêm Sản phẩm".</td></tr>`;
-                return;
-            }
-
-            if (filteredProducts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:30px; color:#94a3b8;">Không tìm thấy sản phẩm theo Mã SP, Mã SKU hoặc tên đã nhập.</td></tr>`;
-                if (window.lucide) lucide.createIcons();
-                updateInventoryKpi();
-                return;
-            }
-
-            tbody.innerHTML = filteredProducts.map(p => {
-                const idx = productsData.indexOf(p);
-                return `
-                    <tr>
-                        <td>${p.image ? `<img class="product-thumb" src="${escapeHtml(productImageUrl(p.image))}" alt="Ảnh ${escapeHtml(p.name)}">` : `<span class="product-no-image"><i data-lucide="image"></i></span>`}</td>
-                        <td><strong>${escapeHtml(p.productId || p.sku)}</strong></td>
-                        <td><strong>${escapeHtml(p.sku)}</strong></td>
-                        <td>${escapeHtml(p.name)}</td>
-                        <td><span class="badge blue">${escapeHtml(p.type || "Chưa phân loại")}</span></td>
-                        <td><span class="badge">${escapeHtml(productAudienceLabel(getProductAudience(p)))}</span></td>
-                        <td>${escapeHtml(p.supplierName || "Chưa chọn")}</td>
-                        <td><span class="badge">${escapeHtml(p.color || "Mặc định")}</span></td>
-                        <td><span class="badge">${escapeHtml(p.size || "Free size")}</span></td>
-                        <td>${new Intl.NumberFormat('vi-VN').format(p.price)} ₫</td>
-                        <td><span class="badge ${p.stock <= 0 ? 'red' : (p.stock < 10 ? 'red' : 'green')}">${p.stock}</span></td>
-                        <td>
-                            <button class="icon-button" title="Chỉnh sửa" onclick="openEditProduct(${idx})"><i data-lucide="pencil" style="width:16px"></i></button>
-                            <button class="icon-button" title="Xóa" onclick="deleteProduct(${idx})"><i data-lucide="trash-2" style="width:16px;color:#ef4444"></i></button>
-                        </td>
-                    </tr>
-                `;
-            }).join("");
+            const keyword = document.getElementById('productSearchInput')?.value || '';
+            const audience = document.getElementById('productAudienceFilter')?.value || '';
+            const color = colorSelect?.value || '';
+            const stock = document.getElementById('productStockFilter')?.value || '';
+            const groups = getProductGroups().filter(group => group.some(p =>
+                matchesProductSearch(p, keyword) && (!audience || getProductAudience(p) === audience) &&
+                (!color || p.color === color) && (!stock || (stock === 'available' ? Number(p.stock) > 0 :
+                    stock === 'low' ? Number(p.stock) > 0 && Number(p.stock) < 10 : Number(p.stock) <= 0))));
+            const summary = document.getElementById('productSearchSummary');
+            if (summary) summary.textContent = `${groups.length} sản phẩm · ${groups.reduce((sum,g) => sum + g.length, 0)} SKU`;
+            const filterSummary = document.getElementById('productFilterSummary');
+            if (filterSummary) filterSummary.textContent = [audience && productAudienceLabel(audience), color,
+                stock && ({available:'Còn tồn',low:'Sắp hết hàng',out:'Hết hàng'}[stock])].filter(Boolean).join(' · ');
+            const clear = document.getElementById('productSearchClear');
+            if (clear) clear.style.display = keyword.trim() ? 'inline-flex' : 'none';
+            tbody.innerHTML = groups.map(group => {
+                const p = group[0], idx = productsData.indexOf(p);
+                const prices = group.map(item => Number(item.price));
+                const min = Math.min(...prices), max = Math.max(...prices);
+                const total = group.reduce((sum,item) => sum + Number(item.stock || 0), 0);
+                return `<tr>
+                    <td>${p.image ? `<img class="product-thumb" src="${escapeHtml(productImageUrl(p.image))}" alt="${escapeHtml(p.name)}">` : ''}</td>
+                    <td><strong>${escapeHtml(p.productId || p.sku)}</strong></td><td>${escapeHtml(p.name)}</td>
+                    <td>${escapeHtml(p.type || '')}</td><td>${escapeHtml(productAudienceLabel(getProductAudience(p)))}</td>
+                    <td>${escapeHtml(p.supplierName || '')}</td><td>${escapeHtml([...new Set(group.map(item => item.color))].filter(Boolean).join(', '))}</td>
+                    <td>${group.length}</td><td>${min.toLocaleString('vi-VN')}${max !== min ? ' – ' + max.toLocaleString('vi-VN') : ''} ₫</td>
+                    <td>${total}</td><td><button class="btn btn-secondary" onclick="openProductVariants(${idx})">Xem sản phẩm</button>
+                    <button class="btn btn-secondary" onclick="openEditProductGroup(${idx})">Sửa sản phẩm</button>
+                    <button class="btn btn-secondary" onclick="openAddProductVariant(${idx})">Thêm biến thể</button></td></tr>`;
+            }).join('') || '<tr><td colspan="11" style="text-align:center;padding:30px">Không có sản phẩm phù hợp.</td></tr>';
             if (window.lucide) lucide.createIcons();
             updateInventoryKpi();
+        }
+
+        function getProductGroups() {
+            const groups = new Map();
+            for (const product of productsData) {
+                const key = product.productId || product.sku;
+                if (!groups.has(key)) groups.set(key, []);
+                groups.get(key).push(product);
+            }
+            return [...groups.values()];
+        }
+
+        function toggleProductFilters(button) {
+            const panel = document.getElementById('productFilters');
+            panel.hidden = !panel.hidden;
+            panel.style.display = panel.hidden ? 'none' : 'flex';
+            button.setAttribute('aria-expanded', String(!panel.hidden));
+        }
+
+        function resetProductFilters() {
+            ['productStockFilter','productAudienceFilter','productColorFilter'].forEach(id => { document.getElementById(id).value = ''; });
+            renderProducts();
+        }
+
+        function closeProductVariants() { document.getElementById('productVariantsModal')?.remove(); }
+
+        function openProductVariants(index) {
+            closeProductVariants();
+            const product = productsData[index];
+            if (!product) return;
+            const group = productsData.filter(p => (p.productId || p.sku) === (product.productId || product.sku));
+            const modal = document.createElement('div');
+            modal.id = 'productVariantsModal';
+            modal.className = 'modal-bg open';
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
+            modal.innerHTML = `<div class="modal" style="width:min(1100px,95vw);max-width:1100px"><h2>${escapeHtml(product.productId || product.sku)} – ${escapeHtml(product.name)}</h2>
+                <div style="overflow:auto;max-height:65vh"><table class="data-table"><thead><tr><th>Mã SKU</th><th>Màu</th><th>Size</th><th>Giá bán</th><th>Tồn</th><th>Thao tác</th></tr></thead><tbody>${group.map(p => {
+                    const idx = productsData.indexOf(p);
+                    return `<tr><td>${escapeHtml(p.sku)}</td><td>${escapeHtml(p.color || '')}</td><td>${escapeHtml(p.size || '')}</td><td>${Number(p.price).toLocaleString('vi-VN')} ₫</td><td>${p.stock}</td><td><button class="btn btn-secondary" onclick="closeProductVariants();openEditProduct(${idx})">Sửa biến thể</button><button class="btn btn-secondary" onclick="deleteProductVariant(${idx})">Xóa</button></td></tr>`;
+                }).join('')}</tbody></table></div><div class="modal-actions"><button class="btn btn-secondary" onclick="closeProductVariants()">Đóng</button><button class="btn btn-primary" onclick="closeProductVariants();openAddProductVariant(${index})">Thêm biến thể</button></div></div>`;
+            document.body.appendChild(modal);
+        }
+
+        async function deleteProductVariant(index) {
+            await deleteProduct(index);
+            closeProductVariants();
+        }
+
+        function openEditProductGroup(index) {
+            const p = productsData[index];
+            crudContext = {action:'edit',target:'productGroup',editIndex:index};
+            document.getElementById('crudModalTitle').textContent = 'Sửa sản phẩm ' + p.productId;
+            document.getElementById('crudModalFields').innerHTML = `<label>Tên sản phẩm</label><input id="pg_name" class="input" value="${escapeHtml(p.name)}"><label>Danh mục</label><select id="f_audience" class="input" onchange="updateProductTypeOptionsForAudience()">${buildProductAudienceOptions(getProductAudience(p))}</select><label>Loại sản phẩm</label><select id="f_type" class="input">${buildProductTypeOptions(p.type, getProductAudience(p))}</select><label>Nhà cung cấp</label><select id="pg_supplier" class="input">${buildImportSupplierOptions(p.supplierId)}</select>`;
+            document.getElementById('crudModalBg').classList.add('open');
+        }
+
+        function openAddProductVariant(index = -1) {
+            if (!productsData.length) { alert('Vui lòng thêm sản phẩm trước.'); return; }
+            crudContext = {action:'add',target:'productVariant',editIndex:-1};
+            pendingProductImages = [];
+            document.getElementById('crudModalTitle').textContent = 'Thêm biến thể sản phẩm';
+            document.getElementById('crudModalFields').innerHTML = `<label>Sản phẩm</label><select id="pv_product" class="input" onchange="updateProductVariantFields()"><option value="">Chọn sản phẩm</option>${getProductGroups().map(group => {
+                const p = group[0], idx = productsData.indexOf(p);
+                return `<option value="${idx}">${escapeHtml(p.productId || p.sku)} – ${escapeHtml(p.name)}</option>`;
+            }).join('')}</select><div id="pv_fields"></div>`;
+            if (index >= 0) document.getElementById('pv_product').value = String(index);
+            updateProductVariantFields();
+            document.getElementById('crudModalBg').classList.add('open');
+        }
+
+        function updateProductVariantFields() {
+            pendingProductImages = [];
+            const selected = document.getElementById('pv_product').value;
+            const p = selected === '' ? null : productsData[Number(selected)];
+            document.getElementById('pv_fields').innerHTML = p ? `<label>Màu sắc</label><input id="pv_color" class="input" list="pv_colors" maxlength="50" placeholder="Chọn hoặc nhập màu mới"><datalist id="pv_colors">${getProductColors(p.type).map(color => `<option value="${escapeHtml(color)}">`).join('')}</datalist>
+                ${getProductAudience(p) === 'PHU_KIEN' ? '' : `<label>Size</label><input id="pv_size" class="input" list="pv_sizes" maxlength="20" placeholder="Chọn hoặc nhập size mới"><datalist id="pv_sizes">${getProductSizes(p.name,p.type).map(size => `<option value="${size}">`).join('')}</datalist>`}
+                <label>Giá bán</label><input id="pv_price" class="input" type="number" min="1" value="${Number(p.price)}">${buildProductImageField()}` : '';
+        }
+
+        async function saveProductManagementData() {
+            const isVariant = crudContext.target === 'productVariant';
+            let payload, url;
+            if (isVariant) {
+                const selected = document.getElementById('pv_product').value;
+                const p = selected === '' ? null : productsData[Number(selected)];
+                if (!p) { alert('Vui lòng chọn sản phẩm.'); return; }
+                const color = document.getElementById('pv_color').value.trim();
+                const size = getProductAudience(p) === 'PHU_KIEN' ? 'Free size' : document.getElementById('pv_size').value.trim();
+                const price = Number(document.getElementById('pv_price').value);
+                if (!color || !size || !Number.isFinite(price) || price <= 0) { alert('Nhập đủ màu, size và giá bán lớn hơn 0.'); return; }
+                if (productsData.some(item => item.productId === p.productId && normalizeSkuText(item.color).trim() === normalizeSkuText(color).trim() && normalizeSkuText(item.size).trim() === normalizeSkuText(size).trim())) { alert('Sản phẩm đã có màu và size này.'); return; }
+                payload = {productId:p.productId,color,size,price,images:pendingProductImages};
+                url = '/api/san-pham/bien-the';
+            } else {
+                const p = productsData[crudContext.editIndex];
+                payload = {name:document.getElementById('pg_name').value.trim(),type:document.getElementById('f_type').value,audience:document.getElementById('f_audience').value,supplierId:document.getElementById('pg_supplier').value};
+                if (!payload.name || !payload.type || !payload.audience || !payload.supplierId) { alert('Vui lòng nhập đủ thông tin sản phẩm.'); return; }
+                url = '/api/san-pham/nhom/' + encodeURIComponent(p.productId);
+            }
+            const button = document.querySelector('#crudModalBg .modal-actions .btn-primary');
+            if (button.disabled) return;
+            button.disabled = true;
+            try {
+                const response = await fetch(API_BASE_URL + url, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+                if (!response.ok) throw new Error(await getApiErrorMessage(response,'Không lưu được sản phẩm.'));
+                await loadAppState(); renderAll(); closeCrudModal(); toast(isVariant ? 'Đã thêm biến thể. Nhập kho để bổ sung tồn.' : 'Đã cập nhật toàn bộ SKU của sản phẩm.');
+            } catch(error) { alert(error.message); }
+            finally { button.disabled = false; }
         }
 
         function normalizeProductSearchText(value) {
@@ -1035,13 +1131,22 @@
             updateProductSizeOptions();
         }
 
-        // Dùng danh sách màu cố định để dữ liệu sau này lọc trên website không bị lệch tên.
-        function buildProductColorOptions(selected = "", type = "") {
+        // Dùng chung danh sách màu cho thêm sản phẩm, sửa SKU và thêm biến thể.
+        function getProductColors(type = "") {
             const normalizedType = normalizeSkuText(type);
-            const colors = normalizedType.includes("QUAN JEANS") ? ["Trắng", "Xanh jeans", "Đen"]
-                : normalizedType === "DO LOT NAM" ? ["Trắng", "Đen", "Xám"]
-                : normalizedType === "DO LOT NU" ? ["Trắng", "Đen", "Be"]
-                : ["Trắng", "Đen", "Đỏ"];
+            if (normalizedType.includes("QUAN JEANS")) {
+                return ["Trắng", "Đen", "Xám", "Xám đậm", "Xanh jeans", "Xanh jeans nhạt", "Xanh jeans đậm", "Xanh navy"];
+            }
+            if (normalizedType.includes("DO LOT")) {
+                return ["Trắng", "Đen", "Xám", "Xám nhạt", "Xám đậm", "Be", "Kem", "Nâu", "Xanh navy"];
+            }
+            return ["Trắng", "Đen", "Đỏ", "Đỏ đô", "Xám", "Xám nhạt", "Xám đậm", "Be", "Kem", "Nâu", "Nâu nhạt",
+                "Vàng", "Vàng nhạt", "Cam", "Hồng", "Hồng nhạt", "Tím", "Tím nhạt", "Xanh dương", "Xanh da trời",
+                "Xanh navy", "Xanh lá", "Xanh rêu", "Xanh mint", "Xanh jeans", "Xanh jeans nhạt", "Xanh jeans đậm"];
+        }
+
+        function buildProductColorOptions(selected = "", type = "") {
+            const colors = getProductColors(type);
             const values = selected && !colors.includes(selected) ? [selected, ...colors] : colors;
             return `<option value="">Chọn màu sản phẩm</option>` + values.map(color =>
                 `<option value="${escapeHtml(color)}" ${selected === color ? "selected" : ""}>${escapeHtml(color)}</option>`
@@ -1051,7 +1156,7 @@
         function getProductSizes(name = "", type = "") {
             const text = normalizeSkuText(`${name} ${type}`);
             if (/QUAN.*(JEAN|JEANS|TAY)|(JEAN|JEANS).*QUAN/.test(text)) {
-                return ["28", "30", "32", "34"];
+                return Array.from({ length: 11 }, (_, index) => String(28 + index));
             }
             if (/\bVO\b|\bNON\b|PHU KIEN/.test(text)) return ["Free size"];
             return ["S", "M", "L", "XL"];
@@ -1191,29 +1296,29 @@
             crudContext = { action: 'edit', target: 'product', editIndex: idx };
             const p = productsData[idx];
             pendingProductImages = normalizeProductImages(p);
-            document.getElementById("crudModalTitle").textContent = "Cập Nhật Sản Phẩm";
+            document.getElementById("crudModalTitle").textContent = "Sửa biến thể " + p.sku;
             document.getElementById("crudModalFields").innerHTML = `
                     <label>Mã sản phẩm</label>
                     <input id="f_product_id" class="input" value="${escapeHtml(p.productId || p.sku)}" readonly>
                     <label>Mã SKU</label>
                     <input id="f_sku" class="input" value="${escapeHtml(p.sku)}" readonly>
                     <label>Tên sản phẩm</label>
-                    <input id="f_name" class="input" value="${p.name}" placeholder="Tên sản phẩm">
+                    <input id="f_name" class="input" value="${escapeHtml(p.name)}" readonly>
                     <label>Danh mục</label>
-                    <select id="f_audience" class="input" onchange="updateProductTypeOptionsForAudience()">${buildProductAudienceOptions(getProductAudience(p))}</select>
+                    <select id="f_audience" class="input" disabled>${buildProductAudienceOptions(getProductAudience(p))}</select>
                     <label>Loại sản phẩm</label>
-                    <select id="f_type" class="input" onchange="updateProductSizeOptions()">${buildProductTypeOptions(p.type || "", getProductAudience(p))}</select>
+                    <select id="f_type" class="input" disabled>${buildProductTypeOptions(p.type || "", getProductAudience(p))}</select>
                     <label>Màu sắc</label>
-                    <select id="f_color" class="input">${buildProductColorOptions(p.color || "Mặc định", p.type || "")}</select>
-                    <label>Size</label>
-                    <select id="f_size" class="input">${buildProductSizeOptions(p.size || "Free size", p.name, p.type)}</select>
+                    <input id="f_color" class="input" list="f_color_options" maxlength="50" value="${escapeHtml(p.color || '')}">
+                    <datalist id="f_color_options">${getProductColors(p.type).map(color => `<option value="${escapeHtml(color)}">`).join('')}</datalist>
+                    ${getProductAudience(p) === 'PHU_KIEN' ? '<input id="f_size" type="hidden" value="Free size">' : `<label>Size</label><input id="f_size" class="input" list="f_size_options" maxlength="20" value="${escapeHtml(p.size || '')}"><datalist id="f_size_options">${getProductSizes(p.name,p.type).map(size => `<option value="${escapeHtml(size)}">`).join('')}</datalist>`}
                     <label>Giá bán</label>
                     <input id="f_price" class="input" type="number" value="${p.price}" placeholder="Giá bán">
                     <label>Số lượng tồn</label>
                     <input id="f_stock" class="input" type="number" value="${p.stock}" placeholder="Số lượng tồn">
                     ${buildProductImageField(pendingProductImages)}
                     <label>Nhà cung cấp</label>
-                    <select id="f_supplier" class="input">${buildImportSupplierOptions(p.supplierId || "")}</select>
+                    <select id="f_supplier" class="input" disabled>${buildImportSupplierOptions(p.supplierId || "")}</select>
                 `;
             document.getElementById("crudModalBg").classList.add("open");
         }
@@ -1906,6 +2011,10 @@
 
         // Nút Lưu của modal chung. Dựa vào crudContext để biết đang lưu sản phẩm, đối tác hay voucher.
         async function saveCrudData() {
+            if (crudContext.target === 'productVariant' || crudContext.target === 'productGroup') {
+                await saveProductManagementData();
+                return;
+            }
             if (crudContext.target === 'product') {
                 const sku = document.getElementById("f_sku").value.trim();
                 const productId = document.getElementById("f_product_id").value.trim();

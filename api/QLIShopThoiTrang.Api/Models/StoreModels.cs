@@ -42,6 +42,8 @@ public sealed record ProductUpsertDto(
     List<string>? Images = null);
 
 public sealed record ProductTypeDto(string Id, string Name);
+public sealed record ProductVariantCreateDto(string ProductId, string Color, string Size, decimal Price, List<string>? Images = null);
+public sealed record ProductGroupUpdateDto(string Name, string Type, string Audience, string SupplierId);
 
 public sealed record PartnerDto(
     string Category,

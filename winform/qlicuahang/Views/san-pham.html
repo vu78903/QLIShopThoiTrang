@@ -51,6 +51,7 @@
                             <h1>Danh mục & Sản phẩm</h1>
                         </div>
                         <div class="actions">
+                            <button class="btn btn-secondary" onclick="openAddProductVariant()">Thêm biến thể</button>
                             <button class="btn btn-secondary" onclick="openProductImport()"><i data-lucide="file-up" style="width:16px"></i> Nhập Excel/CSV</button>
                             <button class="btn btn-secondary" onclick="showView('product-types')"><i data-lucide="tags" style="width:16px"></i> Loại sản phẩm</button>
                             <button class="btn btn-primary" onclick="openAddProduct()"><i data-lucide="plus" style="width:16px"></i> Thêm Sản phẩm</button>
@@ -59,12 +60,21 @@
                     </div>
                     <div class="card pad">
                         <div class="filterbar" style="margin-bottom:14px">
+                            <button class="btn btn-secondary" type="button" aria-expanded="false" aria-controls="productFilters" onclick="toggleProductFilters(this)">Lọc</button>
+                            <span id="productFilterSummary"></span>
+                            <div id="productFilters" hidden style="display:none;gap:12px;flex-wrap:wrap;width:100%">
+                            <label>Tồn kho<select id="productStockFilter" class="input" onchange="renderProducts()"><option value="">Tất cả tồn kho</option><option value="available">Còn tồn</option><option value="low">Sắp hết hàng (1–9 / SKU)</option><option value="out">Hết hàng</option></select></label>
+                            <label>Màu<select id="productColorFilter" class="input" onchange="renderProducts()"><option value="">Tất cả màu</option></select></label>
+                            <label>Danh mục
                             <select id="productAudienceFilter" class="input" style="max-width:190px" onchange="renderProducts()" aria-label="Lọc theo danh mục">
                                 <option value="">Tất cả danh mục</option>
                                 <option value="NAM">Nam</option>
                                 <option value="NU">Nữ</option>
                                 <option value="PHU_KIEN">Phụ kiện</option>
                             </select>
+                            </label>
+                            <button class="btn btn-secondary" type="button" onclick="resetProductFilters()">Xóa bộ lọc</button>
+                            </div>
                             <div class="input-wrap" style="max-width:520px">
                                 <input id="productSearchInput" class="input" type="search"
                                        placeholder="Tìm theo Mã SP, Mã SKU hoặc tên sản phẩm..."
@@ -83,13 +93,12 @@
                                     <tr>
                                         <th>Hình ảnh</th>
                                         <th>Mã SP</th>
-                                        <th>Mã SKU</th>
                                         <th>Tên sản phẩm</th>
                                         <th>Loại sản phẩm</th>
                                         <th>Danh mục</th>
                                         <th>Nhà cung cấp</th>
                                         <th>Màu sắc</th>
-                                        <th>Size</th>
+                                        <th>Số SKU</th>
                                         <th>Giá bán</th>
                                         <th>Tồn kho</th>
                                         <th>Thao tác</th>

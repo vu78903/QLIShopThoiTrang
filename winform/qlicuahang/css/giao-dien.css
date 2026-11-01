@@ -2526,3 +2526,8 @@
                 font-size: 15px;
             }
         }
+#pv_fields { display:flex; flex-direction:column; gap:12px; }
+#productFilters label { display:flex; flex-direction:column; gap:6px; min-width:170px; }
+#productFilters { align-items:flex-end; }
+#view-products .data-table td:last-child { min-width:170px; }
+#view-products .data-table td:last-child .btn { margin:3px 0; }

@@ -146,6 +146,36 @@ app.MapPost("/api/san-pham", async (ProductUpsertDto input, StoreRepository stor
     }
 });
 
+app.MapPost("/api/san-pham/nhom/{productId}", async (string productId, ProductGroupUpdateDto input, StoreRepository store) =>
+{
+    try { await store.UpdateProductGroupAsync(productId, input); return Results.Ok(); }
+    catch (InvalidOperationException ex) { return Results.Conflict(new { message = ex.Message }); }
+});
+
+app.MapPost("/api/san-pham/bien-the", async (ProductVariantCreateDto input, StoreRepository store, ProductImageStorage storage) =>
+{
+    if (string.IsNullOrWhiteSpace(input.ProductId) || string.IsNullOrWhiteSpace(input.Color) || string.IsNullOrWhiteSpace(input.Size) || input.Price <= 0)
+        return Results.BadRequest(new { message = "Vui lòng nhập đủ sản phẩm, màu, size và giá bán." });
+    if (input.Images?.Count > 5) return Results.BadRequest(new { message = "Mỗi SKU tối đa 5 ảnh." });
+    var savedImages = new List<string>();
+    try
+    {
+        foreach (var image in input.Images ?? [])
+        {
+            var saved = await storage.SaveAsync("variant-" + Guid.NewGuid().ToString("N"), image);
+            if (!string.IsNullOrWhiteSpace(saved)) savedImages.Add(saved);
+        }
+        var sku = await store.CreateProductVariantAsync(input with { Images = savedImages });
+        return Results.Ok(new { sku });
+    }
+    catch (Exception ex)
+    {
+        foreach (var image in savedImages)
+            if (!await store.IsProductImageInUseAsync(image)) await storage.DeleteManagedFileAsync(image);
+        return Results.Conflict(new { message = ex.Message });
+    }
+});
+
 app.MapPost("/api/san-pham/import", async (List<ProductUpsertDto> input, StoreRepository store) =>
 {
     if (input.Count == 0) return Results.BadRequest("File không có sản phẩm để nhập.");

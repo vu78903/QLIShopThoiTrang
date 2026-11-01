@@ -13,15 +13,20 @@ public sealed class ProductImageStorage(IHttpClientFactory httpClientFactory, IC
         @"^data:image/(?<type>png|jpeg|webp);base64,(?<data>.+)$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    private readonly string _supabaseUrl = (
-        Environment.GetEnvironmentVariable("SUPABASE_URL")
-        ?? configuration["Supabase:Url"]
-        ?? string.Empty).TrimEnd('/');
+    private string SupabaseUrl => ReadSetting("SUPABASE_URL", "Supabase:Url").TrimEnd('/');
 
-    private readonly string _serviceRoleKey =
-        Environment.GetEnvironmentVariable("SUPABASE_SERVICE_ROLE_KEY")
-        ?? configuration["Supabase:ServiceRoleKey"]
-        ?? string.Empty;
+    private string ServiceRoleKey => ReadSetting("SUPABASE_SERVICE_ROLE_KEY", "Supabase:ServiceRoleKey");
+
+    private string ReadSetting(string variable, string setting)
+    {
+        // Windows có thể đã lưu cấu hình mới trong User khi API/Visual Studio vẫn đang chạy.
+        // Đọc lại mỗi lần dùng, bỏ qua giá trị rỗng thay vì giữ cấu hình thiếu đến khi restart.
+        var userValue = OperatingSystem.IsWindows()
+            ? Environment.GetEnvironmentVariable(variable, EnvironmentVariableTarget.User)
+            : null;
+        return new[] { userValue, Environment.GetEnvironmentVariable(variable), configuration[setting] }
+            .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))?.Trim() ?? string.Empty;
+    }
 
     public async Task<string?> SaveAsync(string sku, string? image)
     {
@@ -64,7 +69,7 @@ public sealed class ProductImageStorage(IHttpClientFactory httpClientFactory, IC
         if (!response.IsSuccessStatusCode)
             throw new InvalidOperationException("Supabase Storage từ chối ảnh: " + await response.Content.ReadAsStringAsync());
 
-        return $"{_supabaseUrl}/storage/v1/object/public/{BucketName}/{objectPath}";
+        return $"{SupabaseUrl}/storage/v1/object/public/{BucketName}/{objectPath}";
     }
 
     public async Task DeleteManagedFileAsync(string? imageUrl)
@@ -112,16 +117,16 @@ public sealed class ProductImageStorage(IHttpClientFactory httpClientFactory, IC
 
     private HttpRequestMessage CreateRequest(HttpMethod method, string path)
     {
-        var request = new HttpRequestMessage(method, _supabaseUrl + path);
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _serviceRoleKey);
-        request.Headers.Add("apikey", _serviceRoleKey);
+        var request = new HttpRequestMessage(method, SupabaseUrl + path);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", ServiceRoleKey);
+        request.Headers.Add("apikey", ServiceRoleKey);
         return request;
     }
 
     private string? GetManagedObjectPath(string? imageUrl)
     {
-        if (string.IsNullOrWhiteSpace(imageUrl) || string.IsNullOrWhiteSpace(_supabaseUrl)) return null;
-        var prefix = $"{_supabaseUrl}/storage/v1/object/public/{BucketName}/";
+        if (string.IsNullOrWhiteSpace(imageUrl) || string.IsNullOrWhiteSpace(SupabaseUrl)) return null;
+        var prefix = $"{SupabaseUrl}/storage/v1/object/public/{BucketName}/";
         return imageUrl.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
             ? imageUrl[prefix.Length..]
             : null;
@@ -129,7 +134,7 @@ public sealed class ProductImageStorage(IHttpClientFactory httpClientFactory, IC
 
     private void EnsureConfigured()
     {
-        if (string.IsNullOrWhiteSpace(_supabaseUrl) || string.IsNullOrWhiteSpace(_serviceRoleKey))
+        if (string.IsNullOrWhiteSpace(SupabaseUrl) || string.IsNullOrWhiteSpace(ServiceRoleKey))
             throw new InvalidOperationException(
                 "Thiếu SUPABASE_URL hoặc SUPABASE_SERVICE_ROLE_KEY. Hãy đặt hai biến môi trường này rồi mở lại ứng dụng.");
     }

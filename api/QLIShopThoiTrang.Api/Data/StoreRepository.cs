@@ -203,6 +203,78 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
         return new LoginResultDto(reader.GetString(0),reader.GetString(1),role);
     }
 
+    public async Task<string> CreateProductVariantAsync(ProductVariantCreateDto input)
+    {
+        var productId = input.ProductId.Trim().ToUpperInvariant();
+        var color = input.Color.Trim();
+        var size = input.Size.Trim();
+        if (color.Length is < 1 or > 50 || size.Length is < 1 or > 20 || input.Price <= 0)
+            throw new InvalidOperationException("Màu, size và giá bán không hợp lệ.");
+        await using var connection = db.CreateConnection();
+        await connection.OpenAsync();
+        await using var tx = await connection.BeginTransactionAsync();
+        await ExecuteAsync(connection, tx, "SELECT pg_advisory_xact_lock(hashtext(@id))", ("@id", productId));
+        string name, type, audience, supplier;
+        await using (var command = new NpgsqlCommand("SELECT TenSanPham,MaLoai,DanhMuc,MaNSX FROM SanPham WHERE MaSP=@id AND TrangThai=TRUE ORDER BY MaSKU LIMIT 1 FOR UPDATE", connection, tx))
+        {
+            command.Parameters.AddWithValue("id", productId);
+            await using var reader = await command.ExecuteReaderAsync();
+            if (!await reader.ReadAsync()) throw new InvalidOperationException("Sản phẩm không còn hoạt động. Vui lòng tải lại danh sách.");
+            name = reader.GetString(0); type = reader.GetString(1); audience = reader.GetString(2); supplier = reader.GetString(3);
+        }
+        if (audience == "PHU_KIEN") size = "Free size";
+        var typeName = await ScalarStringAsync(connection, tx, "SELECT TenLoai FROM LoaiSanPham WHERE MaLoai=@id AND TrangThai=TRUE", ("@id", type));
+        if (typeName is null || await ScalarLongAsync(connection, tx, "SELECT COUNT(*) FROM NhaSanXuat WHERE MaNSX=@id AND TrangThai=TRUE", ("@id", supplier)) == 0)
+            throw new InvalidOperationException("Loại sản phẩm hoặc nhà cung cấp đã ngừng hoạt động.");
+        if (Regex.IsMatch(ToAscii(typeName), @"QUAN.*(JEANS?|TAY)") && !Regex.IsMatch(size, @"^\d{2,3}$"))
+            throw new InvalidOperationException("Quần jeans và quần tây phải chọn size số.");
+        if (await ScalarLongAsync(connection, tx, "SELECT COUNT(*) FROM SanPham WHERE MaSP=@id AND lower(trim(MauSac))=lower(@color) AND lower(trim(KichCo))=lower(@size)", ("@id", productId), ("@color", color), ("@size", size)) > 0)
+            throw new InvalidOperationException("Sản phẩm đã có biến thể màu và size này (kể cả biến thể đã tắt).");
+        var sequence = Regex.Match(productId, @"\d+$").Value;
+        var skuBase = $"{ProductSkuCode(name)}-{sequence}-{ColorSkuCode(color)}-{SizeSkuCode(size)}";
+        if (skuBase.Length > 20) skuBase = skuBase[..20].TrimEnd('-');
+        var sku = skuBase;
+        var suffix = 2;
+        while (await ScalarLongAsync(connection, tx, "SELECT COUNT(*) FROM SanPham WHERE MaSKU=@sku", ("@sku", sku)) > 0)
+        {
+            var tail = $"-{suffix++}";
+            sku = skuBase[..Math.Min(skuBase.Length, 20-tail.Length)].TrimEnd('-') + tail;
+        }
+        var images = NormalizeProductImages(input.Images, null);
+        // Chỉ kế thừa ảnh cùng màu; màu mới được để trống nếu chưa tải ảnh.
+        if (images.Count == 0)
+        {
+            var json = await ScalarStringAsync(connection, tx, "SELECT DanhSachHinhAnh::text FROM SanPham WHERE MaSP=@id AND lower(trim(MauSac))=lower(@color) AND TrangThai=TRUE AND DanhSachHinhAnh IS NOT NULL ORDER BY MaSKU LIMIT 1", ("@id", productId), ("@color", color));
+            if (!string.IsNullOrEmpty(json)) images = NormalizeProductImages(JsonSerializer.Deserialize<List<string>>(json), null);
+        }
+        await ExecuteAsync(connection, tx, """
+            INSERT INTO SanPham(MaSP,MaSKU,MaLoai,TenSanPham,DanhMuc,MaNSX,SoLuong,KichCo,MauSac,TrangThai,DonGia,SoLuongTonKho,HinhAnh,DanhSachHinhAnh)
+            VALUES(@id,@sku,@type,@name,@audience,@supplier,0,@size,@color,TRUE,@price,0,@image,CAST(@images AS jsonb))
+            """, ("@id", productId), ("@sku", sku), ("@type", type), ("@name", name), ("@audience", audience), ("@supplier", supplier),
+            ("@size", size), ("@color", color), ("@price", input.Price), ("@image", DbValue(images.FirstOrDefault())), ("@images", JsonSerializer.Serialize(images)));
+        await tx.CommitAsync();
+        return sku;
+    }
+
+    public async Task UpdateProductGroupAsync(string productId, ProductGroupUpdateDto input)
+    {
+        if (string.IsNullOrWhiteSpace(input.Name) || input.Name.Length > 200)
+            throw new InvalidOperationException("Tên sản phẩm không hợp lệ.");
+        var audience = NormalizeProductAudience(input.Audience);
+        await using var connection = db.CreateConnection();
+        await connection.OpenAsync();
+        await using var tx = await connection.BeginTransactionAsync();
+        await ExecuteAsync(connection, tx, "SELECT pg_advisory_xact_lock(hashtext(@id))", ("@id", productId));
+        var type = await ScalarStringAsync(connection, tx, "SELECT MaLoai FROM LoaiSanPham WHERE TenLoai=@type AND TrangThai=TRUE", ("@type", input.Type));
+        if (type is null) throw new InvalidOperationException("Loại sản phẩm không tồn tại.");
+        if (input.SupplierId != ExpectedSupplierId(input.Type, audience) || await ScalarLongAsync(connection, tx, "SELECT COUNT(*) FROM NhaSanXuat WHERE MaNSX=@id AND TrangThai=TRUE", ("@id", input.SupplierId)) == 0)
+            throw new InvalidOperationException("Nhà cung cấp không phù hợp với loại sản phẩm.");
+        if (await ScalarLongAsync(connection, tx, "SELECT COUNT(*) FROM SanPham WHERE MaSP=@id AND TrangThai=TRUE", ("@id", productId)) == 0)
+            throw new InvalidOperationException("Không tìm thấy sản phẩm.");
+        await ExecuteAsync(connection, tx, "UPDATE SanPham SET TenSanPham=@name,MaLoai=@type,DanhMuc=@audience,MaNSX=@supplier WHERE MaSP=@id", ("@id", productId), ("@name", input.Name.Trim()), ("@type", type), ("@audience", audience), ("@supplier", input.SupplierId));
+        await tx.CommitAsync();
+    }
+
     public async Task SaveProductAsync(ProductUpsertDto input)
     {
         var sku = (input.Sku ?? string.Empty).Trim().ToUpperInvariant();
@@ -216,6 +288,7 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
         await connection.OpenAsync();
         await using var tx = (NpgsqlTransaction)await connection.BeginTransactionAsync();
         var type = input.Type.Trim();
+        await ExecuteAsync(connection, tx, "SELECT pg_advisory_xact_lock(hashtext(@id))", ("@id", productId));
         var audience = NormalizeProductAudience(input.Audience);
         var supplier = (input.SupplierId ?? string.Empty).Trim().ToUpperInvariant();
         if (string.IsNullOrWhiteSpace(supplier) || await ScalarLongAsync(connection, tx,

@@ -79,6 +79,8 @@ internal static class ApiProcessManager
         CopyUserEnvironment(startInfo, "PAYOS_CHECKSUM_KEY");
         CopyUserEnvironment(startInfo, "PAYOS_RETURN_URL");
         CopyUserEnvironment(startInfo, "PAYOS_CANCEL_URL");
+        CopyUserEnvironment(startInfo, "SUPABASE_URL");
+        CopyUserEnvironment(startInfo, "SUPABASE_SERVICE_ROLE_KEY");
 
         try
         {
