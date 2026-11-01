@@ -21,11 +21,18 @@ namespace qlicuahang
 
         private async void formQLDoiTac_Load(object? sender, EventArgs e)
         {
+            if (formDangNhap.VaiTro != "CuaHangTruong")
+            {
+                MessageBox.Show("Chỉ admin được mở form Đối tác.", "Không có quyền", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Close();
+                return;
+            }
             // Load trang đối tác.
             webView = new WebView2 { Dock = DockStyle.Fill };
             this.Controls.Add(webView);
 
             await webView.EnsureCoreWebView2Async(null);
+            await WebViewStaffContext.ConfigureAsync(webView.CoreWebView2);
 
             string fileHtml = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Views", "doi-tac.html");
             if (File.Exists(fileHtml))

@@ -46,6 +46,17 @@ public sealed class SqlServerDatabaseInitializer(SqlServerConnectionFactory db)
         if (count < 5)
             throw new InvalidOperationException("Supabase chưa đủ bảng. Hãy chạy file YodyStore_Supabase_PostgreSQL.txt.");
 
+        await using var customerCredentials = connection.CreateCommand();
+        customerCredentials.CommandText = """
+            ALTER TABLE khachhang ADD COLUMN IF NOT EXISTS tendangnhap varchar(50) NULL;
+            ALTER TABLE khachhang ADD COLUMN IF NOT EXISTS matkhau varchar(200) NULL;
+            ALTER TABLE khachhang ADD COLUMN IF NOT EXISTS gioitinh varchar(20) NULL;
+            ALTER TABLE khachhang ADD COLUMN IF NOT EXISTS ngaysinh date NULL;
+            CREATE UNIQUE INDEX IF NOT EXISTS ux_khachhang_tendangnhap
+                ON khachhang(tendangnhap) WHERE tendangnhap IS NOT NULL AND tendangnhap<>'';
+            """;
+        await customerCredentials.ExecuteNonQueryAsync();
+
         // Bổ sung thông tin dùng chung cho đơn giao từ POS và website.
         await using var deliveryColumns = connection.CreateCommand();
         deliveryColumns.CommandText = """

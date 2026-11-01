@@ -39,7 +39,7 @@
         const APP_STORAGE_KEY = "y_fashion_erp_state_v2";
         const API_BASE_URL = "http://127.0.0.1:5000";
         const VAT_RATE = 8;
-        const ADDRESS_OPTIONS = {
+        const ADDRESS_OPTIONS = window.VIETNAM_ADDRESS_OPTIONS || {
             "Thành phố Hồ Chí Minh": ["Tân Sơn Nhì", "Tây Thạnh", "Sơn Kỳ", "Phú Thọ Hòa", "Tân Quý", "Tân Thành", "Hòa Thạnh", "Phú Trung", "Hiệp Tân", "Tân Thới Hòa"],
             "Thành phố Hà Nội": ["Ba Đình", "Hoàn Kiếm", "Cửa Nam", "Hai Bà Trưng", "Đống Đa", "Cầu Giấy", "Thanh Xuân", "Hà Đông"],
             "Thành phố Đà Nẵng": ["Hải Châu", "Thanh Khê", "Sơn Trà", "Ngũ Hành Sơn", "Liên Chiểu", "Cẩm Lệ"]
@@ -680,7 +680,7 @@
                 return;
             }
 
-            const canApprove = window.userRole === "storeManager";
+            const canApprove = ['admin','storeManager'].includes(window.userRole);
             tbody.innerHTML = importRequests.map((request, idx) => {
                 const items = Array.isArray(request.items) ? request.items : [{
                     sku: request.sku, productName: request.productName, qty: request.qty,
@@ -824,7 +824,7 @@
 
         // Cửa hàng trưởng duyệt phiếu thì tồn kho mới được cộng.
         async function approveImportRequest(idx) {
-            if (window.userRole !== "storeManager") {
+            if (!['admin','storeManager'].includes(window.userRole)) {
                 toast("Chỉ cửa hàng trưởng mới có quyền duyệt phiếu nhập");
                 return;
             }
@@ -846,7 +846,7 @@
 
         // Từ chối phiếu nhập nếu tạo nhầm hoặc không cần nhập nữa.
         async function rejectImportRequest(idx) {
-            if (window.userRole !== "storeManager") {
+            if (!['admin','storeManager'].includes(window.userRole)) {
                 toast("Chỉ cửa hàng trưởng mới có quyền từ chối phiếu nhập");
                 return;
             }
@@ -1467,10 +1467,9 @@
                 ? `<label>${meta.roleLabel}</label><input id="p_role" class="input" value="${getCustomerRank(data)} - ${getCustomerPoints(data)} điểm" readonly>`
                 : category === "Nhân viên"
                     ? `<label>${meta.roleLabel}</label><select id="p_role" class="input">
-                            <option value="Quản lý" ${(data.role || "Nhân viên bán hàng") === "Quản lý" ? "selected" : ""}>Quản lý</option>
-                            <option value="Ca trưởng" ${data.role === "Ca trưởng" ? "selected" : ""}>Ca trưởng</option>
-                            <option value="Thu ngân" ${data.role === "Thu ngân" ? "selected" : ""}>Thu ngân</option>
-                            <option value="Nhân viên bán hàng" ${(data.role || "Nhân viên bán hàng") === "Nhân viên bán hàng" ? "selected" : ""}>Nhân viên bán hàng</option>
+                            <option value="Cửa hàng trưởng" ${['Quản lý','Cửa hàng trưởng'].includes(data.role) ? "selected" : ""}>Cửa hàng trưởng</option>
+                            <option value="Trưởng ca" ${['Ca trưởng','Trưởng ca'].includes(data.role) ? "selected" : ""}>Trưởng ca</option>
+                            <option value="Nhân viên thu ngân" ${!data.role || ['Thu ngân','Nhân viên bán hàng','Nhân viên thu ngân'].includes(data.role) ? "selected" : ""}>Nhân viên thu ngân</option>
                             <option value="Nhân viên kho" ${data.role === "Nhân viên kho" ? "selected" : ""}>Nhân viên kho</option>
                         </select>`
                 : "";
@@ -1491,9 +1490,21 @@
                     <label>${meta.phoneLabel}</label>
                     <input id="p_phone" class="input" inputmode="numeric" pattern="[0-9]*" value="${data.phone || ''}" placeholder="${meta.phonePlaceholder}" oninput="digitsOnly(this)" onkeydown="return allowPhoneKey(event)">
                     ${emailField}
-                    <label>${meta.addressLabel}</label>
-                    <input id="p_address" class="input" value="${data.address || ''}" placeholder="${meta.addressPlaceholder}">
+                    ${buildPartnerAddressFields(data)}
                     ${roleField}
+                    ${category === 'Khách hàng' ? `
+                    <label>Giới tính</label>
+                    <select id="p_gender" class="input"><option value="">Chọn giới tính</option><option value="Nam" ${data.gender === 'Nam' ? 'selected' : ''}>Nam</option><option value="Nữ" ${data.gender === 'Nữ' ? 'selected' : ''}>Nữ</option></select>
+                    <label>Ngày sinh</label>
+                    <input id="p_birthdate" class="input" type="date" value="${escapeHtml(data.birthDate || '')}" max="${new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10)}" onkeydown="if(event.key !== 'Tab') event.preventDefault()" onpaste="return false" ondrop="return false" onclick="this.showPicker?.()">` : ''}
+                    ${(category === 'Khách hàng' || category === 'Nhân viên') && window.userRole === 'admin' ? `
+                    <label>Tên đăng nhập</label>
+                    <input id="p_username" class="input" maxlength="50" autocomplete="off" value="${escapeHtml(data.username || '')}">
+                    <label>Mật khẩu</label>
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <input id="p_password" class="input" type="password" maxlength="200" autocomplete="off" value="${escapeHtml(data.password || '')}">
+                        <button type="button" class="btn btn-secondary" onclick="togglePartnerPassword(this)" aria-label="Hiện mật khẩu" aria-pressed="false">Hiện</button>
+                    </div>` : ''}
                 `;
         }
 
@@ -1505,8 +1516,15 @@
                 name: document.getElementById("p_name")?.value || "",
                 phone: document.getElementById("p_phone")?.value || "",
                 email: document.getElementById("p_email")?.value || "",
-                address: document.getElementById("p_address")?.value || "",
-                role: document.getElementById("p_role")?.value || ""
+                address: getPartnerAddress(),
+                addressStreet: document.getElementById('p_address_street')?.value || '',
+                addressCity: document.getElementById('p_address_city')?.value || '',
+                addressWard: document.getElementById('p_address_ward')?.value || '',
+                role: document.getElementById("p_role")?.value || "",
+                username: document.getElementById("p_username")?.value || "",
+                password: document.getElementById("p_password")?.value || "",
+                gender: document.getElementById("p_gender")?.value || null,
+                birthDate: document.getElementById("p_birthdate")?.value || null
             };
         }
 
@@ -1544,6 +1562,7 @@
 
         // Mở form thêm khách hàng/nhà cung cấp/nhân viên.
         function openAddPartner() {
+            if (window.userRole !== 'admin') { toast('Chỉ admin được quản lý đối tác'); return; }
             if (currentPartnerCategory === "Khách hàng") currentPartnerCategory = "Nhà cung cấp";
             crudContext = { action: 'add', target: 'partner', editIndex: -1 };
             document.getElementById("crudModalTitle").textContent = "Thêm Mới Đối Tác";
@@ -1552,16 +1571,36 @@
         }
 
         // Mở form sửa thông tin đối tác.
-        function openEditPartner(idx) {
+        async function openEditPartner(idx) {
+            if (window.userRole !== 'admin') { toast('Chỉ admin được quản lý đối tác'); return; }
             crudContext = { action: 'edit', target: 'partner', editIndex: idx };
             const p = partnersData[idx];
+            let credentials = {};
+            if (window.userRole === 'admin' && ['Khách hàng','Nhân viên'].includes(p.category)) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/doi-tac/${encodeURIComponent(p.category)}/${encodeURIComponent(p.id)}/tai-khoan`, {cache:'no-store'});
+                    if (!response.ok) throw new Error(await getApiErrorMessage(response, 'Không đọc được tài khoản.'));
+                    credentials = await response.json();
+                } catch (error) { alert(error.message); return; }
+            }
             document.getElementById("crudModalTitle").textContent = p.category === "Khách hàng" ? "Cập Nhật Khách Hàng" : "Cập Nhật Đối Tác";
-            document.getElementById("crudModalFields").innerHTML = buildPartnerModalFields(p.category, p);
+            document.getElementById("crudModalFields").innerHTML = buildPartnerModalFields(p.category, {...p, ...credentials});
             document.getElementById("crudModalBg").classList.add("open");
+        }
+
+        function togglePartnerPassword(button) {
+            const input = document.getElementById('p_password');
+            if (!input) return;
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            button.textContent = show ? 'Ẩn' : 'Hiện';
+            button.setAttribute('aria-label', show ? 'Ẩn mật khẩu' : 'Hiện mật khẩu');
+            button.setAttribute('aria-pressed', String(show));
         }
 
         // Xóa đối tác sau khi người dùng xác nhận.
         async function deletePartner(idx) {
+            if (window.userRole !== 'admin') { toast('Chỉ admin được quản lý đối tác'); return; }
             const partner = partnersData[idx];
             if (!partner) return;
             const isEmployee = partner.category === "Nhân viên";
@@ -1756,8 +1795,53 @@
             }
         }
 
-        function buildCityOptions() {
-            return Object.keys(ADDRESS_OPTIONS).map(city => `<option value="${escapeHtml(city)}">${escapeHtml(city)}</option>`).join("");
+        function normalizeAddressToken(value) {
+            const token = String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase()
+                .replace(/^(thanh pho|tinh|phuong|xa)\s+/, '').replace(/^(tp\.?|p\.)\s+/, '').replace(/[^a-z0-9]/g, '');
+            return ['tphcm','hcm'].includes(token) ? 'hochiminh' : token;
+        }
+
+        function splitPartnerAddress(address) {
+            const parts = String(address || '').split(',').map(x => x.trim()).filter(Boolean);
+            const city = Object.keys(ADDRESS_OPTIONS).find(x => normalizeAddressToken(x) === normalizeAddressToken(parts.at(-1))) || '';
+            if (!city) return {street: String(address || ''), city: '', ward: ''};
+            parts.pop();
+            const wardIndex = parts.findLastIndex(part => ADDRESS_OPTIONS[city].some(x => normalizeAddressToken(x) === normalizeAddressToken(part)));
+            const ward = wardIndex < 0 ? '' : ADDRESS_OPTIONS[city].find(x => normalizeAddressToken(x) === normalizeAddressToken(parts[wardIndex]));
+            if (wardIndex >= 0) parts.splice(wardIndex, 1);
+            return {street: parts.join(', '), city, ward};
+        }
+
+        function buildWardOptions(city, selected = '') {
+            return (ADDRESS_OPTIONS[city] || []).map(ward => `<option value="${escapeHtml(ward)}" ${ward === selected ? 'selected' : ''}>${escapeHtml(ward)}</option>`).join('');
+        }
+
+        function buildPartnerAddressFields(data = {}) {
+            const address = Object.hasOwn(data, 'addressStreet')
+                ? {street: data.addressStreet, city: data.addressCity, ward: data.addressWard}
+                : splitPartnerAddress(data.address);
+            return `<label>Tỉnh / thành phố</label>
+                <select id="p_address_city" class="input" onchange="updatePartnerAddressWards()"><option value="">Chọn tỉnh / thành phố</option>${buildCityOptions(address.city)}</select>
+                <label>Phường / xã</label>
+                <select id="p_address_ward" class="input" ${address.city ? '' : 'disabled'}><option value="">Chọn phường / xã</option>${buildWardOptions(address.city, address.ward)}</select>
+                <label>Số nhà, tên đường</label>
+                <input id="p_address_street" class="input" maxlength="200" value="${escapeHtml(address.street)}" placeholder="Nhập số nhà, tên đường">`;
+        }
+
+        function updatePartnerAddressWards() {
+            const city = document.getElementById('p_address_city')?.value || '';
+            const ward = document.getElementById('p_address_ward');
+            if (!ward) return;
+            ward.disabled = !city;
+            ward.innerHTML = '<option value="">Chọn phường / xã</option>' + buildWardOptions(city);
+        }
+
+        function getPartnerAddress() {
+            return ['p_address_street','p_address_ward','p_address_city'].map(id => document.getElementById(id)?.value.trim() || '').filter(Boolean).join(', ');
+        }
+
+        function buildCityOptions(selected = '') {
+            return Object.keys(ADDRESS_OPTIONS).sort((a,b) => a.localeCompare(b,'vi')).map(city => `<option value="${escapeHtml(city)}" ${city === selected ? 'selected' : ''}>${escapeHtml(city)}</option>`).join("");
         }
 
         // Địa chỉ giao hàng chỉ cho chọn thành phố và phường từ danh sách thống nhất.
@@ -1772,6 +1856,7 @@
             const city = document.getElementById("deliveryCity")?.value || "";
             const ward = document.getElementById("deliveryWard");
             if (!ward) return;
+            ward.disabled = !city;
             ward.innerHTML = `<option value="">Chọn phường</option>` +
                 (ADDRESS_OPTIONS[city] || []).map(item => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join("");
         }
@@ -1787,6 +1872,7 @@
             const city = document.getElementById("quick_customer_city")?.value || "";
             const ward = document.getElementById("quick_customer_ward");
             if (!ward) return;
+            ward.disabled = !city;
             const wards = ADDRESS_OPTIONS[city] || [];
             ward.innerHTML = `<option value="">Chọn phường / xã</option>` + wards.map(item => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join("");
         }
@@ -1803,12 +1889,16 @@
                 <input id="quick_customer_phone" class="input" inputmode="numeric" maxlength="11" pattern="[0-9]*" value="${escapeHtml(enteredPhone)}" placeholder="Ví dụ: 0901234567" oninput="digitsOnly(this)" onkeydown="return allowPhoneKey(event)">
                 <label>Email</label>
                 <input id="quick_customer_email" class="input" type="email" placeholder="VD: khachhang@gmail.com">
+                <label>Giới tính</label>
+                <select id="quick_customer_gender" class="input"><option value="">Chọn giới tính</option><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select>
+                <label>Ngày sinh</label>
+                <input id="quick_customer_birthdate" class="input" type="date" max="${new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10)}" onkeydown="if(event.key !== 'Tab') event.preventDefault()" onpaste="return false" ondrop="return false" onclick="this.showPicker?.()">
                 <label>Tỉnh / thành phố</label>
                 <select id="quick_customer_city" class="input" onchange="updateQuickCustomerWards()"><option value="">Chọn tỉnh / thành phố</option>${buildCityOptions()}</select>
                 <label>Phường / xã</label>
-                <select id="quick_customer_ward" class="input"><option value="">Chọn phường / xã</option></select>
+                <select id="quick_customer_ward" class="input" disabled><option value="">Chọn phường / xã</option></select>
                 <label>Địa chỉ chi tiết</label>
-                <input id="quick_customer_address" class="input" placeholder="Số nhà, tên đường">
+                <input id="quick_customer_address" class="input" maxlength="200" placeholder="Số nhà, tên đường">
             `;
             document.getElementById("crudModalBg").classList.add("open");
             setTimeout(() => document.getElementById("quick_customer_name")?.focus(), 50);
@@ -1997,7 +2087,9 @@
                                 phone,
                                 email,
                                 address,
-                                role: ""
+                                role: "",
+                                gender: document.getElementById('quick_customer_gender')?.value || null,
+                                birthDate: document.getElementById('quick_customer_birthdate')?.value || null
                             })
                         });
                         if (!response.ok) throw new Error(await response.text());
@@ -2018,11 +2110,18 @@
                 const name = document.getElementById("p_name").value.trim();
                 const phone = document.getElementById("p_phone").value.trim();
                 const email = document.getElementById("p_email")?.value.trim() || "";
-                const address = document.getElementById("p_address").value.trim();
+                const address = getPartnerAddress();
+                if (address.length > 300) { alert('Địa chỉ không được vượt quá 300 ký tự.'); return; }
                 const role = category === "Nhân viên" ? document.getElementById("p_role")?.value.trim() || "" : "";
 
                 if (!id || !name) {
                     alert("Vui lòng nhập đủ Mã và Tên đối tác!");
+                    return;
+                }
+
+                if (!document.getElementById('p_address_street')?.value.trim() ||
+                    !document.getElementById('p_address_city')?.value || !document.getElementById('p_address_ward')?.value) {
+                    alert('Vui lòng nhập số nhà, tên đường và chọn tỉnh/thành phố, phường/xã.');
                     return;
                 }
 
@@ -2045,7 +2144,11 @@
                     const response = await fetch(`${API_BASE_URL}/api/doi-tac`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ category, id, name, phone, email, address, role })
+                        body: JSON.stringify({ category, id, name, phone, email, address, role,
+                            username: document.getElementById('p_username')?.value.trim() || null,
+                            password: document.getElementById('p_password')?.value || null,
+                            gender: document.getElementById('p_gender')?.value || null,
+                            birthDate: document.getElementById('p_birthdate')?.value || null })
                     });
                     if (!response.ok) throw new Error(await response.text());
                     await loadAppState();
@@ -2053,7 +2156,7 @@
                     toast(crudContext.action === 'add' ? "Đã thêm đối tác mới!" : "Đã cập nhật thông tin đối tác!");
                 } catch (error) {
                     console.error(error);
-                    alert("Không lưu được đối tác vào cơ sở dữ liệu.");
+                    alert("Không lưu được đối tác vào cơ sở dữ liệu.\n" + (error.message || ''));
                     return;
                 }
             } else if (crudContext.target === 'promotion') {
@@ -2263,7 +2366,7 @@
             const points = Number(getRowValue(row, ["diem", "diemtichluy", "points", "điểm"])) || 0;
             const totalSpent = Number(getRowValue(row, ["tongchitieu", "totalspent", "chi tiêu", "tong tien"])) || 0;
             const errors = [];
-            const employeeRoles = ["Quản lý", "Ca trưởng", "Thu ngân", "Nhân viên bán hàng", "Nhân viên kho"];
+            const employeeRoles = ["Cửa hàng trưởng", "Trưởng ca", "Nhân viên thu ngân", "Nhân viên kho"];
 
             if (!name) errors.push("thiếu tên");
             if (!isPhoneValid(phone)) errors.push("số điện thoại phải là số và không được trống");
@@ -4218,6 +4321,7 @@
 
         // Kiểm tra quyền trước khi mở một form.
         function canOpenView(view) {
+            if (view === 'partners' && window.userRole !== 'admin') return false;
             if (!Array.isArray(window.allowedViews) || window.allowedViews.length === 0) return true;
             return window.allowedViews.includes(view);
         }
@@ -4287,6 +4391,7 @@
             if (window.lucide) lucide.createIcons();
             document.querySelectorAll(".nav-btn[data-view]").forEach(btn => {
                 btn.addEventListener("click", () => showView(btn.getAttribute("data-view")));
+                if (btn.getAttribute('data-view') === 'partners' && window.userRole !== 'admin') btn.style.display = 'none';
             });
             document.getElementById("skuSearch")?.addEventListener("keydown", event => {
                 if (event.key === "Enter") {

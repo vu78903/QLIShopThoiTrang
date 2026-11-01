@@ -616,15 +616,31 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
 
     public async Task SavePartnerAsync(PartnerUpsertDto input)
     {
+        if(input.Username is not null && (string.IsNullOrWhiteSpace(input.Username) || input.Username.Length>50 || input.Username.Any(char.IsWhiteSpace)))
+            throw new InvalidOperationException("Tên đăng nhập phải từ 1 đến 50 ký tự và không có khoảng trắng.");
+        if(input.Password is not null && (input.Password.Length==0 || input.Password.Length>200))
+            throw new InvalidOperationException("Mật khẩu phải từ 1 đến 200 ký tự.");
+        DateOnly? birthDate=null;
+        if(!string.IsNullOrWhiteSpace(input.BirthDate))
+        {
+            if(!DateOnly.TryParseExact(input.BirthDate,"yyyy-MM-dd",CultureInfo.InvariantCulture,DateTimeStyles.None,out var parsed) || parsed>DateOnly.FromDateTime(DateTime.Today))
+                throw new InvalidOperationException("Ngày sinh không hợp lệ hoặc nằm trong tương lai.");
+            birthDate=parsed;
+        }
+        if(input.Gender is not null && input.Gender is not ("Nam" or "Nữ"))
+            throw new InvalidOperationException("Giới tính phải là Nam hoặc Nữ.");
+        var credentialParams=CommonPartnerParams(input).Concat(new (string Name,object? Value)[]{("@username",DbValue(input.Username)),("@password",input.Password is null ? DBNull.Value : input.Password),("@gender",DbValue(input.Gender)),("@birthdate",birthDate.HasValue?birthDate.Value:DBNull.Value)}).ToArray();
         if (input.Category == "Khách hàng")
         {
             await ExecuteStandaloneAsync("""
-                INSERT INTO KhachHang(MaKH,SoDienThoai,HoTen,Email,DiaChi)
-                VALUES(@id,@phone,@name,@email,@address)
+                INSERT INTO KhachHang(MaKH,SoDienThoai,HoTen,Email,DiaChi,TenDangNhap,MatKhau,GioiTinh,NgaySinh)
+                VALUES(@id,@phone,@name,@email,@address,@username,@password,@gender,@birthdate)
                 ON CONFLICT (MaKH) DO UPDATE SET HoTen=EXCLUDED.HoTen,
                     SoDienThoai=EXCLUDED.SoDienThoai,Email=EXCLUDED.Email,
-                    DiaChi=EXCLUDED.DiaChi,TrangThai=TRUE;
-                """, CommonPartnerParams(input));
+                    DiaChi=EXCLUDED.DiaChi,TrangThai=TRUE,
+                    TenDangNhap=COALESCE(@username,KhachHang.TenDangNhap),MatKhau=COALESCE(@password,KhachHang.MatKhau),
+                    GioiTinh=COALESCE(@gender,KhachHang.GioiTinh),NgaySinh=COALESCE(@birthdate,KhachHang.NgaySinh);
+                """, credentialParams);
             return;
         }
         if (input.Category == "Nhà cung cấp")
@@ -640,18 +656,31 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
         }
         if (input.Category == "Nhân viên")
         {
-            var parameters = CommonPartnerParams(input).Append(("@permission", (object?)MapPermission(input.Role))).ToArray();
+            var parameters = credentialParams.Append(("@permission", (object?)MapPermission(input.Role))).ToArray();
             await ExecuteStandaloneAsync("""
                 INSERT INTO NhanVien(MaNV,TenDangNhap,HoTen,ChucVu,SoDienThoai,Email,DiaChi,MaQuyen,MatKhau)
-                VALUES(@id,LOWER(REPLACE(@id,'-','')),@name,@role,@phone,@email,@address,@permission,'123')
+                VALUES(@id,COALESCE(@username,LOWER(REPLACE(@id,'-',''))),@name,@role,@phone,@email,@address,@permission,COALESCE(@password,'123'))
                 ON CONFLICT (MaNV) DO UPDATE SET HoTen=EXCLUDED.HoTen,
                     ChucVu=EXCLUDED.ChucVu,SoDienThoai=EXCLUDED.SoDienThoai,
                     Email=EXCLUDED.Email,DiaChi=EXCLUDED.DiaChi,
-                    MaQuyen=EXCLUDED.MaQuyen,TrangThai=TRUE;
+                    MaQuyen=EXCLUDED.MaQuyen,TrangThai=TRUE,
+                    TenDangNhap=COALESCE(@username,NhanVien.TenDangNhap),MatKhau=COALESCE(@password,NhanVien.MatKhau);
                 """, parameters);
             return;
         }
         throw new InvalidOperationException("Loại đối tác không hợp lệ.");
+    }
+
+    public async Task<object?> GetPartnerCredentialsAsync(string category,string id)
+    {
+        var table=category switch {"Khách hàng"=>"KhachHang","Nhân viên"=>"NhanVien",_=>null};
+        if(table is null) return null;
+        var key=category=="Khách hàng"?"MaKH":"MaNV";
+        await using var connection=db.CreateConnection();await connection.OpenAsync();
+        await using var command=NewCommand(connection,null,$"SELECT TenDangNhap,MatKhau FROM {table} WHERE {key}=@id AND TrangThai=TRUE",("@id",id));
+        await using var reader=await command.ExecuteReaderAsync();
+        if(!await reader.ReadAsync())return null;
+        return new {username=reader.IsDBNull(0)?"":reader.GetString(0),password=reader.IsDBNull(1)?"":reader.GetString(1)};
     }
 
     public async Task<bool> DeactivatePartnerAsync(string category, string id)
@@ -1416,20 +1445,21 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
     {
         var items = new List<PartnerDto>();
         await using var command = NewCommand(connection, null, """
-            SELECT 'Khách hàng',MaKH,HoTen,SoDienThoai,COALESCE(Email,''),COALESCE(DiaChi,''),HangThe,DiemTichLuy,TongChiTieu
+            SELECT 'Khách hàng',MaKH,HoTen,SoDienThoai,COALESCE(Email,''),COALESCE(DiaChi,''),HangThe,DiemTichLuy,TongChiTieu,GioiTinh,to_char(NgaySinh,'YYYY-MM-DD')
             FROM KhachHang WHERE TrangThai=TRUE
             UNION ALL
-            SELECT 'Nhà cung cấp',MaNSX,TenNSX,SoDienThoai,COALESCE(Email,''),COALESCE(DiaChi,''),COALESCE(MaSoThue,''),NULL,NULL
+            SELECT 'Nhà cung cấp',MaNSX,TenNSX,SoDienThoai,COALESCE(Email,''),COALESCE(DiaChi,''),COALESCE(MaSoThue,''),NULL,NULL,NULL,NULL
             FROM NhaSanXuat WHERE TrangThai=TRUE
             UNION ALL
-            SELECT 'Nhân viên',MaNV,HoTen,SoDienThoai,COALESCE(Email,''),COALESCE(DiaChi,''),ChucVu,NULL,NULL
+            SELECT 'Nhân viên',MaNV,HoTen,SoDienThoai,COALESCE(Email,''),COALESCE(DiaChi,''),CASE MaQuyen WHEN 'CHT' THEN 'Cửa hàng trưởng' WHEN 'TC' THEN 'Trưởng ca' WHEN 'KHO' THEN 'Nhân viên kho' ELSE 'Nhân viên thu ngân' END,NULL,NULL,NULL,NULL
             FROM NhanVien WHERE TrangThai=TRUE ORDER BY 1,2
             """);
         await using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
             items.Add(new(reader.GetString(0),reader.GetString(1),reader.GetString(2),reader.GetString(3),
                 reader.GetString(4),reader.GetString(5),reader.GetString(6),
-                reader.IsDBNull(7) ? null : reader.GetInt32(7),reader.IsDBNull(8) ? null : reader.GetDecimal(8)));
+                reader.IsDBNull(7) ? null : reader.GetInt32(7),reader.IsDBNull(8) ? null : reader.GetDecimal(8),
+                reader.IsDBNull(9)?null:reader.GetString(9),reader.IsDBNull(10)?null:reader.GetString(10)));
         return items;
     }
 
@@ -1760,7 +1790,7 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
         "Quản lý" or "Cửa hàng trưởng" => "CHT",
         "Ca trưởng" or "Trưởng ca" => "TC",
         "Nhân viên kho" => "KHO",
-        "Thu ngân" => "TN",
+        "Thu ngân" or "Nhân viên thu ngân" => "TN",
         _ => "TN"
     };
 }

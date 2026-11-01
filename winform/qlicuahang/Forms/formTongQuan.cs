@@ -33,12 +33,7 @@ namespace qlicuahang
                 webView = new WebView2 { Dock = DockStyle.Fill };
                 this.Controls.Add(webView);
                 await webView.EnsureCoreWebView2Async(null);
-                string apiTokenJson=JsonSerializer.Serialize(formDangNhap.ApiToken);
-                await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync($@"
-                    (()=>{{const token={apiTokenJson};const original=window.fetch.bind(window);
-                    window.fetch=(resource,init={{}})=>{{const url=typeof resource==='string'?resource:resource.url;
-                    if(new URL(url,location.href).origin==='http://127.0.0.1:5000'){{const headers=new Headers(init.headers || (resource instanceof Request ? resource.headers : undefined));headers.set('Authorization','Bearer '+token);init={{...init,headers}};}}
-                    return original(resource,init);}};}})();");
+                await WebViewStaffContext.ConfigureAsync(webView.CoreWebView2);
 
                 webView.CoreWebView2.WebMessageReceived += (s, args) =>
                 {
@@ -91,12 +86,12 @@ namespace qlicuahang
             switch (formDangNhap.VaiTro)
             {
                 case "CuaHangTruong":
-                    roleKey = "storeManager";
-                    roleLabel = "Vai trò: Cửa hàng trưởng";
+                    roleKey = "admin";
+                    roleLabel = "Vai trò: Cửa hàng trưởng (Admin)";
                     roleTitle = "Cửa hàng trưởng";
                     defaultView = "report";
                     allowedViews = "'report','pos','delivery','returns','partners','products','product-types','inventory','promotions'";
-                    deniedMessage = "Cửa hàng trưởng có toàn quyền trong hệ thống";
+                    deniedMessage = "Admin quản trị hệ thống";
                     break;
                 case "TruongCa":
                     roleKey = "shiftLeader";
@@ -180,14 +175,14 @@ namespace qlicuahang
                     }});
 
                     document.querySelectorAll('.nav-btn.manager-only:not([data-view])').forEach(btn => {{
-                        const canUseSystemSetting = '{roleKey}' === 'storeManager';
+                        const canUseSystemSetting = '{roleKey}' === 'admin';
                         btn.classList.toggle('hidden', !canUseSystemSetting);
                         btn.disabled = !canUseSystemSetting;
                     }});
 
                     const createImportButton = document.querySelector('button[onclick=""openAddImportRequest()""]');
                     if (createImportButton) {{
-                        const canCreateImport = ['storeManager', 'warehouse'].includes('{roleKey}');
+                        const canCreateImport = ['admin', 'storeManager', 'warehouse'].includes('{roleKey}');
                         createImportButton.classList.toggle('hidden', !canCreateImport);
                         createImportButton.disabled = !canCreateImport;
                     }}

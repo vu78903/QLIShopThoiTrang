@@ -52,7 +52,9 @@ public sealed record PartnerDto(
     string Address,
     string Role,
     int? Points,
-    decimal? TotalSpent);
+    decimal? TotalSpent,
+    string? Gender = null,
+    string? BirthDate = null);
 
 public sealed record PromotionProductDto(
     string Sku,
@@ -122,7 +124,11 @@ public sealed record PartnerUpsertDto(
     string Phone,
     string? Email,
     string? Address,
-    string? Role);
+    string? Role,
+    string? Username = null,
+    string? Password = null,
+    string? Gender = null,
+    string? BirthDate = null);
 
 public sealed record PromotionProductUpsertDto(string Sku, decimal Percent);
 

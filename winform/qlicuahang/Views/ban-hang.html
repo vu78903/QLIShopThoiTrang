@@ -128,7 +128,7 @@
                                         <label><span>Thành phố</span><select id="deliveryCity" class="input" onchange="updateDeliveryWards()"><option value="">Chọn thành phố</option></select></label>
                                         <label><span>Phường</span><select id="deliveryWard" class="input"><option value="">Chọn phường</option></select></label>
                                     </div>
-                                    <input id="deliveryAddressDetail" class="input" placeholder="Số nhà, tên đường">
+                                    <input id="deliveryAddressDetail" class="input" maxlength="200" placeholder="Số nhà, tên đường">
                                     <textarea id="deliveryNote" class="input delivery-note" maxlength="500" placeholder="Ghi chú cho shipper, ví dụ: gọi trước khi giao"></textarea>
                                     <div class="shipping-fee-field"><label for="shippingFee">Phí giao hàng</label><div class="money-input"><input id="shippingFee" class="input" type="number" min="0" value="0" oninput="updateCart()"><span>VNĐ</span></div></div>
                                 </div>
@@ -365,6 +365,7 @@
         <span id="toastText">Đã cập nhật thành công</span>
     </div>
 
+    <script src="../js/dia-chi-viet-nam.js"></script>
     <script src="../js/ung-dung.js?v=20261028-2"></script>
 </body>
 </html>
