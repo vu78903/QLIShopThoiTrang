@@ -1,0 +1,14 @@
+DELETE FROM chitietdoitra WHERE sophieudt IN (SELECT sophieudt FROM phieudoitra WHERE sohd LIKE 'TESTPOS-%');
+DELETE FROM phieudoitra WHERE sohd LIKE 'TESTPOS-%';
+DELETE FROM chitiethoadon WHERE sohd LIKE 'TESTPOS-%';
+DELETE FROM hoadon WHERE sohd LIKE 'TESTPOS-%';
+DELETE FROM khuyenmaisanpham WHERE makm LIKE 'TSTPOS-%';
+DELETE FROM khuyenmai WHERE makm LIKE 'TSTPOS-%';
+DELETE FROM sanpham WHERE masku IN ('TESTPOS-SALE','TESTPOS-OTHER') AND tensanpham LIKE 'TESTPOS%';
+DELETE FROM khachhang WHERE makh='TESTPOS-KH' AND hoten='TESTPOS khách hàng';
+DELETE FROM nhanvien WHERE manv IN ('TESTFIX-MAN','TESTFIX-CASH') AND hoten LIKE 'TESTPOS%';
+SELECT COUNT(*) AS test_invoices_remaining FROM hoadon WHERE sohd LIKE 'TESTPOS-%';
+SELECT COUNT(*) AS test_returns_remaining FROM phieudoitra WHERE sohd LIKE 'TESTPOS-%';
+SELECT COUNT(*) AS test_products_remaining FROM sanpham WHERE masku LIKE 'TESTPOS-%';
+SELECT COUNT(*) AS test_accounts_remaining FROM nhanvien WHERE manv IN ('TESTFIX-MAN','TESTFIX-CASH');
+SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename='return_request';

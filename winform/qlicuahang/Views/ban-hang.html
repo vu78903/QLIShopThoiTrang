@@ -88,7 +88,7 @@
                                             <th>Màu sắc</th>
                                             <th>Kích cỡ</th>
                                             <th>Đơn vị tính</th>
-                                            <th class="money-heading">Đơn giá</th>
+                                            <th class="money-heading">Đơn giá sau giảm</th><th>Tồn khả dụng</th>
                                             <th>Số lượng</th>
                                             <th class="money-heading">Thành tiền</th>
                                             <th></th>
@@ -135,7 +135,7 @@
                             </div>
                             <div class="bill">
                                 <div class="sum-row"><span>Tổng tiền hàng</span><strong id="subtotal">0 ₫</strong></div>
-                                <label class="bill-label">Mã khuyến mãi</label>
+                                <label class="bill-label">Voucher</label><select id="posVoucherSelect" class="input" onchange="selectPosVoucher(this.value)"><option value="">Chọn voucher</option></select>
                                 <div style="display:flex; gap:8px; margin:6px 0 10px">
                                     <input id="promoCodeInput" class="input" placeholder="Nhập mã khuyến mãi">
                                     <button class="btn btn-secondary" type="button" onclick="applyPromotionCode()">Áp dụng</button>
@@ -366,6 +366,7 @@
     </div>
 
     <script src="../js/dia-chi-viet-nam.js"></script>
-    <script src="../js/ung-dung.js?v=20261028-2"></script>
+    <script src="../js/ung-dung.js?v=20261103-pos5"></script>
+    <script src="../js/pos-doi-tra.js?v=20261103-1"></script>
 </body>
 </html>

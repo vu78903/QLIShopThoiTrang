@@ -57,6 +57,26 @@ public sealed class SqlServerDatabaseInitializer(SqlServerConnectionFactory db)
             """;
         await customerCredentials.ExecuteNonQueryAsync();
 
+        // Bổ sung vào bảng nghiệp vụ hiện có; không tạo bảng yêu cầu đổi trả riêng.
+        await using var posReturnColumns = connection.CreateCommand();
+        posReturnColumns.CommandText = """
+            ALTER TABLE hoadon ADD COLUMN IF NOT EXISTS dauvantayyeucau varchar(64) NULL;
+            ALTER TABLE chitiethoadon ADD COLUMN IF NOT EXISTS giatrithuctra numeric(18,2) NULL;
+            ALTER TABLE phieudoitra ALTER COLUMN manv DROP NOT NULL;
+            ALTER TABLE phieudoitra ADD COLUMN IF NOT EXISTS mayeucau varchar(80) NULL;
+            ALTER TABLE phieudoitra ADD COLUMN IF NOT EXISTS dauvantayyeucau varchar(64) NULL;
+            ALTER TABLE phieudoitra ADD COLUMN IF NOT EXISTS lydotuchoi varchar(1000) NULL;
+            ALTER TABLE phieudoitra ADD COLUMN IF NOT EXISTS anhminhchung jsonb NOT NULL DEFAULT '[]'::jsonb;
+            CREATE UNIQUE INDEX IF NOT EXISTS ux_phieudoitra_mayeucau ON phieudoitra(mayeucau) WHERE mayeucau IS NOT NULL;
+            DO $$ BEGIN
+              IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='public.phieudoitra'::regclass AND conname='ck_phieudoitra_nhanvien_trangthai') THEN
+                ALTER TABLE phieudoitra ADD CONSTRAINT ck_phieudoitra_nhanvien_trangthai
+                  CHECK(manv IS NOT NULL OR trangthai IN ('CHO_DUYET','CHO_TIEP_NHAN','TU_CHOI'));
+              END IF;
+            END $$;
+            """;
+        await posReturnColumns.ExecuteNonQueryAsync();
+
         // Bổ sung thông tin dùng chung cho đơn giao từ POS và website.
         await using var deliveryColumns = connection.CreateCommand();
         deliveryColumns.CommandText = """

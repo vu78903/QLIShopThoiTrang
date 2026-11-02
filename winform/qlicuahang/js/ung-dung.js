@@ -2,6 +2,10 @@
         // Các mảng dưới đây đang đóng vai trò như "database nhỏ" khi chạy demo.
         // Sau này nếu có SQL Server/API thì chỉ cần thay phần đọc ghi dữ liệu ở đây.
         let productsData = [];
+        let checkoutInProgress = false;
+        let checkoutCompletionInProgress = false;
+        let checkoutAttempt = null;
+        let returnAttempt = null;
         const IMPORT_PIECES_PER_CARTON = 50;
         let productTypesData = [];
         let partnersData = [];
@@ -95,6 +99,8 @@
                     cancelledOrders = Array.isArray(data.cancelledOrders) ? data.cancelledOrders : [];
                     importRequests = Array.isArray(data.importRequests) ? data.importRequests : [];
                     cart = Array.isArray(data.cart) ? data.cart : [];
+                    checkoutAttempt = data.checkoutAttempt || null;
+                    returnAttempt = data.returnAttempt || null;
                     salesHistory = Array.isArray(data.salesHistory) ? data.salesHistory : [];
                     shiftReports = Array.isArray(data.shiftReports) ? data.shiftReports : [];
                     appliedPromotion = data.appliedPromotion || null;
@@ -108,6 +114,10 @@
                 if (!response.ok) throw new Error("API app-state failed");
                 const data = await response.json();
                 productsData = normalizeProductAudiences(Array.isArray(data.productsData) ? data.productsData : []);
+                cart = cart.map(item => {
+                    const product = productsData.find(p => p.sku === item.sku);
+                    return product ? {...item,originalPrice:Number(product.price),price:effectiveProductPrice(product)} : item;
+                });
                 productTypesData = Array.isArray(data.productTypesData) ? data.productTypesData : [];
                 partnersData = Array.isArray(data.partnersData) ? data.partnersData : [];
                 promotionsData = Array.isArray(data.promotionsData) ? data.promotionsData : [];
@@ -142,6 +152,8 @@
                 cancelledOrders,
                 importRequests,
                 cart,
+                checkoutAttempt,
+                returnAttempt,
                 salesHistory,
                 shiftReports,
                 appliedPromotion
@@ -1073,7 +1085,7 @@
             const start = parseLocalDate(promo.startDate);
             const end = parseLocalDate(promo.endDate);
             if (!start || !end) return false;
-            const preciseTime = Array.isArray(promo.products) && promo.products.length > 0;
+            const preciseTime = /[T ]\d{2}:\d{2}/.test(promo.startDate || '') || /[T ]\d{2}:\d{2}/.test(promo.endDate || '');
             if (!preciseTime) start.setHours(0, 0, 0, 0);
             if (!preciseTime) end.setHours(23, 59, 59, 999);
             return today >= start && today <= end && subtotal >= (Number(promo.minOrder) || 0);
@@ -2816,7 +2828,8 @@
                             <td>${escapeHtml(item.color || "Mặc định")}</td>
                             <td>${escapeHtml(item.size || "Free size")}</td>
                             <td>${escapeHtml(item.unit || "Cái")}</td>
-                            <td class="money-cell">${money(item.price)}</td>
+                            <td class="money-cell">${item.originalPrice > item.price ? `<del>${money(item.originalPrice)}</del><br>` : ''}${money(item.price)}</td>
+                            <td>${getAvailableStock(item.sku)} cái</td>
                             <td>
                                 <div class="stepper">
                                     <button onclick="changeQty(${i},-1)">−</button>
@@ -2841,6 +2854,7 @@
 
         // Thêm sản phẩm vào giỏ bằng SKU, đồng thời kiểm tra còn tồn kho hay không.
         function addToCartBySku(sku) {
+            if (checkoutInProgress) return;
             const p = productsData.find(x => x.sku === sku);
             if (!p) return;
             const stock = getAvailableStock(sku);
@@ -2856,7 +2870,7 @@
                 }
                 f.qty++;
             } else {
-                cart.push({ ...p, stock, qty: 1 });
+                cart.push({ ...p, originalPrice:Number(p.price),price:effectiveProductPrice(p), stock, qty: 1 });
             }
             renderCart();
             toast("Đã thêm " + p.name + " vào giỏ");
@@ -2864,6 +2878,7 @@
 
         // Tăng/giảm số lượng một dòng trong giỏ hàng.
         function changeQty(i, n) {
+            if (checkoutInProgress) return;
             const item = cart[i];
             if (!item) return;
             const stock = getAvailableStock(item.sku);
@@ -2885,6 +2900,7 @@
 
         // Cho phép thu ngân nhập trực tiếp số lượng nhưng không vượt quá tồn kho.
         function updateCartQuantity(index, rawValue) {
+            if (checkoutInProgress) return;
             const item = cart[index];
             if (!item) return;
             const quantity = Number(rawValue);
@@ -2906,6 +2922,7 @@
 
         // Xóa một sản phẩm khỏi giỏ.
         async function removeCart(i) {
+            if (checkoutInProgress) return;
             if (!await confirmDeletion("Sản phẩm này sẽ bị xóa khỏi giỏ hàng hiện tại. Bạn có muốn tiếp tục?", "Xóa khỏi giỏ hàng?")) return;
             cart.splice(i, 1);
             renderCart();
@@ -2914,6 +2931,7 @@
 
         // Xóa toàn bộ giỏ và bỏ mã khuyến mãi đang áp dụng.
         async function clearCart(skipConfirmation = false) {
+            if (checkoutInProgress) return;
             if (!cart.length) {
                 toast("Giỏ hàng đang trống");
                 return;
@@ -3024,9 +3042,9 @@
             let promo = null;
             if (appliedPromotion && isPromotionActive(appliedPromotion, subtotal)) {
                 promo = appliedPromotion;
-                promoDiscount = Math.round(subtotal * (Number(promo.percent) || 0) / 100);
+                promoDiscount = voucherAmount(promo,subtotal);
             }
-            const discount = memberDiscount + promoDiscount;
+            const discount = Math.min(subtotal,memberDiscount + promoDiscount);
             const taxableAmount = Math.max(0, subtotal - discount);
             const vatAmount = Math.round(taxableAmount * VAT_RATE / 100);
             const shippingFee = getDeliveryMode() ? Math.max(0, Number(document.getElementById("shippingFee")?.value) || 0) : 0;
@@ -3043,13 +3061,14 @@
             document.getElementById("subtotal").textContent = money(subtotal);
             const discountParts = [];
             if (memberDiscount > 0) discountParts.push(`Hạng ${getCustomerRank(customer)} ${memberRate}%`);
-            if (promo) discountParts.push(`${promo.code} ${promo.percent}%`);
+            if (promo) discountParts.push(`${promo.code} ${voucherText(promo)}`);
             document.getElementById("discountLabel").textContent = discountParts.length ? discountParts.join(" + ") : "Khuyến mãi";
             document.getElementById("discount").textContent = discount > 0 ? "- " + money(discount) : "0 ₫";
             document.getElementById("vatAmount").textContent = money(vatAmount);
             if (document.getElementById("shippingAmount")) document.getElementById("shippingAmount").textContent = money(shippingFee);
             document.getElementById("grandTotal").textContent = money(total);
             document.getElementById("change").textContent = money(cash - total);
+            renderPosVoucherOptions(subtotal);
         }
 
         // Điền nhanh số tiền khách đưa.
@@ -3063,6 +3082,7 @@
 
         // Áp mã khuyến mãi vào giỏ nếu mã còn hạn và đủ điều kiện.
         function applyPromotionCode() {
+            if (checkoutInProgress) return;
             const input = document.getElementById("promoCodeInput");
             const code = input.value.trim().toUpperCase();
             const subtotal = cart.reduce((s, x) => s + x.price * x.qty, 0);
@@ -3079,6 +3099,10 @@
             const promo = promotionsData.find(item => item.code.toUpperCase() === code);
             if (!promo) {
                 toast("Mã khuyến mãi không tồn tại");
+                return;
+            }
+            if ((promo.products || []).length) {
+                toast('Chương trình này giảm riêng SKU, không phải voucher áp cho toàn giỏ.');
                 return;
             }
             if (!isPromotionActive(promo, subtotal)) {
@@ -3388,6 +3412,7 @@
                 promoDiscount,
                 promoCode: promo ? promo.code : "",
                 promoPercent: promo ? promo.percent : 0,
+                promoKind: promo ? promo.kind : 'PHAN_TRAM',
                 vatRate: VAT_RATE,
                 vatAmount,
                 shippingFee,
@@ -3427,7 +3452,7 @@
                 ${itemsHtml}
                 <div class="receipt-line"></div>
                 <div class="receipt-row"><span>Tổng tiền hàng (${receipt.itemCount} SP):</span><span>${moneyPlain(receipt.subtotal)}</span></div>
-                ${receipt.memberDiscount !== undefined ? `<div class="receipt-row"><span>Chiết khấu hạng thẻ ${receipt.memberRate ? "(" + receipt.memberRate + "%)" : ""}:</span><span>${receipt.memberDiscount > 0 ? "-" + moneyPlain(receipt.memberDiscount) : "0"}</span></div><div class="receipt-row"><span>Voucher ${receipt.promoCode ? receipt.promoCode + " (" + (receipt.promoPercent || 0) + "%)" : "chưa áp dụng"}:</span><span>${receipt.promoDiscount > 0 ? "-" + moneyPlain(receipt.promoDiscount) : "0"}</span></div>` : `<div class="receipt-row"><span>Chiết khấu${receipt.promoCode ? " (" + escapeHtml(receipt.promoCode) + ")" : ""}:</span><span>${receipt.discount > 0 ? "-" + moneyPlain(receipt.discount) : "0"}</span></div>`}
+                ${receipt.memberDiscount !== undefined ? `<div class="receipt-row"><span>Chiết khấu hạng thẻ ${receipt.memberRate ? "(" + receipt.memberRate + "%)" : ""}:</span><span>${receipt.memberDiscount > 0 ? "-" + moneyPlain(receipt.memberDiscount) : "0"}</span></div><div class="receipt-row"><span>Voucher ${receipt.promoCode ? receipt.promoCode + " (" + voucherText({percent:receipt.promoPercent||0,kind:receipt.promoKind}) + ")" : "chưa áp dụng"}:</span><span>${receipt.promoDiscount > 0 ? "-" + moneyPlain(receipt.promoDiscount) : "0"}</span></div>` : `<div class="receipt-row"><span>Chiết khấu${receipt.promoCode ? " (" + escapeHtml(receipt.promoCode) + ")" : ""}:</span><span>${receipt.discount > 0 ? "-" + moneyPlain(receipt.discount) : "0"}</span></div>`}
                 <div class="receipt-row"><span>Thuế VAT (${receipt.vatRate || VAT_RATE}%):</span><span>${moneyPlain(receipt.vatAmount)}</span></div>
                 ${receipt.deliveryMode ? `<div class="receipt-row"><span>Phí giao hàng:</span><span>${moneyPlain(receipt.shippingFee || 0)}</span></div>` : ""}
                 <div class="receipt-solid"></div>
@@ -3696,7 +3721,7 @@
                     <td>${escapeHtml(p.color || "Mặc định")}</td>
                     <td>${escapeHtml(p.size || "Free size")}</td>
                     <td>${escapeHtml(p.unit || "Cái")}</td>
-                    <td class="money-cell">${money(Number(p.price) || 0)}</td>
+                    <td class="money-cell">${effectiveProductPrice(p) < Number(p.price) ? `<del>${money(p.price)}</del><br>` : ''}${money(effectiveProductPrice(p))}</td>
                     <td><span class="badge ${p.stock < 10 ? 'red' : 'green'}">${p.stock}</span></td>
                     <td>
                         <button class="btn ${Number(p.stock) <= 0 ? "btn-secondary" : "btn-primary"}" type="button" onclick="addStockPickerItem(${originalIndex})">
@@ -3897,6 +3922,7 @@
                 console.error(error);
                 pendingQrReceipt = null;
                 pendingQrOrderCode = null;
+                setCheckoutBusy(false);
                 qrFallback.style.display = "block";
                 qrFallback.textContent = error.message || "Không tạo được mã QR thanh toán.";
                 if (statusElement) statusElement.textContent = "Chưa tạo được phiên thanh toán.";
@@ -3923,6 +3949,7 @@
             pendingQrReceipt = null;
             pendingQrOrderCode = null;
             document.getElementById("qrPaymentModalBg").classList.remove("open");
+            setCheckoutBusy(false);
             toast("Đã hủy thanh toán QR");
         }
 
@@ -3985,6 +4012,7 @@
             document.getElementById("cardExpiryYear").value = "";
             document.getElementById("cardCvv").value = "";
             document.getElementById("cardPaymentModalBg").classList.remove("open");
+            setCheckoutBusy(false);
             toast("Đã hủy thanh toán thẻ");
         }
 
@@ -4028,7 +4056,10 @@
 
         // Hoàn tất thanh toán: tạo COD hoặc ghi nhận doanh thu, trừ kho, tích điểm, mở hóa đơn.
         async function completeCheckout(receipt, alreadyPersisted = false) {
-            if (!receipt) return;
+            if (!receipt || checkoutCompletionInProgress) return;
+            checkoutCompletionInProgress=true;
+            setCheckoutBusy(true);
+            try {
             const invoicePayload = buildInvoicePayload(receipt);
             const { receiverName, receiverPhone, receiverAddress, deliveryNote } = invoicePayload;
             receipt.deliveryNote = deliveryNote;
@@ -4039,10 +4070,10 @@
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(invoicePayload)
                     });
-                    if (!response.ok) throw new Error(await response.text());
+                    if (!response.ok) throw new Error(await getApiErrorMessage(response,"Không lưu được hóa đơn."));
                 } catch (error) {
                     console.error(error);
-                    toast("Không lưu được hóa đơn vào cơ sở dữ liệu");
+                    toast(error.message || "Không lưu được hóa đơn vào cơ sở dữ liệu");
                     return;
                 }
             }
@@ -4106,10 +4137,14 @@
             toggleShip();
             openReceiptModal(receipt);
             resetSaleCustomer();
+            checkoutAttempt=null;saveAppState();
+            await loadAppState();renderAll();
+            } finally {checkoutCompletionInProgress=false;setCheckoutBusy(false);}
         }
 
         // Nút thanh toán chính của POS, kiểm tra giỏ và điều hướng theo phương thức thanh toán.
         function checkout() {
+            if (checkoutInProgress) return;
             if (!cart.length) {
                 toast("Giỏ hàng đang trống!");
                 return;
@@ -4153,6 +4188,11 @@
                 return;
             }
             const receipt = buildReceiptSnapshot(paymentMethod, deliveryMode);
+            const signature = JSON.stringify({items:receipt.items.map(i=>[i.sku,i.qty]).sort(),phone:receipt.customer?.phone,paymentMethod,deliveryMode,address:buildInvoicePayload(receipt).receiverAddress});
+            if (checkoutAttempt?.signature === signature) receipt.id = checkoutAttempt.id;
+            else checkoutAttempt = {signature,id:receipt.id};
+            saveAppState();
+            setCheckoutBusy(true);
             if (!isCod && paymentMethod === "Quét mã QR") {
                 openQrPaymentModal(receipt);
                 return;
@@ -4309,8 +4349,8 @@
             let qty = Math.max(1, Number.parseInt(qtyInput?.value || "1", 10) || 1);
             if (item && qty > item.remainingQty) qty = item.remainingQty;
             if (qtyInput) qtyInput.value = String(Math.max(1, qty));
-            const returnValue = item ? item.price * qty : 0;
-            const replacementValue = resolution === "DOI_SAN_PHAM" && replacement ? replacement.price * qty : 0;
+            const returnValue = item ? refundableValue(item,qty) : 0;
+            const replacementValue = resolution === "DOI_SAN_PHAM" && replacement ? Math.round(effectiveProductPrice(replacement) * qty * 1.08) : 0;
             const difference = replacementValue - returnValue;
 
             document.getElementById("returnOldValue").textContent = money(returnValue);
@@ -4358,7 +4398,11 @@
                 replacementSku: document.getElementById("returnReplacementSku")?.value || null,
                 employeeId: employee.id
             };
+            const signature=JSON.stringify(payload);
+            if(returnAttempt?.signature!==signature)returnAttempt={signature,id:crypto.randomUUID()};
+            payload.clientRequestId=returnAttempt.id;saveAppState();
             const button = document.getElementById("createReturnButton");
+            if(button?.disabled)return;
             if (button) button.disabled = true;
             try {
                 const response = await fetch(`${API_BASE_URL}/api/doi-tra`, {
@@ -4368,6 +4412,7 @@
                 });
                 if (!response.ok) throw new Error(await getApiErrorMessage(response, "Không tạo được phiếu đổi trả."));
                 const receipt = await response.json();
+                returnAttempt=null;saveAppState();
                 await loadAppState();
                 await loadReturnHistory();
                 clearReturnInvoice();
@@ -4427,6 +4472,9 @@
             const balanceText = receipt.extraAmount > 0
                 ? `Khách trả thêm: ${money(receipt.extraAmount)}`
                 : `Hoàn cho khách: ${money(receipt.refundAmount)}`;
+            if(Array.isArray(receipt.items)&&receipt.items.length>1){
+                return renderMultipleReturnReceipt(receipt);
+            }
             return `
                 <div class="return-slip-header">
                     <div class="return-slip-brand"><div class="receipt-logo">yo<span>dy</span></div></div>
@@ -4594,6 +4642,7 @@
             }
             if (document.getElementById("customerStep")) resetSaleCustomer();
             if (document.getElementById("returnHistoryBody")) loadReturnHistory();
+            if (document.getElementById("webReturnRequestBody")) loadWebReturnRequests();
         });
 
 

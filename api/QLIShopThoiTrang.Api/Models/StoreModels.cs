@@ -26,7 +26,10 @@ public sealed record ProductDto(
     int Stock,
     string? Image,
     List<string> Images,
-    bool Active = true);
+    bool Active = true,
+    decimal? SalePrice = null,
+    decimal SalePercent = 0,
+    string? SaleCode = null);
 
 public sealed record ProductUpsertDto(
     string? ProductId,
@@ -91,7 +94,8 @@ public sealed record PromotionDto(
     decimal MinOrder,
     string StartDate,
     string EndDate,
-    List<PromotionProductDto> Products);
+    List<PromotionProductDto> Products,
+    string Kind = "PHAN_TRAM");
 
 public sealed record ImportRequestDto(
     string Id,
@@ -282,7 +286,9 @@ public sealed record ReturnInvoiceItemDto(
     int PurchasedQty,
     int ReturnedQty,
     int RemainingQty,
-    decimal Price);
+    decimal Price,
+    decimal? PaidTotal = null,
+    decimal ReturnedValue = 0);
 
 public sealed record ReturnInvoiceDetailDto(
     string Id,
@@ -303,7 +309,8 @@ public sealed record ReturnCreateDto(
     string Reason,
     string Resolution,
     string? ReplacementSku,
-    string? EmployeeId);
+    string? EmployeeId,
+    string? ClientRequestId = null);
 
 public sealed record ReturnSummaryDto(
     string Id,
@@ -342,4 +349,13 @@ public sealed record ReturnReceiptDto(
     decimal ReplacementUnitPrice,
     decimal ReplacementValue,
     decimal RefundAmount,
-    decimal ExtraAmount);
+    decimal ExtraAmount,
+    List<ReturnReceiptLineDto>? Items = null);
+
+public sealed record ReturnReceiptLineDto(string Sku, string Name, string Color, string Size, int Qty,
+    decimal ReturnValue, string? ReplacementSku, string? ReplacementName, decimal ReplacementValue, string Reason, int ReplacementQty = 0);
+public sealed record ReturnRequestedLineDto(string Sku, string Name, string Color, string Size, int Qty,
+    string Reason, string Resolution, string? ReplacementSku, string? ReplacementName, int ReplacementQty = 0);
+public sealed record ReturnRequestDto(string Id, string InvoiceId, string CustomerName, string Phone,
+    string CreatedAt, string Status, string? RejectionReason, List<string> Images, List<ReturnRequestedLineDto> Items);
+public sealed record ReturnRequestActionDto(string? EmployeeId, string? Reason = null);

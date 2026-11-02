@@ -32,7 +32,7 @@ app.UseStaticFiles();
 app.Use(async (context,next) =>
 {
     var path=context.Request.Path.Value ?? "";
-    if(path.StartsWith("/api/") && (context.Request.Method is not ("GET" or "OPTIONS") || path.StartsWith("/api/thanh-toan-qr/") || path.EndsWith("/tai-khoan") || path=="/api/san-pham/quan-ly") && path is not ("/api/dang-nhap" or "/api/thanh-toan-qr/webhook"))
+    if(path.StartsWith("/api/") && (context.Request.Method is not ("GET" or "OPTIONS") || path.StartsWith("/api/thanh-toan-qr/") || path.StartsWith("/api/doi-tra/yeu-cau") || path.EndsWith("/tai-khoan") || path=="/api/san-pham/quan-ly") && path is not ("/api/dang-nhap" or "/api/thanh-toan-qr/webhook"))
     {
         var token=context.Request.Headers.Authorization.ToString();
         token=token.StartsWith("Bearer ") ? token[7..] : "";
@@ -502,6 +502,20 @@ app.MapPut("/api/hoa-don/{soHoaDon}/giao-hang", async (string soHoaDon, CodStatu
 app.MapDelete("/api/hoa-don/{soHoaDon}/cod", async (string soHoaDon, StoreRepository store) =>
 {
     return await store.DeletePendingCodAsync(soHoaDon) ? Results.NoContent() : Results.NotFound();
+});
+
+app.MapGet("/api/doi-tra/yeu-cau", async (StoreRepository store) => Results.Ok(await store.GetWebReturnRequestsAsync()));
+
+app.MapPost("/api/doi-tra/yeu-cau/{id}/duyet", async (string id,ReturnRequestActionDto input,StoreRepository store,HttpContext context) =>
+{
+    try { return Results.Ok(await store.ApproveWebReturnAsync(id,((LoginResultDto)context.Items["StaffUser"]!).EmployeeId)); }
+    catch(InvalidOperationException ex) { return Results.Conflict(new {message=ex.Message}); }
+});
+
+app.MapPost("/api/doi-tra/yeu-cau/{id}/tu-choi", async (string id,ReturnRequestActionDto input,StoreRepository store,HttpContext context) =>
+{
+    try { await store.RejectWebReturnAsync(id,input.Reason??"",((LoginResultDto)context.Items["StaffUser"]!).EmployeeId);return Results.Ok(); }
+    catch(InvalidOperationException ex) { return Results.Conflict(new {message=ex.Message}); }
 });
 
 app.MapGet("/api/doi-tra/tra-cuu", async (string? q, StoreRepository store) =>
