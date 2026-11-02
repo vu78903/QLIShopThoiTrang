@@ -63,6 +63,7 @@
                             <button class="btn btn-secondary" type="button" aria-expanded="false" aria-controls="productFilters" onclick="toggleProductFilters(this)">Lọc</button>
                             <span id="productFilterSummary"></span>
                             <div id="productFilters" hidden style="display:none;gap:12px;flex-wrap:wrap;width:100%">
+                            <label>Trạng thái<select id="productStatusFilter" class="input" onchange="renderProducts()"><option value="">Tất cả trạng thái</option><option value="true">Đang bật</option><option value="false">Đang tắt</option></select></label>
                             <label>Tồn kho<select id="productStockFilter" class="input" onchange="renderProducts()"><option value="">Tất cả tồn kho</option><option value="available">Còn tồn</option><option value="low">Sắp hết hàng (1–9 / SKU)</option><option value="out">Hết hàng</option></select></label>
                             <label>Màu<select id="productColorFilter" class="input" onchange="renderProducts()"><option value="">Tất cả màu</option></select></label>
                             <label>Danh mục
@@ -101,6 +102,7 @@
                                         <th>Số SKU</th>
                                         <th>Giá bán</th>
                                         <th>Tồn kho</th>
+                                        <th>Trạng thái</th>
                                         <th>Thao tác</th>
                                     </tr>
                                 </thead>

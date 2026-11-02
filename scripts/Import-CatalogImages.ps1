@@ -1,5 +1,5 @@
 param(
-    [string]$ApiBase = "http://127.0.0.1:5000",
+    [string]$ApiBase = "http://127.0.0.1:5001",
     [string]$ManifestPath = (Join-Path $PSScriptRoot "..\database\catalog-images-2026-10-29.json")
 )
 

@@ -63,7 +63,7 @@ test("nhân viên đổi hàng, giới hạn số lượng và tạo lại phi�
   });
 
   await page.route("https://**/*", route => route.fulfill({ status: 200, body: "" }));
-  await page.route("http://127.0.0.1:5000/api/**", async route => {
+  await page.route("http://127.0.0.1:5001/api/**", async route => {
     const request = route.request();
     const url = new URL(request.url());
     const pathname = url.pathname;

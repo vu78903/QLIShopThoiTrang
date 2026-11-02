@@ -33,7 +33,7 @@ Dong va mo lai Visual Studio sau khi dat bien moi truong.
 
 ## Chay ung dung
 
-Mo `winform/qlicuahang/qlicuahang.csproj` bang Visual Studio va bam Start. WinForms se tu khoi dong API tai `http://127.0.0.1:5000`.
+Mo `winform/qlicuahang/qlicuahang.csproj` bang Visual Studio va bam Start. WinForms se tu khoi dong API tai `http://127.0.0.1:5001`.
 
 Thanh toan QR dong payOS: tren moi may, chay `CauHinh-PayOS.cmd`, nhap 3 khoa payOS, dong va mo lai Visual Studio. Xem chi tiet trong `HUONG_DAN_THANH_TOAN_QR_PAYOS.md`.
 

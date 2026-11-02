@@ -22,7 +22,7 @@ async function mockApi(page) {
     window.currentEmployee = { id: "NV-001", name: "Nguyễn Thu Ngân" };
   });
   await page.route("https://**/*", route => route.fulfill({ status: 200, body: "" }));
-  await page.route("http://127.0.0.1:5000/api/**", async route => {
+  await page.route("http://127.0.0.1:5001/api/**", async route => {
     const url = new URL(route.request().url());
     if (url.pathname === "/api/app-state") {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(appState) });

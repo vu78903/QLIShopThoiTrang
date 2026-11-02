@@ -18,7 +18,7 @@ public partial class formDangNhap : Form
         {
             using var client=new HttpClient {Timeout=TimeSpan.FromSeconds(5)};
             client.DefaultRequestHeaders.Authorization=new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer",ApiToken);
-            try { client.PostAsync("http://127.0.0.1:5000/api/dang-xuat",null).GetAwaiter().GetResult(); } catch(HttpRequestException) { } catch(TaskCanceledException) { }
+            try { client.PostAsync("http://127.0.0.1:5001/api/dang-xuat",null).GetAwaiter().GetResult(); } catch(HttpRequestException) { } catch(TaskCanceledException) { }
         }
         ApiToken="";
         VaiTro = "";
@@ -106,7 +106,7 @@ public partial class formDangNhap : Form
 
         try
         {
-            using HttpClient client = new() { BaseAddress = new Uri("http://127.0.0.1:5000") };
+            using HttpClient client = new() { BaseAddress = new Uri("http://127.0.0.1:5001") };
             using HttpResponseMessage response = await client.PostAsJsonAsync("/api/dang-nhap",
                 new { username = taiKhoan, password = matKhau });
 

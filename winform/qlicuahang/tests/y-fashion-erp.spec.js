@@ -92,7 +92,7 @@ test("thêm sản phẩm tự sinh MaSP và MaSKU theo biến thể", async ({ p
     productId: "SP-001", sku: "AOTHUN-001-DEN-M", name: "Áo thun test",
     type: "Áo", color: "Đen", size: "M", price: 100000, stock: 20
   };
-  await page.route("http://127.0.0.1:5000/api/**", async route => {
+  await page.route("http://127.0.0.1:5001/api/**", async route => {
     const request = route.request();
     if (request.url().endsWith("/api/app-state")) return route.fulfill({ json: state });
     if (request.url().endsWith("/api/san-pham") && request.method() === "POST") {
@@ -123,7 +123,7 @@ test("tìm sản phẩm theo MaSP, MaSKU và tên không dấu", async ({ page }
     { productId: "SP-002", sku: "QJ-002-XANH-32", name: "Quần jean ống suông", type: "Quần", color: "Xanh", size: "32", price: 499000, stock: 10 },
     { productId: "SP-003", sku: "HD-003-DO-L", name: "Áo hoodie", type: "Áo", color: "Đỏ", size: "L", price: 599000, stock: 10 }
   ];
-  await page.route("http://127.0.0.1:5000/api/**", route => route.fulfill({ json: state }));
+  await page.route("http://127.0.0.1:5001/api/**", route => route.fulfill({ json: state }));
   await openPage(page, "san-pham.html", state);
 
   const search = page.locator("#productSearchInput");
@@ -155,7 +155,7 @@ test("tìm sản phẩm theo MaSP, MaSKU và tên không dấu", async ({ page }
 test("đọc file CSV demo theo MaSP và tự sinh MaSKU khi import", async ({ page }) => {
   const state = structuredClone(seededState);
   let importedRows = null;
-  await page.route("http://127.0.0.1:5000/api/**", async route => {
+  await page.route("http://127.0.0.1:5001/api/**", async route => {
     const request = route.request();
     if (request.url().endsWith("/api/app-state")) return route.fulfill({ json: state });
     if (request.url().endsWith("/api/san-pham/import") && request.method() === "POST") {
@@ -218,7 +218,7 @@ test("thêm sản phẩm khuyến mãi nhiều SKU có giờ phút và tải l�
   page.on("request", request => {
     if (request.url().includes("/api/khuyen-mai")) promotionRequests.push(`${request.method()} ${request.url()}`);
   });
-  await page.route("http://127.0.0.1:5000/api/**", async route => {
+  await page.route("http://127.0.0.1:5001/api/**", async route => {
     const request = route.request();
     if (request.url().endsWith("/api/app-state")) return route.fulfill({ json: state });
     if (request.url().endsWith("/api/khuyen-mai") && request.method() === "POST") {
@@ -268,7 +268,7 @@ test("thêm sản phẩm khuyến mãi nhiều SKU có giờ phút và tải l�
   await expect(page.locator("#km_product_body tr")).toHaveCount(2);
   await page.getByRole("button", { name: "Lưu dữ liệu" }).click();
 
-  await expect.poll(() => promotionRequests).toContain("POST http://127.0.0.1:5000/api/khuyen-mai");
+  await expect.poll(() => promotionRequests).toContain("POST http://127.0.0.1:5001/api/khuyen-mai");
   await expect.poll(() => savedPayload?.products?.length || 0).toBe(2);
   await expect(page.locator("#productPromotionBody")).toContainText(savedPayload.code);
   await expect(page.locator("#productPromotionBody")).toContainText("27/10/2026 13:39");
@@ -307,7 +307,7 @@ test("QR payOS tự động xác nhận, xuất hóa đơn và không lưu trùn
   let paymentChecks = 0;
   let directInvoicePosts = 0;
 
-  await page.route("http://127.0.0.1:5000/api/**", async route => {
+  await page.route("http://127.0.0.1:5001/api/**", async route => {
     const request = route.request();
     const url = request.url();
     if (url.endsWith("/api/app-state")) return route.fulfill({ json: state });

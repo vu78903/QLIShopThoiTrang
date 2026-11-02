@@ -7,8 +7,8 @@ namespace qlicuahang;
 
 internal static class ApiProcessManager
 {
-    private const string HealthUrl = "http://127.0.0.1:5000/api/health";
-    private const int ApiPort = 5000;
+    private const string HealthUrl = "http://127.0.0.1:5001/api/health";
+    private const int ApiPort = 5001;
     private static Process? ownedProcess;
     private static readonly HttpClient HealthClient = new()
     {
@@ -52,7 +52,7 @@ internal static class ApiProcessManager
             startInfo = new ProcessStartInfo
             {
                 FileName = executablePath,
-                Arguments = "--urls http://127.0.0.1:5000"
+                Arguments = "--urls http://127.0.0.1:5001"
             };
         }
         else
@@ -60,7 +60,7 @@ internal static class ApiProcessManager
             startInfo = new ProcessStartInfo
             {
                 FileName = "dotnet",
-                Arguments = $"\"{dllPath}\" --urls http://127.0.0.1:5000"
+                Arguments = $"\"{dllPath}\" --urls http://127.0.0.1:5001"
             };
         }
 

@@ -21,7 +21,7 @@ namespace qlicuahang
                 if (!apiReady)
                 {
                     MessageBox.Show(
-                        "Không thể kết nối API tại cổng 5000. Hãy kiểm tra Internet, Supabase hoặc tiến trình đang dùng cổng 5000.",
+                        "Không thể kết nối API tại cổng 5001. Hãy kiểm tra Internet, Supabase hoặc tiến trình đang dùng cổng 5001.",
                         "Lỗi khởi động", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }

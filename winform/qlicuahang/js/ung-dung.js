@@ -2,6 +2,7 @@
         // Các mảng dưới đây đang đóng vai trò như "database nhỏ" khi chạy demo.
         // Sau này nếu có SQL Server/API thì chỉ cần thay phần đọc ghi dữ liệu ở đây.
         let productsData = [];
+        const IMPORT_PIECES_PER_CARTON = 50;
         let productTypesData = [];
         let partnersData = [];
         let promotionsData = [];
@@ -37,7 +38,7 @@
         let revenueChartInstance = null;
         let topChartInstance = null;
         const APP_STORAGE_KEY = "y_fashion_erp_state_v2";
-        const API_BASE_URL = "http://127.0.0.1:5000";
+        const API_BASE_URL = "http://127.0.0.1:5001";
         const VAT_RATE = 8;
         const ADDRESS_OPTIONS = window.VIETNAM_ADDRESS_OPTIONS || {
             "Thành phố Hồ Chí Minh": ["Tân Sơn Nhì", "Tây Thạnh", "Sơn Kỳ", "Phú Thọ Hòa", "Tân Quý", "Tân Thành", "Hòa Thạnh", "Phú Trung", "Hiệp Tân", "Tân Thới Hòa"],
@@ -85,7 +86,7 @@
                 const raw = localStorage.getItem(APP_STORAGE_KEY);
                 if (raw) {
                     const data = JSON.parse(raw);
-                    productsData = normalizeProductAudiences(Array.isArray(data.productsData) ? data.productsData : []);
+                    productsData = normalizeProductAudiences(Array.isArray(data.productsData) ? data.productsData.filter(product => product.active !== false) : []);
                     productTypesData = Array.isArray(data.productTypesData) ? data.productTypesData : [];
                     partnersData = Array.isArray(data.partnersData) ? data.partnersData : [];
                     promotionsData = Array.isArray(data.promotionsData) ? data.promotionsData : [];
@@ -116,6 +117,14 @@
                 codOrders = Array.isArray(data.codOrders) ? data.codOrders : codOrders;
                 cancelledOrders = Array.isArray(data.cancelledOrders) ? data.cancelledOrders : [];
                 saveAppState();
+                // Chỉ trang quản lý lấy cả SKU đã tắt; POS và website vẫn dùng app-state đang bật.
+                if (document.querySelector('#view-products')) {
+                    const managedResponse = await fetch(`${API_BASE_URL}/api/san-pham/quan-ly`, { cache: 'no-store' });
+                    if (!managedResponse.ok) throw new Error('Không tải được danh sách quản lý sản phẩm.');
+                    const managedProducts = await managedResponse.json();
+                    if (!Array.isArray(managedProducts)) throw new Error('Danh sách quản lý sản phẩm không hợp lệ.');
+                    productsData = normalizeProductAudiences(managedProducts);
+                }
             } catch (error) {
                 console.warn("Không tải được dữ liệu từ API, dùng dữ liệu localStorage.", error);
             }
@@ -124,7 +133,7 @@
         // Lưu dữ liệu demo để các trang HTML riêng vẫn dùng chung một trạng thái.
         function saveAppState() {
             const data = {
-                productsData,
+                productsData: productsData.filter(product => product.active !== false),
                 productTypesData,
                 partnersData,
                 promotionsData,
@@ -157,15 +166,17 @@
             const audience = document.getElementById('productAudienceFilter')?.value || '';
             const color = colorSelect?.value || '';
             const stock = document.getElementById('productStockFilter')?.value || '';
+            const active = document.getElementById('productStatusFilter')?.value || '';
             const groups = getProductGroups().filter(group => group.some(p =>
                 matchesProductSearch(p, keyword) && (!audience || getProductAudience(p) === audience) &&
+                (!active || (p.active !== false) === (active === 'true')) &&
                 (!color || p.color === color) && (!stock || (stock === 'available' ? Number(p.stock) > 0 :
                     stock === 'low' ? Number(p.stock) > 0 && Number(p.stock) < 10 : Number(p.stock) <= 0))));
             const summary = document.getElementById('productSearchSummary');
             if (summary) summary.textContent = `${groups.length} sản phẩm · ${groups.reduce((sum,g) => sum + g.length, 0)} SKU`;
             const filterSummary = document.getElementById('productFilterSummary');
             if (filterSummary) filterSummary.textContent = [audience && productAudienceLabel(audience), color,
-                stock && ({available:'Còn tồn',low:'Sắp hết hàng',out:'Hết hàng'}[stock])].filter(Boolean).join(' · ');
+                stock && ({available:'Còn tồn',low:'Sắp hết hàng',out:'Hết hàng'}[stock]), active && (active === 'true' ? 'Đang bật' : 'Đang tắt')].filter(Boolean).join(' · ');
             const clear = document.getElementById('productSearchClear');
             if (clear) clear.style.display = keyword.trim() ? 'inline-flex' : 'none';
             tbody.innerHTML = groups.map(group => {
@@ -179,10 +190,10 @@
                     <td>${escapeHtml(p.type || '')}</td><td>${escapeHtml(productAudienceLabel(getProductAudience(p)))}</td>
                     <td>${escapeHtml(p.supplierName || '')}</td><td>${escapeHtml([...new Set(group.map(item => item.color))].filter(Boolean).join(', '))}</td>
                     <td>${group.length}</td><td>${min.toLocaleString('vi-VN')}${max !== min ? ' – ' + max.toLocaleString('vi-VN') : ''} ₫</td>
-                    <td>${total}</td><td><button class="btn btn-secondary" onclick="openProductVariants(${idx})">Xem sản phẩm</button>
+                    <td>${total}</td><td>${productGroupStatusLabel(group)}</td><td><button class="btn btn-secondary" onclick="openProductVariants(${idx})">Xem sản phẩm</button>
                     <button class="btn btn-secondary" onclick="openEditProductGroup(${idx})">Sửa sản phẩm</button>
                     <button class="btn btn-secondary" onclick="openAddProductVariant(${idx})">Thêm biến thể</button></td></tr>`;
-            }).join('') || '<tr><td colspan="11" style="text-align:center;padding:30px">Không có sản phẩm phù hợp.</td></tr>';
+            }).join('') || '<tr><td colspan="12" style="text-align:center;padding:30px">Không có sản phẩm phù hợp.</td></tr>';
             if (window.lucide) lucide.createIcons();
             updateInventoryKpi();
         }
@@ -197,6 +208,15 @@
             return [...groups.values()];
         }
 
+        function productGroupStatusLabel(group) {
+            const enabled = group.filter(p => p.active !== false).length;
+            return enabled === group.length ? '<span class="badge green">Đang bật</span>' : enabled === 0 ? '<span class="badge red">Đang tắt</span>' : `<span class="badge amber">Bật ${enabled}/${group.length} SKU</span>`;
+        }
+
+        function buildProductStatusOptions(active) {
+            return `<option value="true" ${active !== false ? 'selected' : ''}>Đang bật</option><option value="false" ${active === false ? 'selected' : ''}>Đang tắt</option>`;
+        }
+
         function toggleProductFilters(button) {
             const panel = document.getElementById('productFilters');
             panel.hidden = !panel.hidden;
@@ -205,7 +225,7 @@
         }
 
         function resetProductFilters() {
-            ['productStockFilter','productAudienceFilter','productColorFilter'].forEach(id => { document.getElementById(id).value = ''; });
+            ['productStockFilter','productAudienceFilter','productColorFilter','productStatusFilter'].forEach(id => { document.getElementById(id).value = ''; });
             renderProducts();
         }
 
@@ -222,11 +242,28 @@
             modal.setAttribute('role', 'dialog');
             modal.setAttribute('aria-modal', 'true');
             modal.innerHTML = `<div class="modal" style="width:min(1100px,95vw);max-width:1100px"><h2>${escapeHtml(product.productId || product.sku)} – ${escapeHtml(product.name)}</h2>
-                <div style="overflow:auto;max-height:65vh"><table class="data-table"><thead><tr><th>Mã SKU</th><th>Màu</th><th>Size</th><th>Giá bán</th><th>Tồn</th><th>Thao tác</th></tr></thead><tbody>${group.map(p => {
+                <div style="overflow:auto;max-height:65vh"><table class="data-table"><thead><tr><th>Mã SKU</th><th>Màu</th><th>Size</th><th>Giá bán</th><th>Tồn</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>${group.map(p => {
                     const idx = productsData.indexOf(p);
-                    return `<tr><td>${escapeHtml(p.sku)}</td><td>${escapeHtml(p.color || '')}</td><td>${escapeHtml(p.size || '')}</td><td>${Number(p.price).toLocaleString('vi-VN')} ₫</td><td>${p.stock}</td><td><button class="btn btn-secondary" onclick="closeProductVariants();openEditProduct(${idx})">Sửa biến thể</button><button class="btn btn-secondary" onclick="deleteProductVariant(${idx})">Xóa</button></td></tr>`;
+                    return `<tr><td>${escapeHtml(p.sku)}</td><td>${escapeHtml(p.color || '')}</td><td>${escapeHtml(p.size || '')}</td><td>${Number(p.price).toLocaleString('vi-VN')} ₫</td><td>${p.stock}</td><td><span class="badge ${p.active !== false ? 'green' : 'red'}">${p.active !== false ? 'Đang bật' : 'Đang tắt'}</span></td><td><button class="btn btn-secondary" onclick="toggleProductVariantStatus(${idx},this)">${p.active !== false ? 'Tắt SKU' : 'Bật SKU'}</button><button class="btn btn-secondary" onclick="closeProductVariants();openEditProduct(${idx})">Sửa biến thể</button><button class="btn btn-secondary" onclick="deleteProductVariant(${idx})">Xóa</button></td></tr>`;
                 }).join('')}</tbody></table></div><div class="modal-actions"><button class="btn btn-secondary" onclick="closeProductVariants()">Đóng</button><button class="btn btn-primary" onclick="closeProductVariants();openAddProductVariant(${index})">Thêm biến thể</button></div></div>`;
             document.body.appendChild(modal);
+        }
+
+        async function toggleProductVariantStatus(index, button) {
+            const product = productsData[index];
+            if (!product || button.disabled) return;
+            button.disabled = true;
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/san-pham/${encodeURIComponent(product.sku)}/trang-thai`, {
+                    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({active:product.active === false})
+                });
+                if (!response.ok) throw new Error(await getApiErrorMessage(response,'Không lưu được trạng thái SKU.'));
+                await loadAppState(); renderProducts();
+                const newIndex = productsData.findIndex(p => p.productId === product.productId);
+                if (newIndex >= 0) openProductVariants(newIndex); else closeProductVariants();
+                toast('Đã cập nhật trạng thái SKU.');
+            } catch(error) { alert(error.message); }
+            finally { button.disabled = false; }
         }
 
         async function deleteProductVariant(index) {
@@ -239,6 +276,10 @@
             crudContext = {action:'edit',target:'productGroup',editIndex:index};
             document.getElementById('crudModalTitle').textContent = 'Sửa sản phẩm ' + p.productId;
             document.getElementById('crudModalFields').innerHTML = `<label>Tên sản phẩm</label><input id="pg_name" class="input" value="${escapeHtml(p.name)}"><label>Danh mục</label><select id="f_audience" class="input" onchange="updateProductTypeOptionsForAudience()">${buildProductAudienceOptions(getProductAudience(p))}</select><label>Loại sản phẩm</label><select id="f_type" class="input">${buildProductTypeOptions(p.type, getProductAudience(p))}</select><label>Nhà cung cấp</label><select id="pg_supplier" class="input">${buildImportSupplierOptions(p.supplierId)}</select>`;
+            const group = productsData.filter(item => item.productId === p.productId);
+            const mixed = group.some(item => item.active === false) && group.some(item => item.active !== false);
+            document.getElementById('crudModalFields').innerHTML += `<label>Trạng thái toàn bộ SKU</label><select id="pg_active" class="input">${mixed ? '<option value="" selected>Giữ trạng thái riêng của từng SKU</option>' : ''}${buildProductStatusOptions(p.active)}</select>`;
+            if (mixed) document.getElementById('pg_active').value = '';
             document.getElementById('crudModalBg').classList.add('open');
         }
 
@@ -282,6 +323,8 @@
             } else {
                 const p = productsData[crudContext.editIndex];
                 payload = {name:document.getElementById('pg_name').value.trim(),type:document.getElementById('f_type').value,audience:document.getElementById('f_audience').value,supplierId:document.getElementById('pg_supplier').value};
+                const active = document.getElementById('pg_active').value;
+                payload.active = active === '' ? null : active === 'true';
                 if (!payload.name || !payload.type || !payload.audience || !payload.supplierId) { alert('Vui lòng nhập đủ thông tin sản phẩm.'); return; }
                 url = '/api/san-pham/nhom/' + encodeURIComponent(p.productId);
             }
@@ -793,7 +836,7 @@
                         <td><strong>${escapeHtml(request.id)}</strong></td>
                         <td>${escapeHtml(request.supplierName || "-")}</td>
                         <td>${productSummary}</td>
-                        <td>${request.totalQty ?? items.reduce((sum, item) => sum + Number(item.qty || 0), 0)}</td>
+                        <td>${formatImportCartons(request.totalQty ?? items.reduce((sum, item) => sum + Number(item.qty || 0), 0))} kiện</td>
                         <td>${escapeHtml(request.createdBy || "-")}</td>
                         <td>${escapeHtml(request.createdAt || "-")}</td>
                         <td><span class="badge ${badge}">${escapeHtml(request.status)}</span></td>
@@ -849,7 +892,7 @@
             body.insertAdjacentHTML("beforeend", `
                 <tr data-import-line="${rowId}">
                     <td><select class="input import-line-sku" onchange="updateImportLineTotal(${rowId})">${buildImportProductOptions(supplierId)}</select></td>
-                    <td><input class="input import-line-qty" type="number" min="1" step="1" value="1" oninput="updateImportLineTotal(${rowId})"></td>
+                    <td><input class="input import-line-qty" type="number" min="1" step="1" value="1" aria-label="Số kiện nhập, mỗi kiện 50 cái" oninput="updateImportLineTotal(${rowId})"></td>
                     <td><input class="input import-line-cost" type="number" min="1" step="1000" placeholder="Giá gốc" oninput="updateImportLineTotal(${rowId})"></td>
                     <td class="import-line-total money-cell">0 ₫</td>
                     <td><button class="icon-button" type="button" title="Bỏ dòng" onclick="removeImportItemRow(${rowId})"><i data-lucide="trash-2" style="width:16px;color:#ef4444"></i></button></td>
@@ -867,7 +910,7 @@
             if (!row) return;
             const qty = Number(row.querySelector(".import-line-qty")?.value) || 0;
             const unitCost = Number(row.querySelector(".import-line-cost")?.value) || 0;
-            const total = qty * unitCost;
+            const total = qty * IMPORT_PIECES_PER_CARTON * unitCost;
             const cell = row.querySelector(".import-line-total");
             if (cell) cell.textContent = money(total);
             updateImportGrandTotal();
@@ -877,10 +920,14 @@
             const rows = Array.from(document.querySelectorAll("#import_items_body tr"));
             const qty = rows.reduce((sum, row) => sum + (Number(row.querySelector(".import-line-qty")?.value) || 0), 0);
             const amount = rows.reduce((sum, row) => sum +
-                (Number(row.querySelector(".import-line-qty")?.value) || 0) *
+                (Number(row.querySelector(".import-line-qty")?.value) || 0) * IMPORT_PIECES_PER_CARTON *
                 (Number(row.querySelector(".import-line-cost")?.value) || 0), 0);
             const summary = document.getElementById("import_grand_total");
-            if (summary) summary.textContent = `${qty} sản phẩm · ${money(amount)}`;
+            if (summary) summary.textContent = `${qty} kiện (${qty * IMPORT_PIECES_PER_CARTON} cái) · ${money(amount)}`;
+        }
+
+        function formatImportCartons(pieces) {
+            return (Number(pieces || 0) / IMPORT_PIECES_PER_CARTON).toLocaleString('vi-VN', { maximumFractionDigits: 2 });
         }
 
         // Mở form tạo phiếu nhập kho. Nhân viên kho chỉ tạo phiếu, chưa tự cộng tồn.
@@ -909,8 +956,8 @@
                 <label>Nhà cung cấp</label>
                 <select id="import_supplier" class="input" onchange="handleImportSupplierChange()">${buildImportSupplierOptions()}</select>
                 <div class="import-lines-head"><strong>Danh sách sản phẩm nhập</strong><button id="import_add_line" class="btn btn-secondary" type="button" onclick="addImportItemRow()" disabled>+ Thêm sản phẩm</button></div>
-                <div class="table-wrap import-lines-wrap"><table class="data-table import-lines-table"><thead><tr><th>Sản phẩm</th><th>Số lượng</th><th>Giá gốc</th><th>Thành tiền</th><th></th></tr></thead><tbody id="import_items_body"></tbody></table></div>
-                <div class="import-grand-total"><span>Tổng phiếu</span><strong id="import_grand_total">0 sản phẩm · 0 ₫</strong></div>
+                <div class="table-wrap import-lines-wrap"><table class="data-table import-lines-table"><thead><tr><th>Sản phẩm</th><th>Số kiện (50 cái/kiện)</th><th>Giá gốc/cái</th><th>Thành tiền</th><th></th></tr></thead><tbody id="import_items_body"></tbody></table></div>
+                <div class="import-grand-total"><span>Tổng phiếu</span><strong id="import_grand_total">0 kiện (0 cái) · 0 ₫</strong></div>
                 <label>Ghi chú</label>
                 <input id="import_note" class="input" placeholder="Nhập ghi chú phiếu (nếu có)">
             `;
@@ -967,7 +1014,7 @@
             const items = Array.isArray(request.items) ? request.items : [];
             const rows = items.map((item, index) => `
                 <tr><td>${index + 1}</td><td>${escapeHtml(item.sku)}</td><td>${escapeHtml(item.productName)}</td>
-                <td>${item.qty}</td><td>${money(Number(item.unitCost) || 0)}</td><td>${money(Number(item.total) || 0)}</td></tr>`).join("");
+                <td>${formatImportCartons(item.qty)} kiện</td><td>${money(Number(item.unitCost) || 0)}</td><td>${money(Number(item.total) || 0)}</td></tr>`).join("");
             return `
                 <div class="return-slip-header">
                     <div class="return-slip-brand"><div class="receipt-logo">yo<span>dy</span></div></div>
@@ -980,9 +1027,9 @@
                     <div>Nhân viên lập phiếu: <strong>${escapeHtml(request.createdBy)}</strong></div><div>Trạng thái: <strong>${escapeHtml(request.status)}</strong></div>
                     <div class="full">Ghi chú: <strong>${escapeHtml(request.note || "Không có")}</strong></div>
                 </div>
-                <table class="return-slip-table import-slip-table"><thead><tr><th>STT</th><th>Mã SKU</th><th>Tên sản phẩm</th><th>Số lượng</th><th>Giá gốc</th><th>Thành tiền</th></tr></thead><tbody>${rows}</tbody></table>
+                <table class="return-slip-table import-slip-table"><thead><tr><th>STT</th><th>Mã SKU</th><th>Tên sản phẩm</th><th>Số kiện (50 cái/kiện)</th><th>Giá gốc/cái</th><th>Thành tiền</th></tr></thead><tbody>${rows}</tbody></table>
                 <div class="return-slip-totals">
-                    <div><span>Tổng số lượng:</span><strong>${request.totalQty}</strong></div>
+                    <div><span>Tổng số lượng:</span><strong>${formatImportCartons(request.totalQty)} kiện (${Number(request.totalQty || 0)} cái)</strong></div>
                     <div><span>Tổng tiền nhập:</span><strong>${money(Number(request.totalAmount) || 0)}</strong></div>
                 </div>
                 <div class="return-slip-signatures import-slip-signatures">
@@ -1316,6 +1363,8 @@
                     <input id="f_price" class="input" type="number" value="${p.price}" placeholder="Giá bán">
                     <label>Số lượng tồn</label>
                     <input id="f_stock" class="input" type="number" value="${p.stock}" placeholder="Số lượng tồn">
+                    <label>Trạng thái SKU</label>
+                    <select id="f_active" class="input">${buildProductStatusOptions(p.active)}</select>
                     ${buildProductImageField(pendingProductImages)}
                     <label>Nhà cung cấp</label>
                     <select id="f_supplier" class="input" disabled>${buildImportSupplierOptions(p.supplierId || "")}</select>
@@ -2048,6 +2097,7 @@
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
                             productId, sku, name, type, audience, supplierId, color, size, price, stock,
+                            active: document.getElementById('f_active')?.value !== 'false',
                             image: pendingProductImages[0] || null,
                             images: pendingProductImages
                         })
@@ -2112,7 +2162,8 @@
                 const usedSkus = new Set();
                 for (const row of rows) {
                     const sku = row.querySelector(".import-line-sku")?.value || "";
-                    const qty = Number(row.querySelector(".import-line-qty")?.value) || 0;
+                    const cartons = Number(row.querySelector(".import-line-qty")?.value) || 0;
+                    const qty = cartons * IMPORT_PIECES_PER_CARTON;
                     const unitCost = Number(row.querySelector(".import-line-cost")?.value) || 0;
                     const product = productsData.find(item => item.sku === sku);
                     if (!product || product.supplierId !== supplierId) {
@@ -2123,8 +2174,12 @@
                         alert(`SKU ${sku} đang bị chọn lặp trên phiếu!`);
                         return;
                     }
-                    if (!Number.isInteger(qty) || qty <= 0 || unitCost <= 0) {
-                        alert("Số lượng phải là số nguyên và giá gốc phải lớn hơn 0!");
+                    if (!Number.isSafeInteger(cartons) || cartons < 1 || !Number.isSafeInteger(qty) || qty > 2147483647) {
+                        alert("Mỗi SKU phải nhập số kiện nguyên, tối thiểu 1 kiện (50 cái) và không vượt giới hạn số lượng!");
+                        return;
+                    }
+                    if (!Number.isFinite(unitCost) || unitCost <= 0) {
+                        alert("Giá gốc phải lớn hơn 0!");
                         return;
                     }
                     usedSkus.add(sku);

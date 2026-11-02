@@ -25,7 +25,8 @@ public sealed record ProductDto(
     decimal Price,
     int Stock,
     string? Image,
-    List<string> Images);
+    List<string> Images,
+    bool Active = true);
 
 public sealed record ProductUpsertDto(
     string? ProductId,
@@ -39,11 +40,13 @@ public sealed record ProductUpsertDto(
     string? Color = null,
     string? Size = null,
     string? Image = null,
-    List<string>? Images = null);
+    List<string>? Images = null,
+    bool? Active = null);
 
 public sealed record ProductTypeDto(string Id, string Name);
 public sealed record ProductVariantCreateDto(string ProductId, string Color, string Size, decimal Price, List<string>? Images = null);
-public sealed record ProductGroupUpdateDto(string Name, string Type, string Audience, string SupplierId);
+public sealed record ProductGroupUpdateDto(string Name, string Type, string Audience, string SupplierId, bool? Active = null);
+public sealed record ProductStatusUpdateDto(bool Active);
 
 public sealed record PartnerDto(
     string Category,
@@ -117,7 +120,10 @@ public sealed record ImportRequestCreateDto(
     string SupplierId,
     List<ImportRequestItemCreateDto> Items,
     string? Note,
-    string? EmployeeId);
+    string? EmployeeId)
+{
+    public const int MinimumQuantity = 50;
+}
 
 public sealed record PartnerUpsertDto(
     string Category,

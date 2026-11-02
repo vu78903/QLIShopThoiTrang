@@ -4,6 +4,8 @@ using QLIShopThoiTrang.Api.Services;
 using PayOS.Models.Webhooks;
 
 var builder = WebApplication.CreateBuilder(args);
+if (string.IsNullOrWhiteSpace(builder.Configuration["urls"]))
+    builder.WebHost.UseUrls("http://127.0.0.1:5001");
 
 builder.Services.AddCors(options =>
 {
@@ -30,7 +32,7 @@ app.UseStaticFiles();
 app.Use(async (context,next) =>
 {
     var path=context.Request.Path.Value ?? "";
-    if(path.StartsWith("/api/") && (context.Request.Method is not ("GET" or "OPTIONS") || path.StartsWith("/api/thanh-toan-qr/") || path.EndsWith("/tai-khoan")) && path is not ("/api/dang-nhap" or "/api/thanh-toan-qr/webhook"))
+    if(path.StartsWith("/api/") && (context.Request.Method is not ("GET" or "OPTIONS") || path.StartsWith("/api/thanh-toan-qr/") || path.EndsWith("/tai-khoan") || path=="/api/san-pham/quan-ly") && path is not ("/api/dang-nhap" or "/api/thanh-toan-qr/webhook"))
     {
         var token=context.Request.Headers.Authorization.ToString();
         token=token.StartsWith("Bearer ") ? token[7..] : "";
@@ -144,6 +146,18 @@ app.MapPost("/api/san-pham", async (ProductUpsertDto input, StoreRepository stor
     {
         return Results.Problem("Khong luu duoc san pham: " + ex.Message);
     }
+});
+
+app.MapGet("/api/san-pham/quan-ly", async (HttpContext context, StoreRepository store) =>
+{
+    context.Response.Headers.CacheControl = "no-store";
+    return Results.Ok(await store.GetManagedProductsAsync());
+});
+
+app.MapPost("/api/san-pham/{sku}/trang-thai", async (string sku, ProductStatusUpdateDto input, StoreRepository store) =>
+{
+    try { await store.SetProductStatusAsync(sku, input.Active); return Results.Ok(new { active = input.Active }); }
+    catch (InvalidOperationException ex) { return Results.NotFound(new { message = ex.Message }); }
 });
 
 app.MapPost("/api/san-pham/nhom/{productId}", async (string productId, ProductGroupUpdateDto input, StoreRepository store) =>
@@ -315,8 +329,10 @@ app.MapGet("/api/san-pham-khuyen-mai", async (StoreRepository store) =>
 app.MapPost("/api/phieu-nhap-kho", async (ImportRequestCreateDto input, StoreRepository store) =>
 {
     if (string.IsNullOrWhiteSpace(input.SupplierId) || input.Items is null || input.Items.Count == 0 ||
-        input.Items.Any(item => string.IsNullOrWhiteSpace(item.Sku) || item.Qty <= 0 || item.UnitCost <= 0))
+        input.Items.Any(item => string.IsNullOrWhiteSpace(item.Sku) || item.UnitCost <= 0))
         return Results.BadRequest("Nhà cung cấp và danh sách sản phẩm có số lượng, giá gốc hợp lệ là bắt buộc.");
+    if (input.Items.Any(item => item.Qty < ImportRequestCreateDto.MinimumQuantity || item.Qty % ImportRequestCreateDto.MinimumQuantity != 0))
+        return Results.BadRequest(new { message = "Mỗi SKU phải nhập số kiện nguyên, tối thiểu 1 kiện (50 cái)." });
 
     try
     {
