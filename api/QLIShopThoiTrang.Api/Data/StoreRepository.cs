@@ -1707,12 +1707,13 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
         await using (var command = NewCommand(connection, null, """
             SELECT h.SoHD,COALESCE(NULLIF(h.TenNguoiNhan,''),k.HoTen,'Khách giao hàng'),
                    COALESCE(h.SoDienThoai_KH,''),COALESCE(h.DiaChiGiao,''),COALESCE(h.GhiChuGiaoHang,''),
-                   COALESCE(NULLIF(h.TrangThaiGiaoHang,''),'Đã hủy'),h.TongCong,h.ChietKhau,h.ThueVAT,
+                   'Đã hủy',h.TongCong,h.ChietKhau,h.ThueVAT,
                    h.KhachPhaiTra,h.PhuongThucThanhToan,COALESCE(h.PhiShip,0),
                    COALESCE(NULLIF(h.NguonDon,''),CASE WHEN h.SoHD LIKE 'WEB%' THEN 'WEB' ELSE 'POS' END)
             FROM HoaDon h LEFT JOIN KhachHang k ON k.MaKH=h.MaKH
-            WHERE UPPER(h.LoaiHoaDon) IN ('COD','WEB_COD','GIAO_HANG','WEB_DA_THANH_TOAN','WEB_THANH_TOAN','ONLINE')
-              AND (COALESCE(h.TrangThaiGiaoHang,'') ILIKE '%hủy%'
+            WHERE (UPPER(TRIM(COALESCE(h.LoaiHoaDon,''))) IN ('WEB_HUY','HUY','DA_HUY','CANCELLED','CANCELED')
+                   OR COALESCE(h.TrangThaiGiaoHang,'') ILIKE '%hủy%'
+                   OR COALESCE(h.TrangThaiGiaoHang,'') ILIKE '%huỷ%'
                    OR COALESCE(h.TrangThaiGiaoHang,'') ILIKE '%huy%'
                    OR UPPER(TRIM(COALESCE(h.TrangThaiGiaoHang,''))) IN ('HUY','DA_HUY','CANCELLED','CANCELED'))
             ORDER BY h.NgayLap DESC
@@ -1723,13 +1724,16 @@ public sealed class StoreRepository(SqlServerConnectionFactory db)
                     reader.GetString(4), reader.GetString(5), reader.GetDecimal(6), reader.GetDecimal(7), reader.GetDecimal(8),
                     reader.GetDecimal(9), reader.GetString(10), reader.GetDecimal(11), reader.GetString(12)));
 
-        // Website giữ snapshot để tra cứu. Nếu hóa đơn gốc không còn thì đó là đơn đã bị hủy/xóa khỏi luồng giao.
-        await using var existsCommand = NewCommand(connection, null, "SELECT to_regclass('webstore.order_snapshot') IS NOT NULL");
+        // Snapshot chỉ là bản lưu; thiếu hóa đơn không chứng minh đơn đã hủy.
+        // Chỉ dùng bản lưu khi website có ghi nhận hủy và hóa đơn gốc không còn.
+        await using var existsCommand = NewCommand(connection, null, "SELECT to_regclass('webstore.order_snapshot') IS NOT NULL AND to_regclass('webstore.order_cancellation') IS NOT NULL");
         if (Convert.ToBoolean(await existsCommand.ExecuteScalarAsync()))
         {
             await using var snapshotCommand = NewCommand(connection, null, """
-                SELECT s.sohd,s.recipient,s.phone,s.address,s.note,'Đã hủy',s.total,0,0,s.total,'COD',0,'WEB'
+                SELECT s.sohd,s.recipient,s.phone,s.address,COALESCE(NULLIF(c.reason,''),s.note,''),'Đã hủy',
+                       s.total,0,0,s.total,COALESCE(NULLIF(s.paymentmethod,''),'COD'),0,'WEB'
                 FROM webstore.order_snapshot s
+                JOIN webstore.order_cancellation c ON c.sohd=s.sohd
                 LEFT JOIN public.hoadon h ON h.sohd=s.sohd
                 WHERE h.sohd IS NULL
                 ORDER BY s.ngaylap DESC
