@@ -28,3 +28,9 @@ Luôn chạy cleanup theo thứ tự **fix69-cleanup.sql rồi testpos-cleanup.s
 Chính sách hiện tại chọn mức giảm tốt hơn giữa thành viên và voucher, không cộng dồn; nếu bằng nhau ưu tiên thành viên. Các kỳ vọng trong bộ kiểm thử POS đã được cập nhật theo quy tắc này.
 
 `membership-ui.mjs` dùng mock và có thể chạy độc lập. `membership-api.mjs` chạy trên API thử 5022 sau setup gốc, hoặc sau `api.mjs`; script chỉ thay đổi tổng chi tiêu của khách TESTPOS và tạo hóa đơn có tiền tố TESTPOS. Chạy cleanup gốc khi xong. Không chạy `api.mjs` sau script membership trên cùng fixture chưa reset vì ngưỡng chi tiêu đã được thay đổi để kiểm tra các mốc.
+
+## Bật/tắt SKU và lưu sản phẩm
+
+`node tests/pos-returns/product-actions-ui.mjs` kiểm tra cả handler khóa nút riêng và wrapper khóa dùng chung: tắt/bật SKU, bấm lặp, mở khóa sau lỗi và lưu nhóm sản phẩm. Dùng mock, không đổi trạng thái hàng thật.
+
+Thêm `--before` để tái hiện lỗi tại commit `df74242` (cần có commit này trong lịch sử Git). Lượt trước sửa dự kiến thất bại vì handler thấy nút bị wrapper khóa nên không gửi API. Bản sửa giữ khóa logic ngay từ đầu nhưng để handler đọc trạng thái nút ban đầu trước khi khóa giao diện.

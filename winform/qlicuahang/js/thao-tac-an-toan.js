@@ -42,8 +42,13 @@ for (const name of mutatingActionNames) {
             .filter(button => button.getAttribute('onclick').includes(name + '('));
         if (name === 'saveCrudData') buttons.push(...document.querySelectorAll('#crudModalBg .modal-actions button'));
         const prior = new Map(buttons.map(button => [button, button.disabled]));
-        buttons.forEach(button => {button.disabled = true; button.setAttribute('aria-busy','true');});
-        try { return await action.apply(this,args); }
+        try {
+            // Để handler kiểm tra trạng thái nút ban đầu trước khi lớp dùng chung khóa nút.
+            // activeFormActions đã chặn lời gọi lặp ngay từ đầu.
+            const result = action.apply(this,args);
+            buttons.forEach(button => {button.disabled = true; button.setAttribute('aria-busy','true');});
+            return await result;
+        }
         finally {
             activeFormActions.delete(name);
             for (const [button,disabled] of prior) if (button.isConnected) {button.disabled = disabled; button.removeAttribute('aria-busy');}
