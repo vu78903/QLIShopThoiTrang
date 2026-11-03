@@ -51,26 +51,31 @@
         };
 
         // Hiện một hộp xác nhận thống nhất trước mọi thao tác xóa.
-        function confirmDeletion(message, title = "Xác nhận xóa") {
+        function confirmDeletion(message, title = "Xác nhận xóa", confirmLabel = "Xóa") {
             if (deleteConfirmationResolver) deleteConfirmationResolver(false);
-            if (!document.getElementById("deleteConfirmModalBg")) {
+            let dialog = document.getElementById("deleteConfirmModalBg");
+            if (dialog?.tagName !== 'DIALOG') { dialog?.remove(); dialog = null; }
+            if (!dialog) {
                 document.body.insertAdjacentHTML("beforeend", `
-                    <div class="modal-bg" id="deleteConfirmModalBg" role="alertdialog" aria-modal="true" aria-labelledby="deleteConfirmTitle" aria-describedby="deleteConfirmMessage">
+                    <dialog class="delete-confirm-dialog" id="deleteConfirmModalBg" role="alertdialog" aria-modal="true" aria-labelledby="deleteConfirmTitle" aria-describedby="deleteConfirmMessage">
                         <div class="modal delete-confirm-modal">
                             <div class="delete-confirm-icon"><i data-lucide="triangle-alert"></i></div>
                             <h2 id="deleteConfirmTitle">Xác nhận xóa</h2>
                             <p id="deleteConfirmMessage"></p>
                             <div class="modal-actions">
                                 <button class="btn btn-secondary" id="deleteCancelButton" type="button" onclick="resolveDeleteConfirmation(false)">Không xóa</button>
-                                <button class="btn btn-danger" type="button" onclick="resolveDeleteConfirmation(true)"><i data-lucide="trash-2"></i> Xóa</button>
+                                <button class="btn btn-danger" id="deleteAcceptButton" type="button" onclick="resolveDeleteConfirmation(true)">Xóa</button>
                             </div>
                         </div>
-                    </div>`);
+                    </dialog>`);
+                dialog = document.getElementById('deleteConfirmModalBg');
+                dialog.addEventListener('cancel', event => { event.preventDefault(); resolveDeleteConfirmation(false); });
                 if (window.lucide) lucide.createIcons();
             }
             document.getElementById("deleteConfirmTitle").textContent = title;
             document.getElementById("deleteConfirmMessage").textContent = message;
-            document.getElementById("deleteConfirmModalBg").classList.add("open");
+            document.getElementById('deleteAcceptButton').textContent = confirmLabel;
+            if (!dialog.open) dialog.showModal();
             setTimeout(() => document.getElementById("deleteCancelButton")?.focus(), 30);
             return new Promise(resolve => {
                 deleteConfirmationResolver = resolve;
@@ -78,7 +83,7 @@
         }
 
         function resolveDeleteConfirmation(confirmed) {
-            document.getElementById("deleteConfirmModalBg")?.classList.remove("open");
+            document.getElementById("deleteConfirmModalBg")?.close();
             const resolver = deleteConfirmationResolver;
             deleteConfirmationResolver = null;
             resolver?.(confirmed);
@@ -612,7 +617,7 @@
                     <td class="money-cell">${money(order.shippingFee || 0)}</td>
                     <td class="money-cell"><strong>0 ₫</strong><small class="cell-note paid-note">Đã thanh toán</small></td>
                     <td><span class="badge ${getCodStatusBadge(order.status)}">${escapeHtml(order.status)}</span></td>
-                    <td><button class="btn btn-primary btn-compact" onclick="advanceDeliveryStatus(${idx})" ${order.status === "Hàng giao thành công" ? "disabled" : ""}>${escapeHtml(getNextStatusAction(order.status))}</button></td>
+                    <td><button class="btn btn-primary btn-compact" onclick="advanceDeliveryStatus(${idx})" ${order.status === "Hàng giao thành công" ? "disabled" : ""}>${escapeHtml(getNextStatusAction(order.status))}</button> <button class="btn btn-secondary" onclick="cancelDelivery(${idx})">Hủy đơn</button></td>
                 </tr>`).join("");
             if (window.lucide) lucide.createIcons();
         }
@@ -642,7 +647,7 @@
                         <td><span class="badge ${getCodStatusBadge(x.status)}">${escapeHtml(x.status)}</span></td>
                         <td>
                             <button class="btn btn-primary btn-compact" onclick="advanceCodStatus(${idx})" ${x.status === "Hàng giao thành công" ? "disabled" : ""}>${escapeHtml(getNextStatusAction(x.status))}</button>
-                            <button class="icon-button" title="Xóa đơn COD" onclick="deleteCod(${idx})"><i data-lucide="trash-2"></i></button>
+                            <button class="btn btn-secondary" title="Hủy và giữ lịch sử đơn COD" onclick="deleteCod(${idx})">Hủy đơn</button>
                         </td>
                     </tr>
                 `).join("");
@@ -717,9 +722,8 @@
                 toast(error.message || "Không cập nhật được đơn giao hàng");
                 return;
             }
-            order.status = nextStatus;
-            if (nextStatus === "Hàng giao thành công") deliveryOrders.splice(idx, 1);
-            renderDelivery();
+            await loadAppState();
+            renderAll();
             toast(nextStatus === "Hàng giao thành công" ? "Đơn hàng đã giao thành công" : "Đã cập nhật: " + nextStatus);
         }
 
@@ -732,7 +736,7 @@
         }
 
         // Bấm "Cập nhật" thì đơn COD đi sang bước tiếp theo.
-        // Khi giao thành công mới tính doanh thu, trừ kho và tích điểm.
+        // Tồn đã trừ khi tạo đơn; khi giao thành công chỉ ghi nhận thanh toán/tích điểm.
         async function advanceCodStatus(idx) {
             const order = codOrders[idx];
             if (!order) return;
@@ -744,41 +748,18 @@
                 toast("Không cập nhật được đơn COD vào cơ sở dữ liệu");
                 return;
             }
-            order.status = nextStatus;
             if (nextStatus === "Hàng giao thành công") {
-                deductReceiptStock(order.receipt);
-                applyCustomerLoyalty(order.receipt);
-                recordPaidReceipt(order.receipt, "COD");
-                codOrders.splice(idx, 1);
-                toast("Đơn COD đã giao thành công, đã cập nhật tồn kho và tích điểm");
+                toast("Đơn COD đã giao thành công, đã ghi nhận thanh toán và tích điểm");
             } else {
                 toast("Đã cập nhật trạng thái: " + nextStatus);
             }
-            renderCod();
-            renderProducts();
-            renderPartners();
-            updateInventoryKpi();
+            await loadAppState();
+            renderAll();
         }
 
         // Xóa đơn COD chưa hoàn tất nếu nhập nhầm.
         async function deleteCod(idx) {
-            if (!codOrders[idx]) return;
-            if (codOrders[idx].status === "Hàng giao thành công") {
-                toast("Đơn đã giao thành công không nên xóa khỏi lịch sử");
-                return;
-            }
-            if (!await confirmDeletion("Đơn COD này sẽ bị xóa khỏi danh sách và không thể khôi phục. Bạn có chắc muốn xóa?", "Xóa đơn COD?")) return;
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/hoa-don/${encodeURIComponent(codOrders[idx].receipt.id)}/cod`, { method: "DELETE" });
-                if (!response.ok) throw new Error(await response.text());
-            } catch (error) {
-                console.error(error);
-                toast("Không xóa được đơn COD trong cơ sở dữ liệu");
-                return;
-            }
-            codOrders.splice(idx, 1);
-            renderCod();
-            toast("Đã xóa đơn COD");
+            await cancelShipmentOrder(codOrders[idx]);
         }
 
         // Cập nhật các ô tổng tồn, giá trị tồn và số SKU sắp hết hàng.
@@ -2203,7 +2184,7 @@
                     const response = await fetch(`${API_BASE_URL}/api/phieu-nhap-kho`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ supplierId, items, note, employeeId: getCurrentEmployee()?.id || null })
+                        body: JSON.stringify({ supplierId, items, note, employeeId: getCurrentEmployee()?.id || null, clientRequestId: crudContext.clientRequestId ||= crypto.randomUUID() })
                     });
                     if (!response.ok) throw new Error(await getApiErrorMessage(response, "Không tạo được phiếu nhập kho."));
                     const result = await response.json();
@@ -2991,7 +2972,7 @@
             if (status) {
                 status.classList.toggle("hidden", !customer);
                 status.innerHTML = customer
-                    ? `<strong>${escapeHtml(customer.name)}</strong><span>${escapeHtml(customer.phone)}</span>`
+                    ? `<strong>${escapeHtml(customer.name)}</strong><span>${escapeHtml(customer.phone)} · ${getCustomerRank(customer)} · Chiết khấu ${getCustomerDiscountRate(customer)}%</span>`
                     : "";
             }
             syncDeliveryCustomerFields();
@@ -3018,7 +2999,7 @@
                 if (info) info.innerHTML = `<div><strong>${escapeHtml(customer.name)}</strong><small>${escapeHtml(customer.phone)}</small></div><div class="customer-actions"><span>${rank}${discount ? " -" + discount + "%" : ""}</span></div>`;
                 if (status) {
                     status.classList.remove("hidden");
-                    status.innerHTML = `<strong>${escapeHtml(customer.name)}</strong><span>${escapeHtml(customer.phone)}</span>`;
+                    status.innerHTML = `<strong>${escapeHtml(customer.name)}</strong><span>${escapeHtml(customer.phone)} · ${rank} · Chiết khấu ${discount}%</span>`;
                 }
             } else {
                 if (info) info.innerHTML = "";
@@ -3037,14 +3018,17 @@
             const subtotal = cart.reduce((s, x) => s + x.price * x.qty, 0);
             const customer = getCurrentSaleCustomer();
             const memberRate = customer ? getCustomerDiscountRate(customer) : 0;
-            const memberDiscount = Math.round(subtotal * memberRate / 100);
+            const eligibleMemberDiscount = Math.round(subtotal * memberRate / 100);
             let promoDiscount = 0;
             let promo = null;
             if (appliedPromotion && isPromotionActive(appliedPromotion, subtotal)) {
                 promo = appliedPromotion;
                 promoDiscount = voucherAmount(promo,subtotal);
             }
-            const discount = Math.min(subtotal,memberDiscount + promoDiscount);
+            const voucherWins = promoDiscount > eligibleMemberDiscount;
+            const memberDiscount = voucherWins ? 0 : eligibleMemberDiscount;
+            if (!voucherWins) promoDiscount = 0;
+            const discount = Math.min(subtotal,Math.max(memberDiscount,promoDiscount));
             const taxableAmount = Math.max(0, subtotal - discount);
             const vatAmount = Math.round(taxableAmount * VAT_RATE / 100);
             const shippingFee = getDeliveryMode() ? Math.max(0, Number(document.getElementById("shippingFee")?.value) || 0) : 0;
@@ -3055,15 +3039,15 @@
         // Đẩy kết quả tính tiền lên giao diện POS.
         function updateCart() {
             if (!document.getElementById("subtotal")) return;
-            const { subtotal, discount, memberDiscount, memberRate, vatAmount, shippingFee, total, promo, customer } = calculateCartSummary();
+            const { subtotal, memberDiscount, memberRate, promoDiscount, taxableAmount, vatAmount, shippingFee, total, promo, customer } = calculateCartSummary();
             const cash = Number(document.getElementById("cashInput").value) || 0;
 
             document.getElementById("subtotal").textContent = money(subtotal);
-            const discountParts = [];
-            if (memberDiscount > 0) discountParts.push(`Hạng ${getCustomerRank(customer)} ${memberRate}%`);
-            if (promo) discountParts.push(`${promo.code} ${voucherText(promo)}`);
-            document.getElementById("discountLabel").textContent = discountParts.length ? discountParts.join(" + ") : "Khuyến mãi";
-            document.getElementById("discount").textContent = discount > 0 ? "- " + money(discount) : "0 ₫";
+            document.getElementById('memberDiscountLabel').textContent = `Hạng ${getCustomerRank(customer)} (${memberRate}%${memberRate && promoDiscount > 0 ? ' · không áp dụng' : ''})`;
+            document.getElementById('memberDiscountAmount').textContent = memberDiscount > 0 ? '- ' + money(memberDiscount) : '0 ₫';
+            document.getElementById("discountLabel").textContent = promo ? `Voucher ${promo.code} (${voucherText(promo)}${promoDiscount === 0 ? ' · không áp dụng' : ''})` : 'Voucher';
+            document.getElementById("discount").textContent = promoDiscount > 0 ? "- " + money(promoDiscount) : "0 ₫";
+            document.getElementById('taxableAmount').textContent = money(taxableAmount);
             document.getElementById("vatAmount").textContent = money(vatAmount);
             if (document.getElementById("shippingAmount")) document.getElementById("shippingAmount").textContent = money(shippingFee);
             document.getElementById("grandTotal").textContent = money(total);
@@ -3111,7 +3095,9 @@
             }
             appliedPromotion = promo;
             updateCart();
-            toast("Đã áp dụng mã " + promo.code);
+            toast(calculateCartSummary().promoDiscount > 0
+                ? "Đã áp dụng mã " + promo.code
+                : "Giữ ưu đãi thành viên vì có lợi hơn hoặc bằng voucher.");
         }
 
         function getDeliveryMode() {
@@ -3410,9 +3396,9 @@
                 memberDiscount,
                 memberRate,
                 promoDiscount,
-                promoCode: promo ? promo.code : "",
-                promoPercent: promo ? promo.percent : 0,
-                promoKind: promo ? promo.kind : 'PHAN_TRAM',
+                promoCode: promoDiscount > 0 ? promo.code : "",
+                promoPercent: promoDiscount > 0 ? promo.percent : 0,
+                promoKind: promoDiscount > 0 ? promo.kind : 'PHAN_TRAM',
                 vatRate: VAT_RATE,
                 vatAmount,
                 shippingFee,

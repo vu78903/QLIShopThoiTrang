@@ -24,7 +24,7 @@ public sealed partial class StoreRepository
         return Convert.ToDecimal(result);
     }
 
-    private static async Task ValidateInvoicePricingAsync(NpgsqlConnection connection, NpgsqlTransaction? tx, InvoiceCreateDto input)
+    private static async Task<string?> ValidateInvoicePricingAsync(NpgsqlConnection connection, NpgsqlTransaction? tx, InvoiceCreateDto input)
     {
         if (input.Items.Count == 0 || input.Items.Any(i => i.Qty <= 0 || i.Price < 0 || i.Total != i.Price*i.Qty))
             throw new InvalidOperationException("Số lượng hoặc thành tiền từng dòng không hợp lệ.");
@@ -60,11 +60,13 @@ public sealed partial class StoreRepository
             var kind = ToAscii(reader.GetString(1)).Replace("_", " ");
             voucherDiscount = kind is "SO TIEN" or "VND" ? RoundMoney(value) : RoundMoney(subtotal*value/100m);
         }
-        var discount = Math.Min(subtotal, memberDiscount+voucherDiscount);
+        // Không cộng dồn: khách hưởng mức giảm có lợi hơn trước khi tính VAT.
+        var discount = Math.Min(subtotal, Math.Max(memberDiscount,voucherDiscount));
         var vat = RoundMoney((subtotal-discount)*0.08m);
         var shipping = (input.IsCod || !string.IsNullOrWhiteSpace(input.DeliveryMode)) ? input.ShippingFee : 0;
         if (shipping < 0 || input.Subtotal != subtotal || input.Discount != discount || input.VatAmount != vat || input.Total != subtotal-discount+vat+shipping)
             throw new InvalidOperationException("Tạm tính, chiết khấu, VAT hoặc tổng tiền không khớp. Hãy tải lại giỏ hàng.");
+        return voucherDiscount>memberDiscount && discount>0 ? input.PromoCode?.Trim() : null;
     }
 
     // Phân bổ bằng tổng lũy kế: tổng các dòng luôn bằng đúng tiền hàng thực trả, không gồm phí giao.

@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
-    <link rel="stylesheet" href="../css/giao-dien.css?v=20261028-1">
+    <link rel="stylesheet" href="../css/giao-dien.css?v=20261103-fix69">
 </head>
 <body data-view="inventory">
     <div class="shell">
@@ -104,6 +104,18 @@
                                 <tbody id="importRequestBody"></tbody>
                             </table>
                         </div>
+                    </div>
+                    <div class="card pad" id="stockUnconfirmedCard" hidden style="margin-top:16px">
+                        <strong>Đơn cũ cần đối chiếu tồn kho</strong>
+                        <div class="table-wrap"><table class="data-table"><thead><tr><th>Hóa đơn</th><th>Loại</th><th>Trạng thái</th><th>Tồn kho</th><th>Thao tác</th></tr></thead><tbody id="stockUnconfirmedBody"></tbody></table></div>
+                    </div>
+                    <div class="card pad" style="margin-top:16px">
+                        <div class="stock-review-heading"><strong>Kiểm nhận hàng hủy / đổi / trả</strong><button class="btn btn-secondary" onclick="loadStockReviews()">Tải lại</button></div>
+                        <div class="stock-review-filters">
+                            <select class="input" id="stockReviewSource" aria-label="Nguồn hàng kiểm nhận" onchange="renderStockReviews()"><option value="">Tất cả nguồn</option><option value="DON_HUY">Đơn hủy</option><option value="DOI_TRA">Đổi / trả</option></select>
+                            <select class="input" id="stockReviewStatus" aria-label="Trạng thái kiểm nhận" onchange="renderStockReviews()"><option value="CHO_KIEM">Chờ kiểm nhận</option><option value="DA_NHAP_LAI">Đã nhập lại kho</option><option value="KHONG_NHAP_LAI">Không nhập lại</option><option value="">Tất cả trạng thái</option></select>
+                        </div>
+                        <div class="table-wrap"><table class="data-table"><thead><tr><th>Nguồn / chứng từ</th><th>SKU / sản phẩm</th><th>Màu / size</th><th>Số cái</th><th>Tình trạng / lý do</th><th>Trạng thái</th><th>Người duyệt / ngày</th><th>Thao tác</th></tr></thead><tbody id="stockReviewBody"></tbody></table></div>
                     </div>
                 </section>
 
@@ -224,7 +236,9 @@
     </div>
 
     <script src="../js/dia-chi-viet-nam.js"></script>
-    <script src="../js/ung-dung.js?v=20261103-pos5"></script>
+    <script src="../js/ung-dung.js?v=20261103-member1"></script>
     <script src="../js/pos-doi-tra.js?v=20261103-1"></script>
+    <script src="../js/kiem-nhan-kho.js?v=20261103-1"></script>
+    <script src="../js/thao-tac-an-toan.js?v=20261103-1"></script>
 </body>
 </html>

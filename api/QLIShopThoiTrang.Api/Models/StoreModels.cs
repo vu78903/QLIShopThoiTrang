@@ -124,7 +124,8 @@ public sealed record ImportRequestCreateDto(
     string SupplierId,
     List<ImportRequestItemCreateDto> Items,
     string? Note,
-    string? EmployeeId)
+    string? EmployeeId,
+    string? ClientRequestId = null)
 {
     public const int MinimumQuantity = 50;
 }
@@ -359,3 +360,10 @@ public sealed record ReturnRequestedLineDto(string Sku, string Name, string Colo
 public sealed record ReturnRequestDto(string Id, string InvoiceId, string CustomerName, string Phone,
     string CreatedAt, string Status, string? RejectionReason, List<string> Images, List<ReturnRequestedLineDto> Items);
 public sealed record ReturnRequestActionDto(string? EmployeeId, string? Reason = null);
+
+public sealed record StockReviewDto(string Source, string DocumentId, string InvoiceId, string Sku,
+    string Name, string Color, string Size, int Qty, string Status, string Reason, string? ReviewedBy, string? ReviewedAt);
+public sealed record StockReviewActionDto(bool Restock, string? Note, bool Received = false);
+public sealed record StockReconcileDto(bool AlreadyDeducted);
+public sealed record StockUnconfirmedDto(string InvoiceId, string Type, string Status, bool? Deducted, bool KnownUnreserved);
+public sealed record CancelShipmentDto(string? Reason);

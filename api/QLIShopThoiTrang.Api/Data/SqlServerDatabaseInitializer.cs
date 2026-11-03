@@ -77,6 +77,30 @@ public sealed class SqlServerDatabaseInitializer(SqlServerConnectionFactory db)
             """;
         await posReturnColumns.ExecuteNonQueryAsync();
 
+        await using var inventoryReview = connection.CreateCommand();
+        inventoryReview.CommandText = """
+            ALTER TABLE hoadon ADD COLUMN IF NOT EXISTS datrutonkho boolean NULL;
+            ALTER TABLE hoadon ALTER COLUMN datrutonkho SET DEFAULT FALSE;
+            ALTER TABLE hoadon ADD COLUMN IF NOT EXISTS daghinhanthanhtoan boolean NULL;
+            ALTER TABLE hoadon ALTER COLUMN daghinhanthanhtoan SET DEFAULT FALSE;
+            -- Chỉ xác định chứng từ do API có fingerprint tạo; không đoán tồn của đơn cũ từ nguồn khác.
+            UPDATE hoadon SET datrutonkho=(UPPER(loaihoadon) NOT IN ('COD','WEB_COD') OR COALESCE(trangthaigiaohang,'')='Hàng giao thành công'),
+                daghinhanthanhtoan=(UPPER(loaihoadon) NOT IN ('COD','WEB_COD') OR COALESCE(trangthaigiaohang,'')='Hàng giao thành công')
+            WHERE dauvantayyeucau IS NOT NULL AND datrutonkho IS NULL;
+            ALTER TABLE phieunhapkho ADD COLUMN IF NOT EXISTS mayeucau varchar(80) NULL;
+            ALTER TABLE phieunhapkho ADD COLUMN IF NOT EXISTS dauvantayyeucau varchar(64) NULL;
+            CREATE UNIQUE INDEX IF NOT EXISTS ux_phieunhapkho_mayeucau ON phieunhapkho(mayeucau) WHERE mayeucau IS NOT NULL;
+            ALTER TABLE chitiethoadon ADD COLUMN IF NOT EXISTS trangthaikiemnhan varchar(30) NULL;
+            ALTER TABLE chitiethoadon ADD COLUMN IF NOT EXISTS ghichukiemnhan varchar(1000) NULL;
+            ALTER TABLE chitiethoadon ADD COLUMN IF NOT EXISTS manvkiemnhan varchar(20) NULL;
+            ALTER TABLE chitiethoadon ADD COLUMN IF NOT EXISTS ngaykiemnhan timestamp NULL;
+            ALTER TABLE chitietdoitra ADD COLUMN IF NOT EXISTS trangthaikiemnhan varchar(30) NULL;
+            ALTER TABLE chitietdoitra ADD COLUMN IF NOT EXISTS ghichukiemnhan varchar(1000) NULL;
+            ALTER TABLE chitietdoitra ADD COLUMN IF NOT EXISTS manvkiemnhan varchar(20) NULL;
+            ALTER TABLE chitietdoitra ADD COLUMN IF NOT EXISTS ngaykiemnhan timestamp NULL;
+            """;
+        await inventoryReview.ExecuteNonQueryAsync();
+
         // Bổ sung thông tin dùng chung cho đơn giao từ POS và website.
         await using var deliveryColumns = connection.CreateCommand();
         deliveryColumns.CommandText = """

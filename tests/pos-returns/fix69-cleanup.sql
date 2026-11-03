@@ -1,0 +1,11 @@
+DELETE FROM chitietnhapkho WHERE sophieunk IN (SELECT p.sophieunk FROM phieunhapkho p WHERE p.manv='TESTFIX-MAN' AND (p.mayeucau LIKE 'TEST69%' OR EXISTS(SELECT 1 FROM chitietnhapkho c WHERE c.sophieunk=p.sophieunk AND c.ghichu LIKE 'TEST69%')));
+DELETE FROM phieunhapkho WHERE manv='TESTFIX-MAN' AND (mayeucau LIKE 'TEST69%' OR NOT EXISTS(SELECT 1 FROM chitietnhapkho c WHERE c.sophieunk=phieunhapkho.sophieunk));
+DELETE FROM chitietdoitra WHERE sophieudt IN (SELECT sophieudt FROM phieudoitra WHERE sohd LIKE 'TEST69-%');
+DELETE FROM phieudoitra WHERE sohd LIKE 'TEST69-%';
+DELETE FROM chitiethoadon WHERE sohd LIKE 'TEST69-%';
+DELETE FROM hoadon WHERE sohd LIKE 'TEST69-%';
+DELETE FROM sanpham WHERE masku='TEST69-SCARCE' AND tensanpham LIKE 'TEST69%';
+DELETE FROM khachhang WHERE makh='TEST69-KH' AND hoten LIKE 'TEST69%';
+DELETE FROM nhanvien WHERE manv='TEST69-KHO' AND hoten LIKE 'TEST69%';
+SELECT COUNT(*) AS test69_invoices_remaining FROM hoadon WHERE sohd LIKE 'TEST69-%';
+SELECT COUNT(*) AS test69_accounts_remaining FROM khachhang WHERE makh='TEST69-KH';

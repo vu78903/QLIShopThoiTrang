@@ -19,6 +19,7 @@ builder.Services.AddSingleton<ProductImageStorage>();
 builder.Services.AddScoped<StoreRepository>();
 builder.Services.AddScoped<PayOsPaymentService>();
 builder.Services.AddSingleton<StaffSessions>();
+builder.Services.AddSingleton<MutationRequests>();
 
 var app = builder.Build();
 
@@ -32,7 +33,7 @@ app.UseStaticFiles();
 app.Use(async (context,next) =>
 {
     var path=context.Request.Path.Value ?? "";
-    if(path.StartsWith("/api/") && (context.Request.Method is not ("GET" or "OPTIONS") || path.StartsWith("/api/thanh-toan-qr/") || path.StartsWith("/api/doi-tra/yeu-cau") || path.EndsWith("/tai-khoan") || path=="/api/san-pham/quan-ly") && path is not ("/api/dang-nhap" or "/api/thanh-toan-qr/webhook"))
+    if(path.StartsWith("/api/") && (context.Request.Method is not ("GET" or "OPTIONS") || path.StartsWith("/api/kiem-nhan-kho") || path.StartsWith("/api/thanh-toan-qr/") || path.StartsWith("/api/doi-tra/yeu-cau") || path.EndsWith("/tai-khoan") || path=="/api/san-pham/quan-ly") && path is not ("/api/dang-nhap" or "/api/thanh-toan-qr/webhook"))
     {
         var token=context.Request.Headers.Authorization.ToString();
         token=token.StartsWith("Bearer ") ? token[7..] : "";
@@ -63,6 +64,7 @@ app.Use(async (context,next) =>
     }
     await next();
 });
+app.Use((context,next)=>context.RequestServices.GetRequiredService<MutationRequests>().InvokeAsync(context,next));
 app.MapPost("/api/dang-xuat", (HttpContext context,StaffSessions sessions) => {sessions.Remove(context.Request.Headers.Authorization.ToString().Replace("Bearer ",""));return Results.NoContent();});
 
 app.MapGet("/", () => Results.Ok(new { app = "QLI Shop Thoi Trang API", database = "Supabase PostgreSQL", status = "running" }));
@@ -493,6 +495,10 @@ app.MapPut("/api/hoa-don/{soHoaDon}/giao-hang", async (string soHoaDon, CodStatu
         await store.UpdateDeliveryStatusAsync(soHoaDon, input);
         return Results.NoContent();
     }
+    catch (InvalidOperationException ex)
+    {
+        return Results.Conflict(new {message=ex.Message});
+    }
     catch (Exception ex)
     {
         return Results.Problem("Không cập nhật được trạng thái giao hàng: " + ex.Message);
@@ -502,6 +508,24 @@ app.MapPut("/api/hoa-don/{soHoaDon}/giao-hang", async (string soHoaDon, CodStatu
 app.MapDelete("/api/hoa-don/{soHoaDon}/cod", async (string soHoaDon, StoreRepository store) =>
 {
     return await store.DeletePendingCodAsync(soHoaDon) ? Results.NoContent() : Results.NotFound();
+});
+
+app.MapPost("/api/hoa-don/{id}/huy", async (string id,CancelShipmentDto input,StoreRepository store) =>
+{
+    try{return await store.CancelShipmentAsync(id,input.Reason)?Results.NoContent():Results.NotFound();}
+    catch(InvalidOperationException ex){return Results.Conflict(new{message=ex.Message});}
+});
+app.MapGet("/api/kiem-nhan-kho",async (StoreRepository store)=>Results.Ok(await store.GetStockReviewsAsync()));
+app.MapGet("/api/kiem-nhan-kho/doi-chieu",async (StoreRepository store)=>Results.Ok(await store.GetUnconfirmedStockAsync()));
+app.MapPost("/api/kiem-nhan-kho/doi-chieu/{id}",async(string id,StockReconcileDto input,StoreRepository store)=>
+{
+    try{await store.ReconcileInvoiceStockAsync(id,input.AlreadyDeducted);return Results.NoContent();}
+    catch(InvalidOperationException ex){return Results.Conflict(new{message=ex.Message});}
+});
+app.MapPost("/api/kiem-nhan-kho/{source}/{id}/{sku}",async(string source,string id,string sku,StockReviewActionDto input,StoreRepository store,HttpContext context)=>
+{
+    try{await store.ReviewReturnedStockAsync(source,id,sku,input,((LoginResultDto)context.Items["StaffUser"]!).EmployeeId);return Results.NoContent();}
+    catch(InvalidOperationException ex){return Results.Conflict(new{message=ex.Message});}
 });
 
 app.MapGet("/api/doi-tra/yeu-cau", async (StoreRepository store) => Results.Ok(await store.GetWebReturnRequestsAsync()));

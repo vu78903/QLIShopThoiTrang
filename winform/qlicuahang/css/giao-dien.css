@@ -925,6 +925,15 @@
         }
 
         /* MODAL DIALOG */
+        .delete-confirm-dialog { border:0; padding:0; background:transparent; width:min(460px,94vw); max-height:90vh; overflow:auto; }
+        .delete-confirm-dialog::backdrop { background:rgba(15,23,42,.55); }
+        .delete-confirm-dialog .modal { width:100%; margin:0; }
+        .stock-review-heading { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+        .stock-review-filters { display:flex; gap:12px; margin:16px 0; }
+        .stock-review-filters .input { max-width:260px; }
+        .stock-action-fields { display:flex; flex-direction:column; gap:12px; padding:20px; }
+        #stockActionError { color:#b91c1c; }
+
         .modal-bg {
             position: fixed;
             inset: 0;

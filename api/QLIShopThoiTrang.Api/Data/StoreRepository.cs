@@ -869,6 +869,20 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
         await using var connection = db.CreateConnection();
         await connection.OpenAsync();
         await using var tx = (NpgsqlTransaction)await connection.BeginTransactionAsync();
+        var requestKey=input.ClientRequestId?.Trim();
+        var digest=Fingerprint(input);
+        if(!string.IsNullOrEmpty(requestKey))
+        {
+            if(requestKey.Length>80)throw new InvalidOperationException("Mã yêu cầu nhập kho quá dài.");
+            await ExecuteAsync(connection,tx,"SELECT pg_advisory_xact_lock(hashtext(@key))",("@key","import:"+requestKey));
+            await using var previous=NewCommand(connection,tx,"SELECT SoPhieuNK,DauVanTayYeuCau FROM PhieuNhapKho WHERE MaYeuCau=@key",("@key",requestKey));
+            await using var reader=await previous.ExecuteReaderAsync();
+            if(await reader.ReadAsync())
+            {
+                if(reader.GetString(1)!=digest)throw new InvalidOperationException("Mã yêu cầu nhập kho đã dùng cho nội dung khác.");
+                var previousId=reader.GetString(0);await reader.DisposeAsync();await tx.CommitAsync();return previousId;
+            }
+        }
         var supplier = input.SupplierId.Trim();
         if (await ScalarLongAsync(connection, tx,
             "SELECT COUNT(*) FROM NhaSanXuat WHERE MaNSX=@id AND TrangThai=TRUE", ("@id", supplier)) == 0)
@@ -900,11 +914,11 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
         var totalQty = lines.Sum(x => x.Qty);
         var total = lines.Sum(x => x.Total);
         await ExecuteAsync(connection, tx, """
-            INSERT INTO PhieuNhapKho(SoPhieuNK,NgayLap,SoPO,NguoiGiao,TongSoLuong,TongTien,MaNSX,MaNV,TrangThai)
-            VALUES(@id,CURRENT_TIMESTAMP,NULL,NULL,@qty,@total,@supplier,@employee,'CHO_DUYET');
+            INSERT INTO PhieuNhapKho(SoPhieuNK,NgayLap,SoPO,NguoiGiao,TongSoLuong,TongTien,MaNSX,MaNV,TrangThai,MaYeuCau,DauVanTayYeuCau)
+            VALUES(@id,CURRENT_TIMESTAMP,NULL,NULL,@qty,@total,@supplier,@employee,'CHO_DUYET',@key,@digest);
             """,
             ("@id", id), ("@qty", totalQty), ("@total", total), ("@supplier", supplier),
-            ("@employee", employee));
+            ("@employee", employee),("@key",DbValue(requestKey)),("@digest",digest));
         foreach (var line in lines)
             await ExecuteAsync(connection, tx, """
                 INSERT INTO ChiTietNhapKho(SoPhieuNK,MaSKU,SoLuong,DonGia,ThanhTien,GhiChu)
@@ -921,9 +935,15 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
         await connection.OpenAsync();
         await using var tx = (NpgsqlTransaction)await connection.BeginTransactionAsync();
         var status = await ScalarStringAsync(connection, tx,
-            "SELECT TrangThai FROM PhieuNhapKho WHERE SoPhieuNK=@id", ("@id", soPhieu));
+            "SELECT TrangThai FROM PhieuNhapKho WHERE SoPhieuNK=@id FOR UPDATE", ("@id", soPhieu));
+        if(status=="DA_DUYET"){await tx.CommitAsync();return;}
         if (status != "CHO_DUYET")
             throw new InvalidOperationException("Phiếu không tồn tại hoặc không ở trạng thái chờ duyệt.");
+        await using(var locked=NewCommand(connection,tx,"""
+            SELECT s.MaSKU FROM SanPham s JOIN ChiTietNhapKho c ON c.MaSKU=s.MaSKU
+            WHERE c.SoPhieuNK=@id ORDER BY s.MaSKU FOR UPDATE OF s
+            """,("@id",soPhieu)))
+        {await using var reader=await locked.ExecuteReaderAsync();while(await reader.ReadAsync()) { }}
         await ExecuteAsync(connection, tx, """
             UPDATE SanPham sp SET SoLuongTonKho=sp.SoLuongTonKho+ct.SoLuong,
                 SoLuong=sp.SoLuong+ct.SoLuong
@@ -937,7 +957,7 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
     public async Task<bool> RejectImportRequestAsync(string soPhieu) =>
         await ExecuteStandaloneAsync("""
             UPDATE PhieuNhapKho SET TrangThai='TU_CHOI'
-            WHERE SoPhieuNK=@id AND TrangThai='CHO_DUYET'
+            WHERE SoPhieuNK=@id AND TrangThai IN ('CHO_DUYET','TU_CHOI')
             """, ("@id", soPhieu)) > 0;
 
     // Lưu hóa đơn và chi tiết trong một transaction để không thể có hóa đơn thiếu sản phẩm.
@@ -961,7 +981,7 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
         }
         if(input.Items.Select(x=>x.Sku).Distinct(StringComparer.OrdinalIgnoreCase).Count()!=input.Items.Count)
             throw new InvalidOperationException("SKU bị lặp trong hóa đơn.");
-        await ValidateInvoicePricingAsync(connection,tx,input);
+        var appliedVoucher=await ValidateInvoicePricingAsync(connection,tx,input);
         if(!input.IsCod && !string.Equals(input.DeliveryMode,"COD",StringComparison.OrdinalIgnoreCase) && input.PaymentMethod=="Tiền mặt" && input.Paid<input.Total)
             throw new InvalidOperationException("Tiền khách đưa chưa đủ thanh toán.");
 
@@ -992,8 +1012,8 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
                 "SELECT COUNT(*) FROM NhanVien WHERE MaNV=@employee AND TrangThai=TRUE",
                 ("@employee", employee)) == 0)
             throw new InvalidOperationException("Nhân viên lập hóa đơn không tồn tại hoặc đã ngừng hoạt động.");
-        var promo = string.IsNullOrWhiteSpace(input.PromoCode) ? null : await ScalarStringAsync(connection, tx,
-            "SELECT MaKM FROM KhuyenMai WHERE MaKM=@code AND TrangThai=TRUE", ("@code", input.PromoCode.Trim()));
+        var promo = string.IsNullOrWhiteSpace(appliedVoucher) ? null : await ScalarStringAsync(connection, tx,
+            "SELECT MaKM FROM KhuyenMai WHERE UPPER(MaKM)=UPPER(@code) AND TrangThai=TRUE", ("@code", appliedVoucher));
         var invoiceType = isCod ? "COD" : isDelivery ? "GIAO_HANG" : "TAI_QUAY";
         var deliveryStatus = isDelivery ? "Vừa xác nhận đơn" : null;
         var paymentStatus = isCod ? "CHUA_THANH_TOAN" : "DA_THANH_TOAN";
@@ -1027,12 +1047,13 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
                 ("@price", item.Price), ("@total", item.Price * item.Qty),("@paidLine",paidLines[item.Sku]));
         }
 
+        await ReserveInvoiceStockAsync(connection, tx, input.Id);
         if (!isCod)
             await CompleteInvoiceAsync(connection, tx, input.Id, customerId, input.Total);
         await tx.CommitAsync();
     }
 
-    // Đơn COD chỉ trừ kho và tính doanh thu khi giao thành công; đơn đã thanh toán chỉ đổi trạng thái giao.
+    // Tồn đã giữ khi tạo đơn; giao COD thành công chỉ ghi nhận thanh toán/tích điểm một lần.
     public async Task UpdateDeliveryStatusAsync(string soHoaDon, CodStatusUpdateDto input)
     {
         await using var connection = db.CreateConnection();
@@ -1041,7 +1062,7 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
         await using var command = NewCommand(connection, tx, """
             SELECT TrangThaiGiaoHang,MaKH,KhachPhaiTra,UPPER(LoaiHoaDon)
             FROM HoaDon
-            WHERE SoHD=@id AND UPPER(LoaiHoaDon) IN ('COD','WEB_COD','GIAO_HANG','WEB_DA_THANH_TOAN','WEB_THANH_TOAN')
+            WHERE SoHD=@id AND UPPER(LoaiHoaDon) IN ('COD','WEB_COD','GIAO_HANG','WEB_DA_THANH_TOAN','WEB_THANH_TOAN') FOR UPDATE
             """, ("@id", soHoaDon));
         string? oldStatus;
         string? customerId;
@@ -1059,6 +1080,7 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
         var statusFlow = new[] { "Vừa xác nhận đơn", "Shipper đã lấy hàng", "Hàng đang được vận chuyển", "Hàng giao thành công" };
         var oldIndex = Array.IndexOf(statusFlow, oldStatus ?? statusFlow[0]);
         var newIndex = Array.IndexOf(statusFlow, input.Status);
+        if (oldIndex < 0) throw new InvalidOperationException("Đơn đã hủy hoặc trạng thái không cho phép giao tiếp.");
         if (newIndex < 0) throw new InvalidOperationException("Trạng thái giao hàng không hợp lệ.");
         if (oldStatus == "Hàng giao thành công" && input.Status != oldStatus)
             throw new InvalidOperationException("Đơn đã giao thành công không thể lùi trạng thái.");
@@ -1066,6 +1088,7 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
             throw new InvalidOperationException("Trạng thái đơn hàng phải được cập nhật theo đúng thứ tự.");
 
         var isCod = invoiceType is "COD" or "WEB_COD";
+        await ReserveInvoiceStockAsync(connection, tx, soHoaDon);
         if (isCod && input.Status == "Hàng giao thành công" && oldStatus != input.Status)
             await CompleteInvoiceAsync(connection, tx, soHoaDon, customerId, total);
 
@@ -1079,43 +1102,13 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
         await tx.CommitAsync();
     }
 
-    public async Task<bool> DeletePendingCodAsync(string soHoaDon)
-    {
-        await using var connection = db.CreateConnection();
-        await connection.OpenAsync();
-        await using var tx = (NpgsqlTransaction)await connection.BeginTransactionAsync();
-        var exists = await ScalarLongAsync(connection, tx, """
-            SELECT COUNT(*) FROM HoaDon
-            WHERE SoHD=@id AND UPPER(LoaiHoaDon) IN ('COD','WEB_COD') AND COALESCE(TrangThaiGiaoHang,'')<>'Hàng giao thành công'
-            """, ("@id", soHoaDon));
-        if (exists == 0) return false;
-        await ExecuteAsync(connection, tx,
-            "DELETE FROM ChiTietHoaDon WHERE SoHD=@id; DELETE FROM HoaDon WHERE SoHD=@id;", ("@id", soHoaDon));
-        await tx.CommitAsync();
-        return true;
-    }
+    public Task<bool> DeletePendingCodAsync(string soHoaDon) => CancelShipmentAsync(soHoaDon, "Hủy đơn COD");
 
     private static async Task CompleteInvoiceAsync(NpgsqlConnection connection, NpgsqlTransaction tx,
         string invoiceId, string? customerId, decimal total)
     {
-        await using(var command=NewCommand(connection,tx,"""
-            SELECT sp.MaSKU FROM SanPham sp JOIN ChiTietHoaDon ct ON ct.MaSKU=sp.MaSKU
-            WHERE ct.SoHD=@id ORDER BY sp.MaSKU FOR UPDATE OF sp
-            """,("@id",invoiceId)))
-        {await using var reader=await command.ExecuteReaderAsync();while(await reader.ReadAsync()) { }}
-        var unavailable = await ScalarLongAsync(connection, tx, """
-            SELECT COUNT(*) FROM ChiTietHoaDon ct
-            JOIN SanPham sp ON sp.MaSKU=ct.MaSKU
-            WHERE ct.SoHD=@id AND sp.SoLuongTonKho<ct.SoLuong
-            """, ("@id", invoiceId));
-        if (unavailable > 0) throw new InvalidOperationException("Tồn kho không đủ để hoàn tất hóa đơn.");
-
-        await ExecuteAsync(connection, tx, """
-            UPDATE SanPham sp SET SoLuongTonKho=sp.SoLuongTonKho-ct.SoLuong,
-                SoLuong=sp.SoLuong-ct.SoLuong
-            FROM ChiTietHoaDon ct
-            WHERE ct.MaSKU=sp.MaSKU AND ct.SoHD=@id;
-            """, ("@id", invoiceId));
+        await ReserveInvoiceStockAsync(connection, tx, invoiceId);
+        if(await ScalarLongAsync(connection,tx,"SELECT COUNT(*) FROM HoaDon WHERE SoHD=@id AND DaGhiNhanThanhToan=TRUE",("@id",invoiceId))>0)return;
 
         if (customerId is not null)
         {
@@ -1130,6 +1123,7 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
                 WHERE MaKH=@customer;
                 """, ("@total", total), ("@customer", customerId));
         }
+        await ExecuteAsync(connection,tx,"UPDATE HoaDon SET DaGhiNhanThanhToan=TRUE WHERE SoHD=@id",("@id",invoiceId));
     }
 
     // Tìm hóa đơn bằng mã hoặc số điện thoại để nhân viên bắt đầu đổi trả.

@@ -135,12 +135,14 @@
                             </div>
                             <div class="bill">
                                 <div class="sum-row"><span>Tổng tiền hàng</span><strong id="subtotal">0 ₫</strong></div>
+                                <div class="sum-row"><span id="memberDiscountLabel">Hạng Bạc (0%)</span><strong id="memberDiscountAmount">0 ₫</strong></div>
                                 <label class="bill-label">Voucher</label><select id="posVoucherSelect" class="input" onchange="selectPosVoucher(this.value)"><option value="">Chọn voucher</option></select>
                                 <div style="display:flex; gap:8px; margin:6px 0 10px">
                                     <input id="promoCodeInput" class="input" placeholder="Nhập mã khuyến mãi">
                                     <button class="btn btn-secondary" type="button" onclick="applyPromotionCode()">Áp dụng</button>
                                 </div>
-                                <div class="sum-row"><span id="discountLabel">Khuyến mãi</span><strong id="discount">0 ₫</strong></div>
+                                <div class="sum-row"><span id="discountLabel">Voucher</span><strong id="discount">0 ₫</strong></div>
+                                <div class="sum-row"><span>Tiền hàng sau giảm</span><strong id="taxableAmount">0 ₫</strong></div>
                                 <div class="sum-row"><span>Thuế VAT (8%)</span><strong id="vatAmount">0 ₫</strong></div>
                                 <div class="sum-row"><span>Phí giao hàng</span><strong id="shippingAmount">0 ₫</strong></div>
                                 <div class="paybox">
@@ -366,7 +368,9 @@
     </div>
 
     <script src="../js/dia-chi-viet-nam.js"></script>
-    <script src="../js/ung-dung.js?v=20261103-pos5"></script>
+    <script src="../js/ung-dung.js?v=20261103-member1"></script>
     <script src="../js/pos-doi-tra.js?v=20261103-1"></script>
+    <script src="../js/kiem-nhan-kho.js?v=20261103-1"></script>
+    <script src="../js/thao-tac-an-toan.js?v=20261103-1"></script>
 </body>
 </html>

@@ -13,6 +13,7 @@ public sealed class StaffSessions
     {
         if(path=="/api/dang-xuat") return true;
         if(role=="CuaHangTruong") return true;
+        if(path.StartsWith("/api/kiem-nhan-kho")) return method=="GET" && role is "NhanVienKho" or "TruongCa";
         if(path.StartsWith("/api/phieu-nhap-kho")) return !path.EndsWith("/duyet") && !path.EndsWith("/tu-choi") && role is "NhanVienKho" or "TruongCa";
         if(path.StartsWith("/api/hoa-don") || path.StartsWith("/api/doi-tra") || path.StartsWith("/api/thanh-toan-qr")) return role is "ThuNgan" or "TruongCa";
         // Thu ngân được thêm nhanh khách hàng, không được quản trị đối tác khác.

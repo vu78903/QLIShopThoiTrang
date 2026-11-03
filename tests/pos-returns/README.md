@@ -12,3 +12,19 @@ Chạy tại thư mục gốc repository. Cần .NET 10, biến môi trường k
 API test tạo chứng từ thật cho dữ liệu thử, bao gồm yêu cầu web nhiều SKU bằng bảng tiếng Việt. UI test chặn API và chỉ dùng dữ liệu giả. Kết quả và ảnh nằm trong `artifacts/pos-returns/`, được bỏ qua bởi Git. Dừng API thử sau khi xong.
 
 Không gọi file setup lần hai khi chưa cleanup. Nếu ID fixture đã tồn tại, dừng và kiểm tra trước khi dọn; không thay mã để ghi đè dữ liệu khác.
+
+## Kiểm thử thêm mục 6–9
+
+Sau setup gốc, chạy thêm `fix69-setup.sql` bằng cùng công cụ DB. Cần build công cụ DB trước khi chạy các script Node có SQL (`dotnet build tests/pos-returns/db`).
+
+Chạy lần lượt `api.mjs`, `fix69-api.mjs`, `fix69-real-ui.mjs` trên API thử 5022. Hai script cuối dùng các SKU/tài khoản TEST69 riêng; script UI thật ghi dữ liệu qua form vào API thử/Supabase. `fix69-real-ui.mjs` chạy sau `fix69-api.mjs` vì kiểm tra tài khoản fixture đã được cập nhật.
+
+`ui.mjs` và `fix69-ui.mjs` dùng mock API, có thể chạy độc lập. Script mới kiểm tra cả bộ lọc, kiểm nhận hàng thực tế, nút Hiện/Ẩn mật khẩu, khóa lưu và dialog trên cùng ở các màn hình.
+
+Luôn chạy cleanup theo thứ tự **fix69-cleanup.sql rồi testpos-cleanup.sql**, kể cả khi test lỗi. Không chạy lại fixture khi chưa cleanup. Nếu chạy lại toàn bộ, khởi động lại API thử để tránh cache X-Request-ID của lượt trước. Dừng riêng tiến trình API thử khi hoàn tất.
+
+## Hạng thẻ và voucher
+
+Chính sách hiện tại chọn mức giảm tốt hơn giữa thành viên và voucher, không cộng dồn; nếu bằng nhau ưu tiên thành viên. Các kỳ vọng trong bộ kiểm thử POS đã được cập nhật theo quy tắc này.
+
+`membership-ui.mjs` dùng mock và có thể chạy độc lập. `membership-api.mjs` chạy trên API thử 5022 sau setup gốc, hoặc sau `api.mjs`; script chỉ thay đổi tổng chi tiêu của khách TESTPOS và tạo hóa đơn có tiền tố TESTPOS. Chạy cleanup gốc khi xong. Không chạy `api.mjs` sau script membership trên cùng fixture chưa reset vì ngưỡng chi tiêu đã được thay đổi để kiểm tra các mốc.
