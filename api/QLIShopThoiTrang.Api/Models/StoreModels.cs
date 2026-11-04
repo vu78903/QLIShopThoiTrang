@@ -1,4 +1,4 @@
-namespace QLIShopThoiTrang.Api.Models;
+﻿namespace QLIShopThoiTrang.Api.Models;
 
 public sealed record AppStateDto(
     List<ProductDto> ProductsData,
@@ -367,3 +367,5 @@ public sealed record StockReviewActionDto(bool Restock, string? Note, bool Recei
 public sealed record StockReconcileDto(bool AlreadyDeducted);
 public sealed record StockUnconfirmedDto(string InvoiceId, string Type, string Status, bool? Deducted, bool KnownUnreserved);
 public sealed record CancelShipmentDto(string? Reason);
+
+public sealed record BestSellingProductDto(string ProductId,string Name,long Quantity,long OrderCount);

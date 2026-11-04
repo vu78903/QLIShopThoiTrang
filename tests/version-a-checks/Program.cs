@@ -64,6 +64,9 @@ var versionOld=sessions.Create(new("VERSION-TEST","Test","ThuNgan",SessionVersio
 var versionNew=sessions.Create(new("VERSION-TEST","Test","ThuNgan",SessionVersion:"new"));
 sessions.RemoveEmployeeVersion(" VERSION-TEST ","old");
 Check(sessions.Get(versionOld) is null && sessions.Get(versionNew) is not null,"Version-scoped revocation preserves concurrently issued current token");
+Check((await Authorize("GET","/api/bao-cao/ban-chay")).Response.StatusCode==401,"Best sellers requires login");
+Check((await Authorize("GET","/api/bao-cao/ban-chay","ThuNgan")).Response.StatusCode==403,"Cashier cannot read best sellers report");
+Check((await Authorize("GET","/api/bao-cao/ban-chay","TruongCa")).Response.StatusCode==204,"Shift leader can read best sellers report");
 Console.WriteLine($"PASS {checks} authorization checks.");
 
 var connectionString = Environment.GetEnvironmentVariable("FORM_TEST_POSTGRES");
@@ -131,6 +134,30 @@ try
     var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> { ["ConnectionStrings:YodyStoreDb"] = settings.ConnectionString }).Build();
     var db = new SqlServerConnectionFactory(config); var repository = new StoreRepository(db);
     var initializer = new SqlServerDatabaseInitializer(db);
+    await Exec("""
+        INSERT INTO sanpham(masp,masku,maloai,tensanpham,kichco,mausac,dongia,soluong,soluongtonkho,danhmuc,mansx)
+        VALUES('SP-900','BEST-S','AO','Test','S','Đen',100000,10,10,'NAM','NCC-001'),
+              ('SP-901','BEST-OTHER','AO','Other product','M','Đen',100000,10,10,'NAM','NCC-001');
+        INSERT INTO hoadon(sohd,manv,loaihoadon,phuongthucthanhtoan,trangthaithanhtoan,trangthaigiaohang,ngaylap)
+        VALUES('BEST-1','M','TAI_QUAY','TIEN_MAT','DA_THANH_TOAN',NULL,'2020-01-01 23:59:59'),
+              ('BEST-2','M','TAI_QUAY','TIEN_MAT','DA_THANH_TOAN',NULL,'2020-01-02 00:00:00'),
+              ('BEST-CANCEL','M','COD','COD','DA_THANH_TOAN','Đã hủy','2020-01-01'),
+              ('BEST-UNPAID','M','COD','COD','CHUA_THANH_TOAN',NULL,'2020-01-01'),
+              ('BEST-OTHER','M','TAI_QUAY','TIEN_MAT','DA_THANH_TOAN',NULL,'2020-01-01'),
+              ('BEST-TYPE','M','WEB_HUY','COD','DA_THANH_TOAN',NULL,'2020-01-01');
+        INSERT INTO chitiethoadon(sohd,masku,soluong,dongia,thanhtien)
+        VALUES('BEST-1','TEST-M',3,100000,300000),('BEST-1','BEST-S',2,100000,200000),
+              ('BEST-2','TEST-M',4,100000,400000),('BEST-CANCEL','TEST-M',99,100000,9900000),
+              ('BEST-UNPAID','TEST-M',88,100000,8800000),('BEST-OTHER','BEST-OTHER',6,100000,600000),
+              ('BEST-TYPE','TEST-M',77,100000,7700000);
+        """);
+    var bestDay=await repository.GetBestSellingProductsAsync(new DateOnly(2020,1,1),new DateOnly(2020,1,1));
+    Check(bestDay.Count==2 && bestDay[0].ProductId=="SP-901" && bestDay[0].Quantity==6,"Best sellers ranks by units, not number of variants");
+    Check(bestDay[1].Quantity==5 && bestDay[1].OrderCount==1,"Best sellers merges SKUs and counts distinct paid non-cancelled invoices");
+    var bestRange=await repository.GetBestSellingProductsAsync(new DateOnly(2020,1,1),new DateOnly(2020,1,2));
+    Check(bestRange[0].ProductId=="SP-900" && bestRange[0].Quantity==9 && bestRange[0].OrderCount==2,"Best sellers includes whole end date and preserves next day boundary");
+    Check((await repository.GetBestSellingProductsAsync(new DateOnly(2019,1,1),new DateOnly(2019,1,1))).Count==0,"Best sellers empty range");
+    await Exec("DELETE FROM chitiethoadon WHERE sohd LIKE 'BEST-%';DELETE FROM hoadon WHERE sohd LIKE 'BEST-%';DELETE FROM sanpham WHERE masku IN ('BEST-S','BEST-OTHER');");
     var securityMigration=await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory,"BoSung-PhienBanBaoMat.sql"));
     var missingSecurityRejected=false;
     try{await initializer.InitializeAsync();}catch(InvalidOperationException ex){missingSecurityRejected=ex.Message.Contains("phienbanbaomat");}
@@ -222,6 +249,8 @@ try
         using(var list=JsonDocument.Parse(await client.GetStringAsync("/api/hoa-don")))Check(new[]{"OWN","OTHER","WEB"}.All(id=>list.RootElement.EnumerateArray().Any(i=>i.GetProperty("id").GetString()==id)),"HTTP cashier lists all operational invoices");
         using(var login=await client.PostAsJsonAsync("/api/dang-nhap",new{username="manager",password="test123"}))
         {login.EnsureSuccessStatusCode();using var data=JsonDocument.Parse(await login.Content.ReadAsStringAsync());client.DefaultRequestHeaders.Authorization=new AuthenticationHeaderValue("Bearer",data.RootElement.GetProperty("token").GetString());}
+        Check((await client.GetAsync("/api/bao-cao/ban-chay")).IsSuccessStatusCode,"HTTP manager reads best sellers report");
+        Check((await client.GetAsync("/api/bao-cao/ban-chay?from=2020-01-02&to=2020-01-01")).StatusCode==HttpStatusCode.BadRequest,"HTTP best sellers rejects reversed dates");
         using(var saved=await client.PostAsJsonAsync("/api/san-pham",stale))
         {saved.EnsureSuccessStatusCode();using var data=JsonDocument.Parse(await saved.Content.ReadAsStringAsync());Check(data.RootElement.GetProperty("stock").GetInt32()==14,"HTTP metadata save returns current stock, not stale input");}
         async Task LoginAs(string name,string password="test123")

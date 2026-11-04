@@ -63,6 +63,13 @@ app.MapGet("/api/app-state", async (StoreRepository store,HttpContext context) =
     return Results.Ok(user.Role=="NhanVienKho" ? await store.GetWarehouseAppStateAsync(user.EmployeeId) : await store.GetAppStateAsync());
 });
 
+app.MapGet("/api/bao-cao/ban-chay", async (DateOnly? from, DateOnly? to, StoreRepository store) =>
+{
+    if(from.HasValue!=to.HasValue || (from.HasValue && from.Value>to!.Value))
+        return Results.BadRequest(new { message="Khoảng thời gian báo cáo không hợp lệ." });
+    return Results.Ok(await store.GetBestSellingProductsAsync(from,to));
+});
+
 app.MapGet("/api/loai-san-pham", async (StoreRepository store) =>
 {
     return Results.Ok(await store.GetProductTypesAsync());

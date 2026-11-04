@@ -1,4 +1,4 @@
-// 1. DỮ LIỆU TẠM TRÊN TRÌNH DUYỆT
+﻿// 1. DỮ LIỆU TẠM TRÊN TRÌNH DUYỆT
         // Các mảng dưới đây đang đóng vai trò như "database nhỏ" khi chạy demo.
         // Sau này nếu có SQL Server/API thì chỉ cần thay phần đọc ghi dữ liệu ở đây.
         let productsData = [];
@@ -4746,3 +4746,50 @@
 
 
 
+
+        let bestSellerRequestId = 0;
+        function closeBestSellers() {
+            bestSellerRequestId++;
+            document.getElementById('bestSellersModal')?.remove();
+        }
+        function openBestSellers() {
+            if (!['admin','shiftLeader'].includes(window.userRole)) return;
+            closeBestSellers();
+            const selectedDate = document.getElementById('reportDate')?.value || getDateKey();
+            document.body.insertAdjacentHTML('beforeend', `<div class="modal-bg open" id="bestSellersModal" role="dialog" aria-modal="true" aria-labelledby="bestSellersTitle"><div class="modal" style="width:min(960px,95vw);max-width:960px">
+                <h2 id="bestSellersTitle">Bán chạy</h2>
+                <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px"><label for="bestSellersPeriod">Thời gian</label><select class="input" id="bestSellersPeriod" style="max-width:250px" onchange="loadBestSellers()"><option value="day">Ngày đang chọn</option><option value="30days">30 ngày đến ngày chọn</option><option value="all">Toàn bộ thời gian</option></select><span id="bestSellersRange"></span></div>
+                <div style="overflow:auto;max-height:60vh"><table class="data-table"><thead><tr><th>Hạng</th><th>Mã SP</th><th>Sản phẩm</th><th>Số lượng bán</th><th>Số đơn</th></tr></thead><tbody id="bestSellersBody"></tbody></table></div>
+                <div class="modal-actions"><button class="btn btn-secondary" type="button" onclick="closeBestSellers()">Đóng</button></div>
+            </div></div>`);
+            document.getElementById('bestSellersModal').dataset.date = selectedDate;
+            loadBestSellers();
+        }
+        async function loadBestSellers() {
+            const modal = document.getElementById('bestSellersModal');
+            if (!modal) return;
+            const requestId = ++bestSellerRequestId;
+            const body = document.getElementById('bestSellersBody');
+            body.innerHTML = '<tr><td colspan="5">Đang tải...</td></tr>';
+            const period = document.getElementById('bestSellersPeriod').value;
+            const end = modal.dataset.date;
+            let query = '';
+            if (period !== 'all') {
+                const start = new Date(end + 'T12:00:00');
+                if (period === '30days') start.setDate(start.getDate()-29);
+                const from = `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`;
+                query = '?' + new URLSearchParams({from,to:end});
+                document.getElementById('bestSellersRange').textContent = from === end ? end : from + ' – ' + end;
+            } else document.getElementById('bestSellersRange').textContent = '';
+            try {
+                const response = await fetch(API_BASE_URL + '/api/bao-cao/ban-chay' + query, {cache:'no-store'});
+                if (!response.ok) throw new Error(await getApiErrorMessage(response,'Không tải được báo cáo bán chạy.'));
+                const products = await response.json();
+                if (!Array.isArray(products)) throw new Error('Dữ liệu báo cáo không hợp lệ.');
+                if (requestId !== bestSellerRequestId || !modal.isConnected) return;
+                body.innerHTML = products.map((p,index) => `<tr><td>${index+1}</td><td>${escapeHtml(p.productId)}</td><td>${escapeHtml(p.name)}</td><td>${Number(p.quantity).toLocaleString('vi-VN')}</td><td>${Number(p.orderCount).toLocaleString('vi-VN')}</td></tr>`).join('') || '<tr><td colspan="5">Chưa có sản phẩm đã bán trong thời gian này.</td></tr>';
+            } catch (error) {
+                if (requestId !== bestSellerRequestId || !modal.isConnected) return;
+                body.innerHTML = `<tr><td colspan="5" role="alert">${escapeHtml(error.message)}</td></tr>`;
+            }
+        }

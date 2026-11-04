@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using QLIShopThoiTrang.Api.Models;
 namespace QLIShopThoiTrang.Api.Services;
@@ -26,6 +26,7 @@ public sealed class StaffSessions
     {
         if(role=="CuaHangTruong")return true;
         if(role is not ("ThuNgan" or "TruongCa" or "NhanVienKho"))return false;
+        if(path=="/api/bao-cao/ban-chay")return role=="TruongCa";
         if(path is "/api/app-state" or "/api/loai-san-pham" or "/api/san-pham-khuyen-mai")return true;
         if(Under(path,"/api/kiem-nhan-kho"))return role is "NhanVienKho" or "TruongCa";
         return role is "ThuNgan" or "TruongCa" && (Under(path,"/api/hoa-don") || Under(path,"/api/doi-tra") || Under(path,"/api/thanh-toan-qr"));
