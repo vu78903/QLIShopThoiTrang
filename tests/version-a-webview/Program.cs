@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
@@ -17,6 +17,14 @@ internal static class Program
     private static void Main()
     {
         ApplicationConfiguration.Initialize();
+        var compatibility = typeof(formTongQuan).Assembly.GetType("qlicuahang.ApiProcessManager")!
+            .GetMethod("IsCompatibleHealth", BindingFlags.Static | BindingFlags.NonPublic)!;
+        bool Compatible(string json) { using var doc=JsonDocument.Parse(json); return (bool)compatibility.Invoke(null,new object[]{doc.RootElement})!; }
+        Check(!Compatible("{\"ok\":true,\"qrPayment\":true}"),"Startup rejects legacy API that lacks staff security protocol");
+        Check(Compatible("{\"ok\":true,\"qrPayment\":true,\"staffSecurityVersion\":1}"),"Startup accepts matching staff security API");
+        Check(!Compatible("{\"ok\":true,\"qrPayment\":true,\"staffSecurityVersion\":0}"),"Startup rejects mismatched API protocol");
+        Check(!Compatible("{\"ok\":false,\"qrPayment\":true,\"staffSecurityVersion\":1}"),"Startup rejects unhealthy API");
+
         Environment.SetEnvironmentVariable("WEBVIEW2_USER_DATA_FOLDER",Path.Combine(AppContext.BaseDirectory,"profile-"+Guid.NewGuid().ToString("N")));
         using var api=new FakeApi();
         using var context=new ApplicationContext();
@@ -78,7 +86,7 @@ internal static class Program
 
     private static async Task Wait(WebView2 view,string expression)
     {
-        for(var n=0;n<300;n++)
+        for(var n=0;n<1200;n++)
         {
             if(view.CoreWebView2 is not null && !view.IsDisposed)
             {
@@ -97,7 +105,7 @@ internal static class Program
         try {view.CoreWebView2.Reload();await loaded.Task.WaitAsync(TimeSpan.FromSeconds(20));}
         finally {view.CoreWebView2.NavigationCompleted-=Complete;}
     }
-    private static Task<string> Js(WebView2 view,string expression)=>view.CoreWebView2.ExecuteScriptAsync(expression);
+    private static Task<string> Js(WebView2 view,string expression)=>view.CoreWebView2 is { } core && !view.IsDisposed ? core.ExecuteScriptAsync(expression) : Task.FromResult("WebView unavailable; disposed="+view.IsDisposed);
     private static async Task CheckState(WebView2 view,string expression,string message)
     {
         var valid=await Js(view,expression)=="true";

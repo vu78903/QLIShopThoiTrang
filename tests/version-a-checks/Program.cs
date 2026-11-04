@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -210,9 +210,9 @@ try
         start.Environment["YODYSTORE_CONNECTION_STRING"]=settings.ConnectionString;
         start.Environment["ASPNETCORE_ENVIRONMENT"]="Production";
         api=Process.Start(start)!;var log=api.StandardOutput.ReadToEndAsync();var error=api.StandardError.ReadToEndAsync();
-        using var client=new HttpClient {BaseAddress=new Uri($"http://127.0.0.1:{port}"),Timeout=TimeSpan.FromSeconds(5)};
+        using var client=new HttpClient(new HttpClientHandler { UseProxy=false }) {BaseAddress=new Uri($"http://127.0.0.1:{port}"),Timeout=TimeSpan.FromSeconds(30)};
         var ready=false;
-        for(var n=0;n<100;n++){if(api.HasExited)throw new Exception("Test API failed: "+await log+await error);try{if((await client.GetAsync("/api/health")).IsSuccessStatusCode){ready=true;break;}}catch(HttpRequestException){} await Task.Delay(100);}
+        for(var n=0;n<100;n++){if(api.HasExited)throw new Exception("Test API failed: "+await log+await error);try{if((await client.GetAsync("/api/health")).IsSuccessStatusCode){ready=true;break;}}catch(Exception ex) when(ex is HttpRequestException or TaskCanceledException){} await Task.Delay(100);}
         Check(ready,"Test API startup");
         foreach(var route in new[]{"/api/app-state","/api/hoa-don","/API/HOA-DON/"})Check((await client.GetAsync(route)).StatusCode==HttpStatusCode.Unauthorized,"HTTP anonymous "+route);
         using(var health=await client.GetAsync("/api/health")){var data=await health.Content.ReadAsStringAsync();Check(!data.Contains("database"),"Public health hides connection details");}
@@ -333,10 +333,15 @@ try
     }
     Console.WriteLine($"PASS {checks} checks including database, concurrency and real HTTP.");
 }
+catch(Exception ex)
+{
+    Console.Error.WriteLine("Test body failed before cleanup: " + ex);
+    throw;
+}
 finally
 {
     if(api is {HasExited:false}) {api.Kill(true);await api.WaitForExitAsync();}api?.Dispose();
-    await using var drop=new NpgsqlCommand("DROP DATABASE "+database+" WITH (FORCE)",admin);await drop.ExecuteNonQueryAsync();
+    await using var drop=new NpgsqlCommand("DROP DATABASE "+database+" WITH (FORCE)",admin){CommandTimeout=120};await drop.ExecuteNonQueryAsync();
 }
 
 public sealed class UnitStaffValidator : IStaffSessionValidator

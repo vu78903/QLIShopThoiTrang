@@ -1,4 +1,4 @@
-using QLIShopThoiTrang.Api.Data;
+﻿using QLIShopThoiTrang.Api.Data;
 using QLIShopThoiTrang.Api.Models;
 using QLIShopThoiTrang.Api.Services;
 using PayOS.Models.Webhooks;
@@ -47,6 +47,7 @@ app.MapGet("/api/health", async (StoreRepository store) =>
             ok = true,
             // Không công khai địa chỉ database.
             qrPayment = true,
+            staffSecurityVersion = 1,
             apiVersion = typeof(Program).Assembly.GetName().Version?.ToString()
         });
     }

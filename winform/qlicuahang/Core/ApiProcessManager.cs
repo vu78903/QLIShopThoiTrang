@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
@@ -115,15 +115,21 @@ internal static class ApiProcessManager
             if (!response.IsSuccessStatusCode) return false;
             await using Stream content = await response.Content.ReadAsStreamAsync();
             using JsonDocument json = await JsonDocument.ParseAsync(content);
-            return json.RootElement.TryGetProperty("ok", out JsonElement ok) && ok.GetBoolean()
-                && json.RootElement.TryGetProperty("qrPayment", out JsonElement qrPayment)
-                && qrPayment.GetBoolean();
+            return IsCompatibleHealth(json.RootElement);
         }
         catch
         {
             return false;
         }
     }
+
+    // Không dùng lại API cũ chỉ vì cổng 5001 còn trả health thành công.
+    private static bool IsCompatibleHealth(JsonElement health) =>
+        health.ValueKind == JsonValueKind.Object
+        && health.TryGetProperty("ok", out var ok) && ok.ValueKind == JsonValueKind.True
+        && health.TryGetProperty("qrPayment", out var qr) && qr.ValueKind == JsonValueKind.True
+        && health.TryGetProperty("staffSecurityVersion", out var version)
+        && version.ValueKind == JsonValueKind.Number && version.TryGetInt32(out var value) && value == 1;
 
     private static async Task<bool> IsPortOpenAsync()
     {
