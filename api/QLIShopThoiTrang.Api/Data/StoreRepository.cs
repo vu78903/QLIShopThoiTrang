@@ -207,7 +207,7 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
         await using var connection = db.CreateConnection();
         await connection.OpenAsync();
         await using var command = NewCommand(connection, null, """
-            SELECT nv.MaNV,nv.HoTen,nv.MaQuyen
+            SELECT nv.MaNV,nv.HoTen,nv.MaQuyen,nv.phienbanbaomat::text || ':' || pq.phienbanbaomat::text
             FROM NhanVien nv JOIN PhanQuyen pq ON pq.MaQuyen=nv.MaQuyen
             WHERE nv.TenDangNhap=@username AND nv.MatKhau=@password
               AND nv.TrangThai=TRUE AND pq.TrangThai=TRUE LIMIT 1
@@ -221,7 +221,7 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
             "KHO" => "NhanVienKho",
             _ => "ThuNgan"
         };
-        return new LoginResultDto(reader.GetString(0),reader.GetString(1),role);
+        return new LoginResultDto(reader.GetString(0),reader.GetString(1),role,reader.GetString(2),reader.GetString(3));
     }
 
     public async Task<string> CreateProductVariantAsync(ProductVariantCreateDto input)
@@ -350,7 +350,7 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
             VALUES(@productId,@sku,@type,@name,@audience,@supplier,@stock,@size,@color,@active,@price,@stock,@image,CAST(@images AS jsonb))
             ON CONFLICT (MaSKU) DO UPDATE SET
                 MaSP=EXCLUDED.MaSP,MaLoai=EXCLUDED.MaLoai,TenSanPham=EXCLUDED.TenSanPham,DonGia=EXCLUDED.DonGia,
-                SoLuong=EXCLUDED.SoLuong,SoLuongTonKho=EXCLUDED.SoLuongTonKho,
+                -- Tồn kho chỉ thay đổi qua nghiệp vụ nhập/bán/kiểm nhận.
                 KichCo=EXCLUDED.KichCo,MauSac=EXCLUDED.MauSac,DanhMuc=EXCLUDED.DanhMuc,MaNSX=EXCLUDED.MaNSX,
                 HinhAnh=EXCLUDED.HinhAnh,DanhSachHinhAnh=EXCLUDED.DanhSachHinhAnh,TrangThai=EXCLUDED.TrangThai;
             """,
@@ -710,63 +710,6 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
 
     public async Task<bool> DeactivateProductTypeAsync(string maLoai) =>
         await ExecuteStandaloneAsync("UPDATE LoaiSanPham SET TrangThai=FALSE WHERE MaLoai=@id", ("@id", maLoai)) > 0;
-
-    public async Task SavePartnerAsync(PartnerUpsertDto input)
-    {
-        if(input.Username is not null && (string.IsNullOrWhiteSpace(input.Username) || input.Username.Length>50 || input.Username.Any(char.IsWhiteSpace)))
-            throw new InvalidOperationException("Tên đăng nhập phải từ 1 đến 50 ký tự và không có khoảng trắng.");
-        if(input.Password is not null && (input.Password.Length==0 || input.Password.Length>200))
-            throw new InvalidOperationException("Mật khẩu phải từ 1 đến 200 ký tự.");
-        DateOnly? birthDate=null;
-        if(!string.IsNullOrWhiteSpace(input.BirthDate))
-        {
-            if(!DateOnly.TryParseExact(input.BirthDate,"yyyy-MM-dd",CultureInfo.InvariantCulture,DateTimeStyles.None,out var parsed) || parsed>DateOnly.FromDateTime(DateTime.Today))
-                throw new InvalidOperationException("Ngày sinh không hợp lệ hoặc nằm trong tương lai.");
-            birthDate=parsed;
-        }
-        if(input.Gender is not null && input.Gender is not ("Nam" or "Nữ"))
-            throw new InvalidOperationException("Giới tính phải là Nam hoặc Nữ.");
-        var credentialParams=CommonPartnerParams(input).Concat(new (string Name,object? Value)[]{("@username",DbValue(input.Username)),("@password",input.Password is null ? DBNull.Value : input.Password),("@gender",DbValue(input.Gender)),("@birthdate",birthDate.HasValue?birthDate.Value:DBNull.Value)}).ToArray();
-        if (input.Category == "Khách hàng")
-        {
-            await ExecuteStandaloneAsync("""
-                INSERT INTO KhachHang(MaKH,SoDienThoai,HoTen,Email,DiaChi,TenDangNhap,MatKhau,GioiTinh,NgaySinh)
-                VALUES(@id,@phone,@name,@email,@address,@username,@password,@gender,@birthdate)
-                ON CONFLICT (MaKH) DO UPDATE SET HoTen=EXCLUDED.HoTen,
-                    SoDienThoai=EXCLUDED.SoDienThoai,Email=EXCLUDED.Email,
-                    DiaChi=EXCLUDED.DiaChi,TrangThai=TRUE,
-                    TenDangNhap=COALESCE(@username,KhachHang.TenDangNhap),MatKhau=COALESCE(@password,KhachHang.MatKhau),
-                    GioiTinh=COALESCE(@gender,KhachHang.GioiTinh),NgaySinh=COALESCE(@birthdate,KhachHang.NgaySinh);
-                """, credentialParams);
-            return;
-        }
-        if (input.Category == "Nhà cung cấp")
-        {
-            await ExecuteStandaloneAsync("""
-                INSERT INTO NhaSanXuat(MaNSX,TenNSX,DiaChi,MaSoThue,SoDienThoai,Email)
-                VALUES(@id,@name,@address,@role,@phone,@email)
-                ON CONFLICT (MaNSX) DO UPDATE SET TenNSX=EXCLUDED.TenNSX,
-                    DiaChi=EXCLUDED.DiaChi,MaSoThue=EXCLUDED.MaSoThue,
-                    SoDienThoai=EXCLUDED.SoDienThoai,Email=EXCLUDED.Email,TrangThai=TRUE;
-                """, CommonPartnerParams(input));
-            return;
-        }
-        if (input.Category == "Nhân viên")
-        {
-            var parameters = credentialParams.Append(("@permission", (object?)MapPermission(input.Role))).ToArray();
-            await ExecuteStandaloneAsync("""
-                INSERT INTO NhanVien(MaNV,TenDangNhap,HoTen,ChucVu,SoDienThoai,Email,DiaChi,MaQuyen,MatKhau)
-                VALUES(@id,COALESCE(@username,LOWER(REPLACE(@id,'-',''))),@name,@role,@phone,@email,@address,@permission,COALESCE(@password,'123'))
-                ON CONFLICT (MaNV) DO UPDATE SET HoTen=EXCLUDED.HoTen,
-                    ChucVu=EXCLUDED.ChucVu,SoDienThoai=EXCLUDED.SoDienThoai,
-                    Email=EXCLUDED.Email,DiaChi=EXCLUDED.DiaChi,
-                    MaQuyen=EXCLUDED.MaQuyen,TrangThai=TRUE,
-                    TenDangNhap=COALESCE(@username,NhanVien.TenDangNhap),MatKhau=COALESCE(@password,NhanVien.MatKhau);
-                """, parameters);
-            return;
-        }
-        throw new InvalidOperationException("Loại đối tác không hợp lệ.");
-    }
 
     public async Task<object?> GetPartnerCredentialsAsync(string category,string id)
     {
@@ -1546,21 +1489,19 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
         return result;
     }
 
+    private const string CancelledShipmentSql = "(UPPER(TRIM(COALESCE(h.LoaiHoaDon,''))) IN ('WEB_HUY','HUY','DA_HUY','CANCELLED','CANCELED') OR UPPER(TRANSLATE(TRIM(COALESCE(h.TrangThaiGiaoHang,'')),'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ','aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyydAAAAAAAAAAAAAAAAAEEEEEEEEEEEIIIIIOOOOOOOOOOOOOOOOOUUUUUUUUUUUYYYYYD')) IN ('DA HUY','HUY','DON DA HUY','DA_HUY','CANCELLED','CANCELED','DA NHAN TIEN - CAN CUA HANG XU LY'))";
+
     private static async Task<List<ShipmentRow>> QueryCancelledShipmentRowsAsync(NpgsqlConnection connection)
     {
         var rows = new List<ShipmentRow>();
-        await using (var command = NewCommand(connection, null, """
+        await using (var command = NewCommand(connection, null, $"""
             SELECT h.SoHD,COALESCE(NULLIF(h.TenNguoiNhan,''),k.HoTen,'Khách giao hàng'),
                    COALESCE(h.SoDienThoai_KH,''),COALESCE(h.DiaChiGiao,''),COALESCE(h.GhiChuGiaoHang,''),
                    'Đã hủy',h.TongCong,h.ChietKhau,h.ThueVAT,
                    h.KhachPhaiTra,h.PhuongThucThanhToan,COALESCE(h.PhiShip,0),
                    COALESCE(NULLIF(h.NguonDon,''),CASE WHEN h.SoHD LIKE 'WEB%' THEN 'WEB' ELSE 'POS' END)
             FROM HoaDon h LEFT JOIN KhachHang k ON k.MaKH=h.MaKH
-            WHERE (UPPER(TRIM(COALESCE(h.LoaiHoaDon,''))) IN ('WEB_HUY','HUY','DA_HUY','CANCELLED','CANCELED')
-                   OR COALESCE(h.TrangThaiGiaoHang,'') ILIKE '%hủy%'
-                   OR COALESCE(h.TrangThaiGiaoHang,'') ILIKE '%huỷ%'
-                   OR COALESCE(h.TrangThaiGiaoHang,'') ILIKE '%huy%'
-                   OR UPPER(TRIM(COALESCE(h.TrangThaiGiaoHang,''))) IN ('HUY','DA_HUY','CANCELLED','CANCELED'))
+            WHERE {CancelledShipmentSql}
             ORDER BY h.NgayLap DESC
             """))
         await using (var reader = await command.ExecuteReaderAsync())
@@ -1604,9 +1545,7 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
             false => "('GIAO_HANG','WEB_DA_THANH_TOAN','WEB_THANH_TOAN')",
             _ => "('COD','WEB_COD','GIAO_HANG','WEB_DA_THANH_TOAN','WEB_THANH_TOAN','ONLINE')"
         };
-        var cancellationFilter = cancelled
-            ? "AND (COALESCE(h.TrangThaiGiaoHang,'') ILIKE '%hủy%' OR COALESCE(h.TrangThaiGiaoHang,'') ILIKE '%huy%' OR UPPER(TRIM(COALESCE(h.TrangThaiGiaoHang,''))) IN ('HUY','DA_HUY','CANCELLED','CANCELED'))"
-            : "AND NOT (COALESCE(h.TrangThaiGiaoHang,'') ILIKE '%hủy%' OR COALESCE(h.TrangThaiGiaoHang,'') ILIKE '%huy%' OR UPPER(TRIM(COALESCE(h.TrangThaiGiaoHang,''))) IN ('HUY','DA_HUY','CANCELLED','CANCELED'))";
+        var cancellationFilter = cancelled ? "AND " + CancelledShipmentSql : "AND NOT " + CancelledShipmentSql;
         await using var command = NewCommand(connection, null, $"""
             SELECT h.SoHD,COALESCE(NULLIF(h.TenNguoiNhan,''),k.HoTen,'Khách giao hàng'),
                    COALESCE(h.SoDienThoai_KH,''),COALESCE(h.DiaChiGiao,''),COALESCE(h.GhiChuGiaoHang,''),

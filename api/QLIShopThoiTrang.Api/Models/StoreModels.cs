@@ -221,7 +221,7 @@ public sealed record DeliveryOrderDto(
     ReceiptStateDto Receipt);
 
 public sealed record LoginRequestDto(string Username, string Password);
-public sealed record LoginResultDto(string EmployeeId, string DisplayName, string Role);
+public sealed record LoginResultDto(string EmployeeId, string DisplayName, string Role, string? PermissionCode = null, string? SessionVersion = null);
 
 public sealed record InvoiceSummaryDto(
     string Id,

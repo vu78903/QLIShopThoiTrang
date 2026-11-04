@@ -26,6 +26,7 @@ namespace qlicuahang
             this.Controls.Add(webView);
 
             await webView.EnsureCoreWebView2Async(null);
+            await WebViewStaffContext.ConfigureAsync(webView.CoreWebView2);
 
             string fileHtml = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Views", "giao-hang-cod.html");
             if (File.Exists(fileHtml))

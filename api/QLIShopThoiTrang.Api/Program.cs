@@ -19,6 +19,7 @@ builder.Services.AddSingleton<ProductImageStorage>();
 builder.Services.AddScoped<StoreRepository>();
 builder.Services.AddScoped<PayOsPaymentService>();
 builder.Services.AddSingleton<StaffSessions>();
+builder.Services.AddScoped<IStaffSessionValidator,DatabaseStaffSessionValidator>();
 builder.Services.AddSingleton<MutationRequests>();
 
 var app = builder.Build();
@@ -29,43 +30,10 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseCors("AllowLocalClients");
+app.UseMiddleware<StaffAuthorizationMiddleware>();
 app.UseStaticFiles();
-app.Use(async (context,next) =>
-{
-    var path=context.Request.Path.Value ?? "";
-    if(path.StartsWith("/api/") && (context.Request.Method is not ("GET" or "OPTIONS") || path.StartsWith("/api/kiem-nhan-kho") || path.StartsWith("/api/thanh-toan-qr/") || path.StartsWith("/api/doi-tra/yeu-cau") || path.EndsWith("/tai-khoan") || path=="/api/san-pham/quan-ly") && path is not ("/api/dang-nhap" or "/api/thanh-toan-qr/webhook"))
-    {
-        var token=context.Request.Headers.Authorization.ToString();
-        token=token.StartsWith("Bearer ") ? token[7..] : "";
-        var user=context.RequestServices.GetRequiredService<StaffSessions>().Get(token);
-        if(user is null) { context.Response.StatusCode=401; await context.Response.WriteAsJsonAsync(new{message="Vui lòng đăng nhập lại."}); return; }
-        if(!StaffSessions.CanWrite(user.Role,path,context.Request.Method) && path!="/api/doi-tac") { context.Response.StatusCode=403; await context.Response.WriteAsJsonAsync(new{message="Bạn không có quyền thực hiện thao tác này."}); return; }
-        if(path=="/api/doi-tac" && user.Role!="CuaHangTruong")
-        {
-            context.Request.EnableBuffering();
-            var input=await context.Request.ReadFromJsonAsync<PartnerUpsertDto>(); context.Request.Body.Position=0;
-            if(user.Role is not ("ThuNgan" or "TruongCa" or "CuaHangTruong") || input?.Category!="Khách hàng") {context.Response.StatusCode=403;return;}
-        }
-        context.Items["StaffUser"]=user;
-        if(context.Request.ContentLength>0 && (path.StartsWith("/api/hoa-don") || path=="/api/phieu-nhap-kho" || path=="/api/doi-tra" || path=="/api/thanh-toan-qr"))
-        {
-            try
-            {
-                var body=await System.Text.Json.Nodes.JsonNode.ParseAsync(context.Request.Body);
-                if(body is System.Text.Json.Nodes.JsonObject obj)
-                {
-                    obj["employeeId"]=user.EmployeeId;
-                    var bytes=System.Text.Encoding.UTF8.GetBytes(obj.ToJsonString());
-                    context.Request.Body=new MemoryStream(bytes);context.Request.ContentLength=bytes.Length;
-                }
-            }
-            catch(System.Text.Json.JsonException) {context.Response.StatusCode=400;await context.Response.WriteAsJsonAsync(new{message="Dữ liệu gửi lên không hợp lệ."});return;}
-        }
-    }
-    await next();
-});
 app.Use((context,next)=>context.RequestServices.GetRequiredService<MutationRequests>().InvokeAsync(context,next));
-app.MapPost("/api/dang-xuat", (HttpContext context,StaffSessions sessions) => {sessions.Remove(context.Request.Headers.Authorization.ToString().Replace("Bearer ",""));return Results.NoContent();});
+app.MapPost("/api/dang-xuat", (HttpContext context,StaffSessions sessions) => {sessions.Remove(context.Request.Headers.Authorization.ToString()[7..].Trim());return Results.NoContent();});
 
 app.MapGet("/", () => Results.Ok(new { app = "QLI Shop Thoi Trang API", database = "Supabase PostgreSQL", status = "running" }));
 
@@ -73,23 +41,25 @@ app.MapGet("/api/health", async (StoreRepository store) =>
 {
     try
     {
+        await store.GetDatabaseNameAsync();
         return Results.Ok(new
         {
             ok = true,
-            database = await store.GetDatabaseNameAsync(),
+            // Không công khai địa chỉ database.
             qrPayment = true,
             apiVersion = typeof(Program).Assembly.GetName().Version?.ToString()
         });
     }
-    catch (Exception ex)
+    catch (Exception)
     {
-        return Results.Problem("Không kết nối được Supabase PostgreSQL: " + ex.Message);
+        return Results.Problem("Dịch vụ dữ liệu chưa sẵn sàng.",statusCode:503);
     }
 });
 
-app.MapGet("/api/app-state", async (StoreRepository store) =>
+app.MapGet("/api/app-state", async (StoreRepository store,HttpContext context) =>
 {
-    return Results.Ok(await store.GetAppStateAsync());
+    var user=(LoginResultDto)context.Items["StaffUser"]!;
+    return Results.Ok(user.Role=="NhanVienKho" ? await store.GetWarehouseAppStateAsync(user.EmployeeId) : await store.GetAppStateAsync());
 });
 
 app.MapGet("/api/loai-san-pham", async (StoreRepository store) =>
@@ -142,7 +112,7 @@ app.MapPost("/api/san-pham", async (ProductUpsertDto input, StoreRepository stor
                      !savedImages.Contains(oldImage, StringComparer.OrdinalIgnoreCase)))
             if (!await store.IsProductImageInUseAsync(oldImage))
                 await images.DeleteManagedFileAsync(oldImage);
-        return Results.Ok(savedProduct);
+        return Results.Ok(savedProduct with { Stock = await store.GetProductStockAsync(savedProduct.Sku!) });
     }
     catch (Exception ex)
     {
@@ -258,7 +228,7 @@ app.MapGet("/api/doi-tac/{category}/{id}/tai-khoan", async (string category,stri
     var result=await store.GetPartnerCredentialsAsync(Uri.UnescapeDataString(category),id);
     return result is null ? Results.NotFound() : Results.Ok(result);
 });
-app.MapPost("/api/doi-tac", async (PartnerUpsertDto input, StoreRepository store,HttpContext context) =>
+app.MapPost("/api/doi-tac", async (PartnerUpsertDto input, StoreRepository store,HttpContext context,StaffSessions sessions) =>
 {
     if((input.Username is not null || input.Password is not null) && (context.Items["StaffUser"] as LoginResultDto)?.Role!="CuaHangTruong")
         return Results.StatusCode(403);
@@ -273,7 +243,16 @@ app.MapPost("/api/doi-tac", async (PartnerUpsertDto input, StoreRepository store
 
     try
     {
-        await store.SavePartnerAsync(input);
+        var user=(LoginResultDto)context.Items["StaffUser"]!;
+        var previous=input.Category=="Nhân viên"?await store.GetActiveStaffAsync(input.Id):null;
+        if(!await store.SavePartnerAsync(input,createOnly:user.Role!="CuaHangTruong"))
+            return Results.Conflict(new{message="Khách hàng đã tồn tại. Quyền thêm nhanh không cho phép sửa thông tin cũ."});
+        if(input.Category=="Nhân viên")
+        {
+            var current=await store.GetActiveStaffAsync(input.Id);
+            if(previous?.SessionVersion is string oldVersion && current?.SessionVersion!=oldVersion)
+                sessions.RemoveEmployeeVersion(input.Id,oldVersion);
+        }
         return Results.Ok(new {id=input.Id});
     }
     catch(Npgsql.PostgresException ex) when(ex.SqlState=="23505")
@@ -290,11 +269,20 @@ app.MapPost("/api/doi-tac", async (PartnerUpsertDto input, StoreRepository store
     }
 });
 
-app.MapDelete("/api/doi-tac/{category}/{id}", async (string category, string id, StoreRepository store) =>
+app.MapDelete("/api/doi-tac/{category}/{id}", async (string category,string id,StoreRepository store,StaffSessions sessions) =>
 {
-    return await store.DeactivatePartnerAsync(Uri.UnescapeDataString(category), id)
-        ? Results.NoContent()
-        : Results.NotFound();
+    var decoded=Uri.UnescapeDataString(category);
+    var previous=decoded=="Nhân viên"?await store.GetActiveStaffAsync(id):null;
+    var changed=await store.DeactivatePartnerAsync(decoded,id);
+    if(changed && previous?.SessionVersion is string oldVersion)sessions.RemoveEmployeeVersion(id,oldVersion);
+    return changed?Results.NoContent():Results.NotFound();
+});
+
+app.MapPost("/api/doi-tac/nhap-file",async(List<PartnerUpsertDto> input,StoreRepository store)=>
+{
+    if(input is null || input.Any(p=>p is null))return Results.BadRequest(new{message="File chứa dòng rỗng không hợp lệ."});
+    try {await store.ImportPartnersAsync(input);return Results.Ok(new{count=input.Count});}
+    catch(InvalidOperationException ex){return Results.Conflict(new{message=ex.Message});}
 });
 
 app.MapPost("/api/khuyen-mai", async (PromotionUpsertDto input, StoreRepository store) =>

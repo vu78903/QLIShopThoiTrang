@@ -1,0 +1,927 @@
+{
+  "tables": [
+    {
+      "name": "baocaodoanhthu",
+      "columns": [
+        {
+          "name": "mabaocao",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "ngaylap",
+          "type": "timestamp without time zone"
+        },
+        {
+          "name": "loaibaocao",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "tienthuthucte",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "tongtienvon",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "tienloi",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "tyleloinhuan",
+          "type": "numeric(9,4)"
+        },
+        {
+          "name": "tienmatkiemdem",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "chenhlechtienmat",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "ghichu",
+          "type": "character varying(1000)"
+        },
+        {
+          "name": "manv",
+          "type": "character varying(20)"
+        }
+      ]
+    },
+    {
+      "name": "bienbanxulyhangloi",
+      "columns": [
+        {
+          "name": "mabienbanxl",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "ngaylap",
+          "type": "timestamp without time zone"
+        },
+        {
+          "name": "nguyennhan",
+          "type": "character varying(500)"
+        },
+        {
+          "name": "bienphapxuly",
+          "type": "character varying(500)"
+        },
+        {
+          "name": "manv",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "masku",
+          "type": "character varying(20)"
+        }
+      ]
+    },
+    {
+      "name": "chitietbaocaodoanhthu",
+      "columns": [
+        {
+          "name": "mabaocao",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "masku",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "soluongban",
+          "type": "integer"
+        },
+        {
+          "name": "giabanthucte",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "giagocnhap",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "thanhtienban",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "tongtienvonsku",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "tienloisku",
+          "type": "numeric(18,2)"
+        }
+      ]
+    },
+    {
+      "name": "chitietdoitra",
+      "columns": [
+        {
+          "name": "sophieudt",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "masku",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "soluong",
+          "type": "integer"
+        },
+        {
+          "name": "loaigiaodich",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "tinhtrang",
+          "type": "character varying(200)"
+        },
+        {
+          "name": "lydotra",
+          "type": "character varying(500)"
+        },
+        {
+          "name": "maskudoi",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "soluongdoi",
+          "type": "integer"
+        },
+        {
+          "name": "dongianhanlai",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "dongiadoi",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "thanhtiennhanlai",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "thanhtiendoi",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "trangthaikiemnhan",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "ghichukiemnhan",
+          "type": "character varying(1000)"
+        },
+        {
+          "name": "manvkiemnhan",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "ngaykiemnhan",
+          "type": "timestamp without time zone"
+        }
+      ]
+    },
+    {
+      "name": "chitiethoadon",
+      "columns": [
+        {
+          "name": "sohd",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "masku",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "soluong",
+          "type": "integer"
+        },
+        {
+          "name": "dongia",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "thanhtien",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "giatrithuctra",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "trangthaikiemnhan",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "ghichukiemnhan",
+          "type": "character varying(1000)"
+        },
+        {
+          "name": "manvkiemnhan",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "ngaykiemnhan",
+          "type": "timestamp without time zone"
+        }
+      ]
+    },
+    {
+      "name": "chitietnhapkho",
+      "columns": [
+        {
+          "name": "sophieunk",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "masku",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "soluong",
+          "type": "integer"
+        },
+        {
+          "name": "dongia",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "thanhtien",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "ghichu",
+          "type": "character varying(500)"
+        }
+      ]
+    },
+    {
+      "name": "giaodichthanhtoanqr",
+      "columns": [
+        {
+          "name": "magd",
+          "type": "bigint"
+        },
+        {
+          "name": "sohd",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "nguondon",
+          "type": "character varying(10)"
+        },
+        {
+          "name": "sotien",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "malienket",
+          "type": "character varying(100)"
+        },
+        {
+          "name": "duongdanthanhtoan",
+          "type": "text"
+        },
+        {
+          "name": "manganhang",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "sotaikhoan",
+          "type": "character varying(50)"
+        },
+        {
+          "name": "tentaikhoan",
+          "type": "character varying(200)"
+        },
+        {
+          "name": "noidung",
+          "type": "character varying(50)"
+        },
+        {
+          "name": "trangthai",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "mathamchieu",
+          "type": "character varying(100)"
+        },
+        {
+          "name": "dulieuhoadon",
+          "type": "jsonb"
+        },
+        {
+          "name": "ngaytao",
+          "type": "timestamp without time zone"
+        },
+        {
+          "name": "ngaythanhtoan",
+          "type": "timestamp without time zone"
+        }
+      ]
+    },
+    {
+      "name": "hoadon",
+      "columns": [
+        {
+          "name": "sohd",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "ngaylap",
+          "type": "timestamp without time zone"
+        },
+        {
+          "name": "loaihoadon",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "phuongthucthanhtoan",
+          "type": "character varying(50)"
+        },
+        {
+          "name": "tongcong",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "chietkhau",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "thuevat",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "khachphaitra",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "tienkhachdua",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "tienthua",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "sodienthoai_kh",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "makh",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "diachigiao",
+          "type": "character varying(400)"
+        },
+        {
+          "name": "donvivanchuyen",
+          "type": "character varying(150)"
+        },
+        {
+          "name": "trangthaigiaohang",
+          "type": "character varying(50)"
+        },
+        {
+          "name": "trangthaithanhtoan",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "phiship",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "tiencod",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "thoigiandukien",
+          "type": "timestamp without time zone"
+        },
+        {
+          "name": "ngaygiaothanhcong",
+          "type": "timestamp without time zone"
+        },
+        {
+          "name": "makm",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "manv",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "tennguoinhan",
+          "type": "character varying(150)"
+        },
+        {
+          "name": "nguondon",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "ghichugiaohang",
+          "type": "character varying(500)"
+        },
+        {
+          "name": "dauvantayyeucau",
+          "type": "character varying(64)"
+        },
+        {
+          "name": "datrutonkho",
+          "type": "boolean"
+        },
+        {
+          "name": "daghinhanthanhtoan",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "name": "khachhang",
+      "columns": [
+        {
+          "name": "makh",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "sodienthoai",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "hoten",
+          "type": "character varying(150)"
+        },
+        {
+          "name": "email",
+          "type": "character varying(254)"
+        },
+        {
+          "name": "diemtichluy",
+          "type": "integer"
+        },
+        {
+          "name": "hangthe",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "diachi",
+          "type": "character varying(300)"
+        },
+        {
+          "name": "ngaysinh",
+          "type": "date"
+        },
+        {
+          "name": "gioitinh",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "tongchitieu",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "trangthai",
+          "type": "boolean"
+        },
+        {
+          "name": "nhankhuyenmai",
+          "type": "boolean"
+        },
+        {
+          "name": "tendangnhap",
+          "type": "character varying(50)"
+        },
+        {
+          "name": "matkhau",
+          "type": "character varying(200)"
+        }
+      ]
+    },
+    {
+      "name": "khuyenmai",
+      "columns": [
+        {
+          "name": "makm",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "tenchuongtrinh",
+          "type": "character varying(200)"
+        },
+        {
+          "name": "loaikm",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "giatrigiam",
+          "type": "numeric(9,2)"
+        },
+        {
+          "name": "giatridonhangtoithieu",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "ngaybatdau",
+          "type": "timestamp without time zone"
+        },
+        {
+          "name": "ngayketthuc",
+          "type": "timestamp without time zone"
+        },
+        {
+          "name": "trangthai",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "name": "khuyenmaisanpham",
+      "columns": [
+        {
+          "name": "makm",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "masku",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "phantramgiam",
+          "type": "numeric(5,2)"
+        }
+      ]
+    },
+    {
+      "name": "loaisanpham",
+      "columns": [
+        {
+          "name": "maloai",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "tenloai",
+          "type": "character varying(100)"
+        },
+        {
+          "name": "mota",
+          "type": "character varying(300)"
+        },
+        {
+          "name": "trangthai",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "name": "nhanvien",
+      "columns": [
+        {
+          "name": "manv",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "tendangnhap",
+          "type": "character varying(50)"
+        },
+        {
+          "name": "hoten",
+          "type": "character varying(150)"
+        },
+        {
+          "name": "chucvu",
+          "type": "character varying(100)"
+        },
+        {
+          "name": "sodienthoai",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "email",
+          "type": "character varying(254)"
+        },
+        {
+          "name": "diachi",
+          "type": "character varying(300)"
+        },
+        {
+          "name": "maquyen",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "matkhau",
+          "type": "character varying(200)"
+        },
+        {
+          "name": "trangthai",
+          "type": "boolean"
+        },
+        {
+          "name": "phienbanbaomat",
+          "type": "uuid"
+        }
+      ]
+    },
+    {
+      "name": "nhasanxuat",
+      "columns": [
+        {
+          "name": "mansx",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "tennsx",
+          "type": "character varying(150)"
+        },
+        {
+          "name": "diachi",
+          "type": "character varying(300)"
+        },
+        {
+          "name": "masothue",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "sodienthoai",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "email",
+          "type": "character varying(254)"
+        },
+        {
+          "name": "trangthai",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "name": "phanquyen",
+      "columns": [
+        {
+          "name": "maquyen",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "tenquyen",
+          "type": "character varying(100)"
+        },
+        {
+          "name": "mota",
+          "type": "character varying(500)"
+        },
+        {
+          "name": "trangthai",
+          "type": "boolean"
+        },
+        {
+          "name": "phienbanbaomat",
+          "type": "uuid"
+        }
+      ]
+    },
+    {
+      "name": "phieudoitra",
+      "columns": [
+        {
+          "name": "sophieudt",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "ngaylap",
+          "type": "timestamp without time zone"
+        },
+        {
+          "name": "hinhthucxuly",
+          "type": "character varying(50)"
+        },
+        {
+          "name": "sotienhoan",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "sohd",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "manv",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "nguondon",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "ngaymoctinh",
+          "type": "timestamp without time zone"
+        },
+        {
+          "name": "giatrihangnhanlai",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "giatrihangdoimoi",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "sotienthuthem",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "trangthai",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "mayeucau",
+          "type": "character varying(80)"
+        },
+        {
+          "name": "dauvantayyeucau",
+          "type": "character varying(64)"
+        },
+        {
+          "name": "lydotuchoi",
+          "type": "character varying(1000)"
+        },
+        {
+          "name": "anhminhchung",
+          "type": "jsonb"
+        }
+      ]
+    },
+    {
+      "name": "phieunhapkho",
+      "columns": [
+        {
+          "name": "sophieunk",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "ngaylap",
+          "type": "timestamp without time zone"
+        },
+        {
+          "name": "sopo",
+          "type": "character varying(50)"
+        },
+        {
+          "name": "nguoigiao",
+          "type": "character varying(150)"
+        },
+        {
+          "name": "tongsoluong",
+          "type": "integer"
+        },
+        {
+          "name": "tongtien",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "mansx",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "manv",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "trangthai",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "mayeucau",
+          "type": "character varying(80)"
+        },
+        {
+          "name": "dauvantayyeucau",
+          "type": "character varying(64)"
+        }
+      ]
+    },
+    {
+      "name": "sanpham",
+      "columns": [
+        {
+          "name": "masp",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "masku",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "maloai",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "tensanpham",
+          "type": "character varying(200)"
+        },
+        {
+          "name": "soluong",
+          "type": "integer"
+        },
+        {
+          "name": "kichco",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "mausac",
+          "type": "character varying(60)"
+        },
+        {
+          "name": "trangthai",
+          "type": "boolean"
+        },
+        {
+          "name": "dongia",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "soluongtonkho",
+          "type": "integer"
+        },
+        {
+          "name": "donvitinh",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "hinhanh",
+          "type": "text"
+        },
+        {
+          "name": "danhmuc",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "mansx",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "danhsachhinhanh",
+          "type": "jsonb"
+        },
+        {
+          "name": "mota",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "sanphamkhuyenmai_hientai",
+      "columns": [
+        {
+          "name": "makhuyenmai",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "masanpham",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "masku",
+          "type": "character varying(20)"
+        },
+        {
+          "name": "tensanpham",
+          "type": "character varying(200)"
+        },
+        {
+          "name": "mausac",
+          "type": "character varying(60)"
+        },
+        {
+          "name": "kichco",
+          "type": "character varying(30)"
+        },
+        {
+          "name": "giagoc",
+          "type": "numeric(18,2)"
+        },
+        {
+          "name": "phantramgiam",
+          "type": "numeric(5,2)"
+        },
+        {
+          "name": "giakhuyenmai",
+          "type": "numeric"
+        },
+        {
+          "name": "ngaybatdau",
+          "type": "timestamp without time zone"
+        },
+        {
+          "name": "ngayketthuc",
+          "type": "timestamp without time zone"
+        },
+        {
+          "name": "hinhanh",
+          "type": "text"
+        }
+      ]
+    }
+  ]
+}

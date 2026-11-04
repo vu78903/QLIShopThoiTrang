@@ -5,7 +5,7 @@ const mutatingActionNames = [
     'approveImportRequest','rejectImportRequest','deleteProduct','deleteProductType','deletePartner','deletePromotion',
     'advanceDeliveryStatus','advanceCodStatus','deleteCod','cancelDelivery','importProductRows',
     'removeProductImage','removeAllProductImages','removeCart','clearCart','confirmCardPayment','cancelQrPayment','openEditPartner',
-    'createReturnRequest','handleWebReturnRequest','submitStockReview','submitStockReconcile'
+    'createReturnRequest','handleWebReturnRequest','submitStockReview','submitStockReconcile','importPartnerRows'
 ];
 
 // Gộp các request đang bay có cùng nội dung. Mỗi response được clone cho từng caller.
@@ -13,9 +13,14 @@ const originalFormFetch = window.fetch.bind(window);
 const pendingFormRequests = new Map();
 const failedFormRequestKeys = new Map();
 window.fetch = async function(resource, options = {}) {
-    const url = typeof resource === 'string' ? resource : resource.url;
+    const url = new URL(resource instanceof Request ? resource.url : String(resource),location.href).href;
     const method = (options.method || resource?.method || 'GET').toUpperCase();
-    if (!url.startsWith(API_BASE_URL + '/api/') || ['GET','OPTIONS'].includes(method)) return originalFormFetch(resource, options);
+    if (!url.startsWith(API_BASE_URL + '/api/') || ['GET','HEAD','OPTIONS'].includes(method) || new URL(url).pathname.toLowerCase().replace(/\/+$/,'')==='/api/dang-xuat') return originalFormFetch(resource, options);
+    if (window.staffApiDataReady === false) {
+        const message='Chưa xác minh được dữ liệu. Vui lòng tải lại trước khi ghi thay đổi.';
+        if(typeof toast==='function')toast(message);
+        throw new Error(message);
+    }
     const signature = method + url + (options.body || '');
     const existing = pendingFormRequests.get(signature);
     if (existing) return (await existing).clone();

@@ -54,6 +54,7 @@ public partial class formDangNhap : Form
         try
         {
             await webView.EnsureCoreWebView2Async();
+            await WebViewStaffContext.ConfigureAsync(webView.CoreWebView2);
             webView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
             webView.CoreWebView2.WebMessageReceived += WebView_WebMessageReceived;
 
@@ -78,6 +79,7 @@ public partial class formDangNhap : Form
 
     private async void WebView_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
     {
+        if (!WebViewStaffContext.IsTrustedDocument(e.Source)) return;
         LoginMessage? message;
         try
         {

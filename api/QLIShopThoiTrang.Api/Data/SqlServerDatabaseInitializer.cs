@@ -1,344 +1,76 @@
+using System.Text.Json;
+using Npgsql;
+
 namespace QLIShopThoiTrang.Api.Data;
 
-// Kiểm tra database và các bảng bắt buộc trước khi API nhận yêu cầu.
+// Giữ tên lớp để tương thích DI; khởi động chỉ đọc, tuyệt đối không sửa schema/dữ liệu.
 public sealed class SqlServerDatabaseInitializer(SqlServerConnectionFactory db)
 {
     public async Task InitializeAsync()
     {
         await using var connection = db.CreateConnection();
         await connection.OpenAsync();
-        // PostgreSQL tự chuyển tên không đặt trong dấu ngoặc kép thành chữ thường.
-        // Chuẩn hóa schema một lần để các câu SQL trong API không phụ thuộc kiểu viết hoa.
-        await using (var normalize = connection.CreateCommand())
+        await using var transaction = await connection.BeginTransactionAsync();
+        await using (var readOnly = new NpgsqlCommand("SET TRANSACTION READ ONLY", connection, transaction))
+            await readOnly.ExecuteNonQueryAsync();
+
+        using var contract = JsonDocument.Parse(await File.ReadAllTextAsync(
+            Path.Combine(AppContext.BaseDirectory, "Data", "SchemaContract.json")));
+        var columns = new Dictionary<string, string>();
+        await using (var command = new NpgsqlCommand("""
+            SELECT c.relname,a.attname,format_type(a.atttypid,a.atttypmod)
+            FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+            JOIN pg_attribute a ON a.attrelid=c.oid
+            WHERE n.nspname='public' AND c.relkind IN ('r','v')
+              AND a.attnum>0 AND NOT a.attisdropped
+            """, connection, transaction))
+        await using (var reader = await command.ExecuteReaderAsync())
+            while (await reader.ReadAsync()) columns[reader.GetString(0) + "." + reader.GetString(1)] = reader.GetString(2);
+
+        var problems = new List<string>();
+        foreach (var table in contract.RootElement.GetProperty("tables").EnumerateArray())
         {
-            normalize.CommandText = """
-                DO $$
-                DECLARE r record;
-                BEGIN
-                  FOR r IN
-                    SELECT table_name, column_name
-                    FROM information_schema.columns
-                    WHERE table_schema='public' AND column_name <> lower(column_name)
-                  LOOP
-                    EXECUTE format('ALTER TABLE public.%I RENAME COLUMN %I TO %I',
-                                   r.table_name, r.column_name, lower(r.column_name));
-                  END LOOP;
-                  FOR r IN
-                    SELECT table_name
-                    FROM information_schema.tables
-                    WHERE table_schema='public' AND table_type='BASE TABLE'
-                      AND table_name <> lower(table_name)
-                  LOOP
-                    EXECUTE format('ALTER TABLE public.%I RENAME TO %I', r.table_name, lower(r.table_name));
-                  END LOOP;
-                END $$;
-                """;
-            await normalize.ExecuteNonQueryAsync();
+            var name = table.GetProperty("name").GetString();
+            foreach (var column in table.GetProperty("columns").EnumerateArray())
+            {
+                var key = name + "." + column.GetProperty("name").GetString();
+                if (!columns.TryGetValue(key, out var actual)) problems.Add("thiếu " + key);
+                else if (actual != column.GetProperty("type").GetString()) problems.Add("sai kiểu " + key);
+            }
         }
-        await using var command = connection.CreateCommand();
-        command.CommandText = """
-            SELECT COUNT(*)
-            FROM information_schema.tables
-            WHERE table_schema='public'
-              AND table_name IN ('sanpham','nhanvien','khachhang','nhasanxuat','phieunhapkho')
-            """;
-        var count = Convert.ToInt32(await command.ExecuteScalarAsync());
-        if (count < 5)
-            throw new InvalidOperationException("Supabase chưa đủ bảng. Hãy chạy file YodyStore_Supabase_PostgreSQL.txt.");
-
-        await using var customerCredentials = connection.CreateCommand();
-        customerCredentials.CommandText = """
-            ALTER TABLE khachhang ADD COLUMN IF NOT EXISTS tendangnhap varchar(50) NULL;
-            ALTER TABLE khachhang ADD COLUMN IF NOT EXISTS matkhau varchar(200) NULL;
-            ALTER TABLE khachhang ADD COLUMN IF NOT EXISTS gioitinh varchar(20) NULL;
-            ALTER TABLE khachhang ADD COLUMN IF NOT EXISTS ngaysinh date NULL;
-            CREATE UNIQUE INDEX IF NOT EXISTS ux_khachhang_tendangnhap
-                ON khachhang(tendangnhap) WHERE tendangnhap IS NOT NULL AND tendangnhap<>'';
-            """;
-        await customerCredentials.ExecuteNonQueryAsync();
-
-        // Bổ sung vào bảng nghiệp vụ hiện có; không tạo bảng yêu cầu đổi trả riêng.
-        await using var posReturnColumns = connection.CreateCommand();
-        posReturnColumns.CommandText = """
-            ALTER TABLE hoadon ADD COLUMN IF NOT EXISTS dauvantayyeucau varchar(64) NULL;
-            ALTER TABLE chitiethoadon ADD COLUMN IF NOT EXISTS giatrithuctra numeric(18,2) NULL;
-            ALTER TABLE phieudoitra ALTER COLUMN manv DROP NOT NULL;
-            ALTER TABLE phieudoitra ADD COLUMN IF NOT EXISTS mayeucau varchar(80) NULL;
-            ALTER TABLE phieudoitra ADD COLUMN IF NOT EXISTS dauvantayyeucau varchar(64) NULL;
-            ALTER TABLE phieudoitra ADD COLUMN IF NOT EXISTS lydotuchoi varchar(1000) NULL;
-            ALTER TABLE phieudoitra ADD COLUMN IF NOT EXISTS anhminhchung jsonb NOT NULL DEFAULT '[]'::jsonb;
-            CREATE UNIQUE INDEX IF NOT EXISTS ux_phieudoitra_mayeucau ON phieudoitra(mayeucau) WHERE mayeucau IS NOT NULL;
-            DO $$ BEGIN
-              IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='public.phieudoitra'::regclass AND conname='ck_phieudoitra_nhanvien_trangthai') THEN
-                ALTER TABLE phieudoitra ADD CONSTRAINT ck_phieudoitra_nhanvien_trangthai
-                  CHECK(manv IS NOT NULL OR trangthai IN ('CHO_DUYET','CHO_TIEP_NHAN','TU_CHOI'));
-              END IF;
-            END $$;
-            """;
-        await posReturnColumns.ExecuteNonQueryAsync();
-
-        await using var inventoryReview = connection.CreateCommand();
-        inventoryReview.CommandText = """
-            ALTER TABLE hoadon ADD COLUMN IF NOT EXISTS datrutonkho boolean NULL;
-            ALTER TABLE hoadon ALTER COLUMN datrutonkho SET DEFAULT FALSE;
-            ALTER TABLE hoadon ADD COLUMN IF NOT EXISTS daghinhanthanhtoan boolean NULL;
-            ALTER TABLE hoadon ALTER COLUMN daghinhanthanhtoan SET DEFAULT FALSE;
-            -- Chỉ xác định chứng từ do API có fingerprint tạo; không đoán tồn của đơn cũ từ nguồn khác.
-            UPDATE hoadon SET datrutonkho=(UPPER(loaihoadon) NOT IN ('COD','WEB_COD') OR COALESCE(trangthaigiaohang,'')='Hàng giao thành công'),
-                daghinhanthanhtoan=(UPPER(loaihoadon) NOT IN ('COD','WEB_COD') OR COALESCE(trangthaigiaohang,'')='Hàng giao thành công')
-            WHERE dauvantayyeucau IS NOT NULL AND datrutonkho IS NULL;
-            ALTER TABLE phieunhapkho ADD COLUMN IF NOT EXISTS mayeucau varchar(80) NULL;
-            ALTER TABLE phieunhapkho ADD COLUMN IF NOT EXISTS dauvantayyeucau varchar(64) NULL;
-            CREATE UNIQUE INDEX IF NOT EXISTS ux_phieunhapkho_mayeucau ON phieunhapkho(mayeucau) WHERE mayeucau IS NOT NULL;
-            ALTER TABLE chitiethoadon ADD COLUMN IF NOT EXISTS trangthaikiemnhan varchar(30) NULL;
-            ALTER TABLE chitiethoadon ADD COLUMN IF NOT EXISTS ghichukiemnhan varchar(1000) NULL;
-            ALTER TABLE chitiethoadon ADD COLUMN IF NOT EXISTS manvkiemnhan varchar(20) NULL;
-            ALTER TABLE chitiethoadon ADD COLUMN IF NOT EXISTS ngaykiemnhan timestamp NULL;
-            ALTER TABLE chitietdoitra ADD COLUMN IF NOT EXISTS trangthaikiemnhan varchar(30) NULL;
-            ALTER TABLE chitietdoitra ADD COLUMN IF NOT EXISTS ghichukiemnhan varchar(1000) NULL;
-            ALTER TABLE chitietdoitra ADD COLUMN IF NOT EXISTS manvkiemnhan varchar(20) NULL;
-            ALTER TABLE chitietdoitra ADD COLUMN IF NOT EXISTS ngaykiemnhan timestamp NULL;
-            """;
-        await inventoryReview.ExecuteNonQueryAsync();
-
-        // Bổ sung thông tin dùng chung cho đơn giao từ POS và website.
-        await using var deliveryColumns = connection.CreateCommand();
-        deliveryColumns.CommandText = """
-            ALTER TABLE hoadon ADD COLUMN IF NOT EXISTS tennguoinhan varchar(150) NULL;
-            ALTER TABLE hoadon ADD COLUMN IF NOT EXISTS nguondon varchar(20) NOT NULL DEFAULT 'POS';
-            ALTER TABLE hoadon ADD COLUMN IF NOT EXISTS ghichugiaohang varchar(500) NULL;
-            CREATE INDEX IF NOT EXISTS ix_hoadon_giaohang
-                ON hoadon (loaihoadon, trangthaigiaohang, ngaylap DESC);
-            """;
-        await deliveryColumns.ExecuteNonQueryAsync();
-
-        await using var productKeys = connection.CreateCommand();
-        productKeys.CommandText = """
-            DO $$
-            DECLARE pk_name text;
-            BEGIN
-              SELECT c.conname INTO pk_name
-              FROM pg_constraint c
-              JOIN pg_class t ON t.oid=c.conrelid
-              JOIN pg_namespace n ON n.oid=t.relnamespace
-              WHERE n.nspname='public' AND t.relname='sanpham' AND c.contype='p'
-                AND pg_get_constraintdef(c.oid) NOT ILIKE '%(masku)%';
-              IF pk_name IS NOT NULL THEN
-                EXECUTE format('ALTER TABLE public.sanpham DROP CONSTRAINT %I', pk_name);
-              END IF;
-              IF NOT EXISTS (
-                SELECT 1 FROM pg_constraint c JOIN pg_class t ON t.oid=c.conrelid
-                WHERE t.relname='sanpham' AND c.contype='p'
-              ) THEN
-                ALTER TABLE public.sanpham ADD CONSTRAINT sanpham_pkey PRIMARY KEY (masku);
-              END IF;
-            END $$;
-            CREATE INDEX IF NOT EXISTS ix_sanpham_masp ON sanpham(masp);
-            CREATE UNIQUE INDEX IF NOT EXISTS ux_sanpham_bienthe
-                ON sanpham(masp, lower(trim(mausac)), lower(trim(kichco)));
-            """;
-        await productKeys.ExecuteNonQueryAsync();
-
-        // Danh mục hiển thị trên website tách biệt với loại sản phẩm (Áo, Quần...).
-        // Dữ liệu cũ không được tự đoán Nam/Nữ; chỉ phụ kiện rõ ràng mới được gán tự động.
-        await using var productAudience = connection.CreateCommand();
-        productAudience.CommandText = """
-            ALTER TABLE sanpham ADD COLUMN IF NOT EXISTS danhmuc varchar(20) NULL;
-            UPDATE sanpham sp
-            SET danhmuc='PHU_KIEN'
-            FROM loaisanpham l
-            WHERE sp.maloai=l.maloai AND sp.danhmuc IS NULL
-              AND (lower(l.tenloai) LIKE '%phụ kiện%' OR lower(l.tenloai) LIKE '%phu kien%');
-            DO $$
-            BEGIN
-              IF NOT EXISTS (
-                SELECT 1 FROM pg_constraint WHERE conname='ck_sanpham_danhmuc'
-              ) THEN
-                ALTER TABLE sanpham ADD CONSTRAINT ck_sanpham_danhmuc
-                  CHECK (danhmuc IS NULL OR danhmuc IN ('NAM','NU','PHU_KIEN'));
-              END IF;
-            END $$;
-            CREATE INDEX IF NOT EXISTS ix_sanpham_danhmuc ON sanpham(danhmuc);
-            """;
-        await productAudience.ExecuteNonQueryAsync();
-
-        // Giữ HinhAnh làm ảnh đại diện để website cũ vẫn hoạt động, đồng thời lưu
-        // tối đa 5 ảnh cho mỗi SKU trong JSON để WinForms và website mới dùng gallery.
-        await using var productImages = connection.CreateCommand();
-        productImages.CommandText = """
-            ALTER TABLE sanpham
-                ADD COLUMN IF NOT EXISTS danhsachhinhanh jsonb NOT NULL DEFAULT '[]'::jsonb;
-            UPDATE sanpham
-            SET danhsachhinhanh = jsonb_build_array(hinhanh)
-            WHERE hinhanh IS NOT NULL AND btrim(hinhanh) <> ''
-              AND (danhsachhinhanh IS NULL OR danhsachhinhanh = '[]'::jsonb);
-            UPDATE sanpham
-            SET hinhanh = danhsachhinhanh->>0
-            WHERE (hinhanh IS NULL OR btrim(hinhanh) = '')
-              AND jsonb_array_length(danhsachhinhanh) > 0;
-            CREATE INDEX IF NOT EXISTS ix_sanpham_danhsachhinhanh
-                ON sanpham USING gin (danhsachhinhanh);
-            """;
-        await productImages.ExecuteNonQueryAsync();
-
-        // Mỗi sản phẩm chỉ nhập từ một nhà cung cấp. Phiếu nhập có thể chứa nhiều SKU,
-        // nhưng tất cả SKU trên phiếu phải thuộc nhà cung cấp đã chọn.
-        await using var productSupplier = connection.CreateCommand();
-        productSupplier.CommandText = """
-            ALTER TABLE sanpham ADD COLUMN IF NOT EXISTS mansx varchar(20) NULL;
-            UPDATE sanpham sp
-            SET mansx = CASE
-                WHEN l.tenloai ILIKE '%quần tây%' OR l.tenloai ILIKE '%sơ mi%' OR l.tenloai ILIKE '%vest%'
-                    THEN (SELECT n.mansx FROM nhasanxuat n WHERE n.tennsx ILIKE '%Việt Tiến%' LIMIT 1)
-                WHEN l.tenloai ILIKE '%áo thun%' OR l.tenloai ILIKE '%baby tee%'
-                    THEN (SELECT n.mansx FROM nhasanxuat n WHERE n.tennsx ILIKE '%An Đông%' LIMIT 1)
-                WHEN l.tenloai ILIKE '%đồ lót%' OR l.tenloai ILIKE '%nón%' OR l.tenloai ILIKE '%vớ%'
-                    THEN (SELECT n.mansx FROM nhasanxuat n WHERE n.tennsx ILIKE '%Thành Công%' LIMIT 1)
-                WHEN sp.danhmuc='NAM'
-                    THEN (SELECT n.mansx FROM nhasanxuat n WHERE n.tennsx ILIKE '%Dony%' LIMIT 1)
-                WHEN sp.danhmuc='NU'
-                    THEN (SELECT n.mansx FROM nhasanxuat n WHERE n.tennsx ILIKE '%Nhà Bè%' LIMIT 1)
-                WHEN sp.danhmuc='PHU_KIEN'
-                    THEN (SELECT n.mansx FROM nhasanxuat n WHERE n.tennsx ILIKE '%Thành Công%' LIMIT 1)
-                ELSE sp.mansx
-            END
-            FROM loaisanpham l
-            WHERE sp.maloai=l.maloai AND sp.mansx IS NULL;
-            DO $$
-            BEGIN
-              IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='fk_sanpham_nhasanxuat') THEN
-                ALTER TABLE sanpham ADD CONSTRAINT fk_sanpham_nhasanxuat
-                  FOREIGN KEY (mansx) REFERENCES nhasanxuat(mansx);
-              END IF;
-            END $$;
-            CREATE INDEX IF NOT EXISTS ix_sanpham_mansx ON sanpham(mansx);
-            """;
-        await productSupplier.ExecuteNonQueryAsync();
-
-        await using var importSupplierGuard = connection.CreateCommand();
-        importSupplierGuard.CommandText = """
-            CREATE OR REPLACE FUNCTION validate_import_product_supplier()
-            RETURNS trigger LANGUAGE plpgsql AS $$
-            BEGIN
-              IF NOT EXISTS (
-                SELECT 1
-                FROM phieunhapkho p
-                JOIN sanpham s ON s.masku=NEW.masku
-                WHERE p.sophieunk=NEW.sophieunk AND p.mansx=s.mansx
-              ) THEN
-                RAISE EXCEPTION 'Sản phẩm không thuộc nhà cung cấp của phiếu nhập kho.';
-              END IF;
-              RETURN NEW;
-            END $$;
-            DO $$
-            BEGIN
-              IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='trg_chitietnhapkho_supplier') THEN
-                CREATE TRIGGER trg_chitietnhapkho_supplier
-                BEFORE INSERT OR UPDATE OF sophieunk,masku ON chitietnhapkho
-                FOR EACH ROW EXECUTE FUNCTION validate_import_product_supplier();
-              END IF;
-            END $$;
-            """;
-        await importSupplierGuard.ExecuteNonQueryAsync();
-
-        // Voucher cũ chỉ lưu ngày; chương trình sản phẩm cần lưu chính xác cả giờ và phút.
-        await using var promotionTimeColumns = connection.CreateCommand();
-        promotionTimeColumns.CommandText = """
-            DROP VIEW IF EXISTS sanphamkhuyenmai_hientai;
-            DO $$
-            BEGIN
-              IF EXISTS (
-                SELECT 1 FROM information_schema.columns
-                WHERE table_schema='public' AND table_name='khuyenmai'
-                  AND column_name IN ('ngaybatdau','ngayketthuc')
-                  AND data_type <> 'timestamp without time zone'
-              ) THEN
-                ALTER TABLE khuyenmai
-                    ALTER COLUMN ngaybatdau TYPE timestamp without time zone USING ngaybatdau::timestamp,
-                    ALTER COLUMN ngayketthuc TYPE timestamp without time zone USING ngayketthuc::timestamp;
-              END IF;
-            END $$;
-            """;
-        await promotionTimeColumns.ExecuteNonQueryAsync();
-
-        // Một chương trình có thể áp dụng cho nhiều MaSKU để giảm riêng đúng màu/size được chọn.
-        await using var promotionProducts = connection.CreateCommand();
-        promotionProducts.CommandText = """
-            CREATE TABLE IF NOT EXISTS khuyenmaisanpham (
-                makm varchar(30) NOT NULL,
-                masku varchar(80) NOT NULL,
-                phantramgiam numeric(5,2) NOT NULL,
-                CONSTRAINT pk_khuyenmaisanpham PRIMARY KEY (makm, masku),
-                CONSTRAINT fk_khuyenmaisanpham_khuyenmai
-                    FOREIGN KEY (makm) REFERENCES khuyenmai(makm) ON DELETE CASCADE,
-                CONSTRAINT fk_khuyenmaisanpham_sanpham
-                    FOREIGN KEY (masku) REFERENCES sanpham(masku) ON DELETE CASCADE,
-                CONSTRAINT ck_khuyenmaisanpham_phantram
-                    CHECK (phantramgiam > 0 AND phantramgiam <= 100)
-            );
-            DROP VIEW IF EXISTS sanphamkhuyenmai_hientai;
-            DO $$
-            BEGIN
-              IF EXISTS (
-                SELECT 1 FROM information_schema.columns
-                WHERE table_schema='public' AND table_name='khuyenmaisanpham' AND column_name='masp'
-              ) AND NOT EXISTS (
-                SELECT 1 FROM information_schema.columns
-                WHERE table_schema='public' AND table_name='khuyenmaisanpham' AND column_name='masku'
-              ) THEN
-                CREATE TEMP TABLE kmsp_chuyen_doi ON COMMIT DROP AS
-                  SELECT old.makm, sp.masku, old.phantramgiam
-                  FROM khuyenmaisanpham old JOIN sanpham sp ON sp.masp=old.masp;
-                TRUNCATE khuyenmaisanpham;
-                ALTER TABLE khuyenmaisanpham RENAME COLUMN masp TO masku;
-                INSERT INTO khuyenmaisanpham(makm,masku,phantramgiam)
-                  SELECT makm,masku,phantramgiam FROM kmsp_chuyen_doi ON CONFLICT DO NOTHING;
-              END IF;
-            END $$;
-            DO $$
-            BEGIN
-              IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='fk_khuyenmaisanpham_sanpham') THEN
-                ALTER TABLE khuyenmaisanpham ADD CONSTRAINT fk_khuyenmaisanpham_sanpham
-                  FOREIGN KEY (masku) REFERENCES sanpham(masku) ON DELETE CASCADE;
-              END IF;
-            END $$;
-            DROP INDEX IF EXISTS ix_khuyenmaisanpham_masp;
-            CREATE INDEX IF NOT EXISTS ix_khuyenmaisanpham_masku
-                ON khuyenmaisanpham(masku);
-
-            UPDATE khuyenmai km
-            SET ngayketthuc = km.ngayketthuc + interval '23 hours 59 minutes 59.999 seconds'
-            WHERE km.ngayketthuc::time = time '00:00:00'
-              AND NOT EXISTS (SELECT 1 FROM khuyenmaisanpham ksp WHERE ksp.makm=km.makm);
-
-            CREATE OR REPLACE VIEW sanphamkhuyenmai_hientai AS
-            WITH muc_giam AS (
-                SELECT DISTINCT ON (ksp.masku)
-                    ksp.masku, ksp.makm, ksp.phantramgiam, km.ngaybatdau, km.ngayketthuc
-                FROM khuyenmaisanpham ksp
-                JOIN khuyenmai km ON km.makm=ksp.makm
-                WHERE km.trangthai=TRUE
-                  AND (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Ho_Chi_Minh')
-                      BETWEEN km.ngaybatdau AND km.ngayketthuc
-                ORDER BY ksp.masku, ksp.phantramgiam DESC, ksp.makm
-            )
-            SELECT mg.makm AS makhuyenmai,
-                   sp.masp AS masanpham,
-                   sp.masku,
-                   sp.tensanpham,
-                   sp.mausac,
-                   sp.kichco,
-                   sp.dongia AS giagoc,
-                   mg.phantramgiam,
-                   ROUND(sp.dongia * (100-mg.phantramgiam)/100, 0) AS giakhuyenmai,
-                   mg.ngaybatdau,
-                   mg.ngayketthuc,
-                   sp.hinhanh
-            FROM muc_giam mg JOIN sanpham sp ON sp.masku=mg.masku
-            WHERE sp.trangthai=TRUE;
-
-            GRANT SELECT ON sanphamkhuyenmai_hientai TO anon, authenticated;
-            """;
-        await promotionProducts.ExecuteNonQueryAsync();
+        foreach (var key in new[] { "sanpham(masku)", "chitiethoadon(sohd,masku)", "chitietdoitra(sophieudt,masku)" })
+        {
+            var table = key[..key.IndexOf('(')];
+            await using var command = new NpgsqlCommand("""
+                SELECT replace(replace(pg_get_constraintdef(oid),'PRIMARY KEY ',''),' ','')
+                FROM pg_constraint WHERE conrelid=to_regclass('public.' || @table) AND contype='p'
+                """, connection, transaction);
+            command.Parameters.AddWithValue("table", table);
+            if (await command.ExecuteScalarAsync() as string != key[table.Length..]) problems.Add("sai khóa chính " + table);
+        }
+        await using (var command = new NpgsqlCommand("""
+            SELECT count(*) FROM information_schema.columns
+            WHERE table_schema='public' AND table_name='hoadon'
+              AND column_name IN ('datrutonkho','daghinhanthanhtoan')
+              AND column_default IN ('false','false::boolean')
+            """, connection, transaction))
+            if (Convert.ToInt32(await command.ExecuteScalarAsync()) != 2) problems.Add("thiếu mặc định FALSE cho cờ tồn/thanh toán");
+        // Chỉ đọc: hai trigger là phần bắt buộc để phát hiện thay đổi bảo mật qua mọi ứng dụng/SQL.
+        await using (var command = new NpgsqlCommand("""
+            SELECT count(*) FROM pg_trigger t
+            JOIN pg_class c ON c.oid=t.tgrelid
+            JOIN pg_namespace n ON n.oid=c.relnamespace
+            JOIN pg_proc p ON p.oid=t.tgfoid
+            JOIN pg_namespace pn ON pn.oid=p.pronamespace
+            WHERE n.nspname='public' AND pn.nspname='public'
+              AND NOT t.tgisinternal AND t.tgtype=23 AND t.tgenabled IN ('O','A')
+              AND ((c.relname='nhanvien' AND t.tgname='trg_phienbanbaomat_nhanvien' AND p.proname='capnhatphienbanbaomatnhanvien')
+                OR (c.relname='phanquyen' AND t.tgname='trg_phienbanbaomat_phanquyen' AND p.proname='capnhatphienbanbaomatphanquyen'))
+            """,connection,transaction))
+            if(Convert.ToInt32(await command.ExecuteScalarAsync())!=2)problems.Add("thiếu trigger phiên bản bảo mật đang hoạt động trên nhanvien/phanquyen");
+        if (problems.Count > 0)
+            throw new InvalidOperationException("Schema chưa tương thích: " + string.Join("; ", problems) +
+                ". Đối chiếu đúng phần cấu trúc được báo với quản trị database; API không tự sửa database.");
+        await transaction.CommitAsync();
     }
 }

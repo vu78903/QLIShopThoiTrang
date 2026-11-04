@@ -17,6 +17,8 @@ namespace qlicuahang
         public formTongQuan()
         {
             InitializeComponent();
+            WebViewStaffContext.SessionExpired += HandleSessionExpired;
+            FormClosed += (_, _) => WebViewStaffContext.SessionExpired -= HandleSessionExpired;
 
             this.WindowState = FormWindowState.Normal;
             this.Size = new Size(2500, 1460);
@@ -37,6 +39,7 @@ namespace qlicuahang
 
                 webView.CoreWebView2.WebMessageReceived += (s, args) =>
                 {
+                    if (!WebViewStaffContext.IsTrustedDocument(args.Source)) return;
                     try
                     {
                         // Đóng form chính để Program mở lại form đăng nhập bằng một vòng đời mới.
@@ -69,6 +72,17 @@ namespace qlicuahang
             {
                 CapNhatGiaoDienTheoQuyen();
             }
+        }
+
+        private void HandleSessionExpired()
+        {
+            if (IsDisposed || YeuCauDangXuat) return;
+            YeuCauDangXuat = true;
+            // Token đã hết hiệu lực, không chờ một request đăng xuất qua mạng.
+            formDangNhap.ApiToken = "";
+            formDangNhap.XoaPhienDangNhap();
+            foreach (Form child in Application.OpenForms.Cast<Form>().Where(f => f != this).ToArray()) child.Close();
+            BeginInvoke(Close);
         }
 
         // Cập nhật giao diện theo vai trò đang đăng nhập.

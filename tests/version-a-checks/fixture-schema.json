@@ -1,0 +1,1391 @@
+{
+  "tables": [
+    {
+      "name": "baocaodoanhthu",
+      "columns": [
+        {
+          "name": "mabaocao",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "ngaylap",
+          "type": "timestamp without time zone",
+          "not_null": true
+        },
+        {
+          "name": "loaibaocao",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "tienthuthucte",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "tongtienvon",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "tienloi",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "tyleloinhuan",
+          "type": "numeric(9,4)",
+          "not_null": true
+        },
+        {
+          "name": "tienmatkiemdem",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "chenhlechtienmat",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "ghichu",
+          "type": "character varying(1000)",
+          "not_null": false
+        },
+        {
+          "name": "manv",
+          "type": "character varying(20)",
+          "not_null": true
+        }
+      ]
+    },
+    {
+      "name": "bienbanxulyhangloi",
+      "columns": [
+        {
+          "name": "mabienbanxl",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "ngaylap",
+          "type": "timestamp without time zone",
+          "not_null": true
+        },
+        {
+          "name": "nguyennhan",
+          "type": "character varying(500)",
+          "not_null": true
+        },
+        {
+          "name": "bienphapxuly",
+          "type": "character varying(500)",
+          "not_null": true
+        },
+        {
+          "name": "manv",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "masku",
+          "type": "character varying(20)",
+          "not_null": true
+        }
+      ]
+    },
+    {
+      "name": "chitietbaocaodoanhthu",
+      "columns": [
+        {
+          "name": "mabaocao",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "masku",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "soluongban",
+          "type": "integer",
+          "not_null": true
+        },
+        {
+          "name": "giabanthucte",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "giagocnhap",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "thanhtienban",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "tongtienvonsku",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "tienloisku",
+          "type": "numeric(18,2)",
+          "not_null": true
+        }
+      ]
+    },
+    {
+      "name": "chitietdoitra",
+      "columns": [
+        {
+          "name": "sophieudt",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "masku",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "soluong",
+          "type": "integer",
+          "not_null": true
+        },
+        {
+          "name": "loaigiaodich",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "tinhtrang",
+          "type": "character varying(200)",
+          "not_null": false
+        },
+        {
+          "name": "lydotra",
+          "type": "character varying(500)",
+          "not_null": false
+        },
+        {
+          "name": "maskudoi",
+          "type": "character varying(20)",
+          "not_null": false
+        },
+        {
+          "name": "soluongdoi",
+          "type": "integer",
+          "not_null": true
+        },
+        {
+          "name": "dongianhanlai",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "dongiadoi",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "thanhtiennhanlai",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "thanhtiendoi",
+          "type": "numeric(18,2)",
+          "not_null": true
+        }
+      ]
+    },
+    {
+      "name": "chitiethoadon",
+      "columns": [
+        {
+          "name": "sohd",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "masku",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "soluong",
+          "type": "integer",
+          "not_null": true
+        },
+        {
+          "name": "dongia",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "thanhtien",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "giatrithuctra",
+          "type": "numeric(18,2)",
+          "not_null": false
+        }
+      ]
+    },
+    {
+      "name": "chitietnhapkho",
+      "columns": [
+        {
+          "name": "sophieunk",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "masku",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "soluong",
+          "type": "integer",
+          "not_null": true
+        },
+        {
+          "name": "dongia",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "thanhtien",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "ghichu",
+          "type": "character varying(500)",
+          "not_null": false
+        }
+      ]
+    },
+    {
+      "name": "giaodichthanhtoanqr",
+      "columns": [
+        {
+          "name": "magd",
+          "type": "bigint",
+          "not_null": true
+        },
+        {
+          "name": "sohd",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "nguondon",
+          "type": "character varying(10)",
+          "not_null": true
+        },
+        {
+          "name": "sotien",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "malienket",
+          "type": "character varying(100)",
+          "not_null": true
+        },
+        {
+          "name": "duongdanthanhtoan",
+          "type": "text",
+          "not_null": true
+        },
+        {
+          "name": "manganhang",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "sotaikhoan",
+          "type": "character varying(50)",
+          "not_null": true
+        },
+        {
+          "name": "tentaikhoan",
+          "type": "character varying(200)",
+          "not_null": true
+        },
+        {
+          "name": "noidung",
+          "type": "character varying(50)",
+          "not_null": true
+        },
+        {
+          "name": "trangthai",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "mathamchieu",
+          "type": "character varying(100)",
+          "not_null": false
+        },
+        {
+          "name": "dulieuhoadon",
+          "type": "jsonb",
+          "not_null": false
+        },
+        {
+          "name": "ngaytao",
+          "type": "timestamp without time zone",
+          "not_null": true
+        },
+        {
+          "name": "ngaythanhtoan",
+          "type": "timestamp without time zone",
+          "not_null": false
+        }
+      ]
+    },
+    {
+      "name": "hoadon",
+      "columns": [
+        {
+          "name": "sohd",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "ngaylap",
+          "type": "timestamp without time zone",
+          "not_null": true
+        },
+        {
+          "name": "loaihoadon",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "phuongthucthanhtoan",
+          "type": "character varying(50)",
+          "not_null": true
+        },
+        {
+          "name": "tongcong",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "chietkhau",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "thuevat",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "khachphaitra",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "tienkhachdua",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "tienthua",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "sodienthoai_kh",
+          "type": "character varying(20)",
+          "not_null": false
+        },
+        {
+          "name": "makh",
+          "type": "character varying(20)",
+          "not_null": false
+        },
+        {
+          "name": "diachigiao",
+          "type": "character varying(400)",
+          "not_null": false
+        },
+        {
+          "name": "donvivanchuyen",
+          "type": "character varying(150)",
+          "not_null": false
+        },
+        {
+          "name": "trangthaigiaohang",
+          "type": "character varying(50)",
+          "not_null": false
+        },
+        {
+          "name": "trangthaithanhtoan",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "phiship",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "tiencod",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "thoigiandukien",
+          "type": "timestamp without time zone",
+          "not_null": false
+        },
+        {
+          "name": "ngaygiaothanhcong",
+          "type": "timestamp without time zone",
+          "not_null": false
+        },
+        {
+          "name": "makm",
+          "type": "character varying(20)",
+          "not_null": false
+        },
+        {
+          "name": "manv",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "tennguoinhan",
+          "type": "character varying(150)",
+          "not_null": false
+        },
+        {
+          "name": "nguondon",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "ghichugiaohang",
+          "type": "character varying(500)",
+          "not_null": false
+        },
+        {
+          "name": "dauvantayyeucau",
+          "type": "character varying(64)",
+          "not_null": false
+        }
+      ]
+    },
+    {
+      "name": "khachhang",
+      "columns": [
+        {
+          "name": "makh",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "sodienthoai",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "hoten",
+          "type": "character varying(150)",
+          "not_null": true
+        },
+        {
+          "name": "email",
+          "type": "character varying(254)",
+          "not_null": false
+        },
+        {
+          "name": "diemtichluy",
+          "type": "integer",
+          "not_null": true
+        },
+        {
+          "name": "hangthe",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "diachi",
+          "type": "character varying(300)",
+          "not_null": false
+        },
+        {
+          "name": "ngaysinh",
+          "type": "date",
+          "not_null": false
+        },
+        {
+          "name": "gioitinh",
+          "type": "character varying(20)",
+          "not_null": false
+        },
+        {
+          "name": "tongchitieu",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "trangthai",
+          "type": "boolean",
+          "not_null": true
+        },
+        {
+          "name": "nhankhuyenmai",
+          "type": "boolean",
+          "not_null": true
+        },
+        {
+          "name": "tendangnhap",
+          "type": "character varying(50)",
+          "not_null": false
+        },
+        {
+          "name": "matkhau",
+          "type": "character varying(200)",
+          "not_null": false
+        }
+      ]
+    },
+    {
+      "name": "khuyenmai",
+      "columns": [
+        {
+          "name": "makm",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "tenchuongtrinh",
+          "type": "character varying(200)",
+          "not_null": true
+        },
+        {
+          "name": "loaikm",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "giatrigiam",
+          "type": "numeric(9,2)",
+          "not_null": true
+        },
+        {
+          "name": "giatridonhangtoithieu",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "ngaybatdau",
+          "type": "timestamp without time zone",
+          "not_null": true
+        },
+        {
+          "name": "ngayketthuc",
+          "type": "timestamp without time zone",
+          "not_null": true
+        },
+        {
+          "name": "trangthai",
+          "type": "boolean",
+          "not_null": true
+        }
+      ]
+    },
+    {
+      "name": "khuyenmaisanpham",
+      "columns": [
+        {
+          "name": "makm",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "masku",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "phantramgiam",
+          "type": "numeric(5,2)",
+          "not_null": true
+        }
+      ]
+    },
+    {
+      "name": "loaisanpham",
+      "columns": [
+        {
+          "name": "maloai",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "tenloai",
+          "type": "character varying(100)",
+          "not_null": true
+        },
+        {
+          "name": "mota",
+          "type": "character varying(300)",
+          "not_null": false
+        },
+        {
+          "name": "trangthai",
+          "type": "boolean",
+          "not_null": true
+        }
+      ]
+    },
+    {
+      "name": "nhanvien",
+      "columns": [
+        {
+          "name": "manv",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "tendangnhap",
+          "type": "character varying(50)",
+          "not_null": true
+        },
+        {
+          "name": "hoten",
+          "type": "character varying(150)",
+          "not_null": true
+        },
+        {
+          "name": "chucvu",
+          "type": "character varying(100)",
+          "not_null": true
+        },
+        {
+          "name": "sodienthoai",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "email",
+          "type": "character varying(254)",
+          "not_null": false
+        },
+        {
+          "name": "diachi",
+          "type": "character varying(300)",
+          "not_null": false
+        },
+        {
+          "name": "maquyen",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "matkhau",
+          "type": "character varying(200)",
+          "not_null": true
+        },
+        {
+          "name": "trangthai",
+          "type": "boolean",
+          "not_null": true
+        }
+      ]
+    },
+    {
+      "name": "nhasanxuat",
+      "columns": [
+        {
+          "name": "mansx",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "tennsx",
+          "type": "character varying(150)",
+          "not_null": true
+        },
+        {
+          "name": "diachi",
+          "type": "character varying(300)",
+          "not_null": false
+        },
+        {
+          "name": "masothue",
+          "type": "character varying(30)",
+          "not_null": false
+        },
+        {
+          "name": "sodienthoai",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "email",
+          "type": "character varying(254)",
+          "not_null": false
+        },
+        {
+          "name": "trangthai",
+          "type": "boolean",
+          "not_null": true
+        }
+      ]
+    },
+    {
+      "name": "phanquyen",
+      "columns": [
+        {
+          "name": "maquyen",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "tenquyen",
+          "type": "character varying(100)",
+          "not_null": true
+        },
+        {
+          "name": "mota",
+          "type": "character varying(500)",
+          "not_null": false
+        },
+        {
+          "name": "trangthai",
+          "type": "boolean",
+          "not_null": true
+        }
+      ]
+    },
+    {
+      "name": "phieudoitra",
+      "columns": [
+        {
+          "name": "sophieudt",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "ngaylap",
+          "type": "timestamp without time zone",
+          "not_null": true
+        },
+        {
+          "name": "hinhthucxuly",
+          "type": "character varying(50)",
+          "not_null": true
+        },
+        {
+          "name": "sotienhoan",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "sohd",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "manv",
+          "type": "character varying(20)",
+          "not_null": false
+        },
+        {
+          "name": "nguondon",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "ngaymoctinh",
+          "type": "timestamp without time zone",
+          "not_null": false
+        },
+        {
+          "name": "giatrihangnhanlai",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "giatrihangdoimoi",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "sotienthuthem",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "trangthai",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "mayeucau",
+          "type": "character varying(80)",
+          "not_null": false
+        },
+        {
+          "name": "dauvantayyeucau",
+          "type": "character varying(64)",
+          "not_null": false
+        },
+        {
+          "name": "lydotuchoi",
+          "type": "character varying(1000)",
+          "not_null": false
+        },
+        {
+          "name": "anhminhchung",
+          "type": "jsonb",
+          "not_null": true
+        }
+      ]
+    },
+    {
+      "name": "phieunhapkho",
+      "columns": [
+        {
+          "name": "sophieunk",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "ngaylap",
+          "type": "timestamp without time zone",
+          "not_null": true
+        },
+        {
+          "name": "sopo",
+          "type": "character varying(50)",
+          "not_null": false
+        },
+        {
+          "name": "nguoigiao",
+          "type": "character varying(150)",
+          "not_null": false
+        },
+        {
+          "name": "tongsoluong",
+          "type": "integer",
+          "not_null": true
+        },
+        {
+          "name": "tongtien",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "mansx",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "manv",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "trangthai",
+          "type": "character varying(20)",
+          "not_null": true
+        }
+      ]
+    },
+    {
+      "name": "sanpham",
+      "columns": [
+        {
+          "name": "masp",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "masku",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "maloai",
+          "type": "character varying(20)",
+          "not_null": true
+        },
+        {
+          "name": "tensanpham",
+          "type": "character varying(200)",
+          "not_null": true
+        },
+        {
+          "name": "soluong",
+          "type": "integer",
+          "not_null": true
+        },
+        {
+          "name": "kichco",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "mausac",
+          "type": "character varying(60)",
+          "not_null": true
+        },
+        {
+          "name": "trangthai",
+          "type": "boolean",
+          "not_null": true
+        },
+        {
+          "name": "dongia",
+          "type": "numeric(18,2)",
+          "not_null": true
+        },
+        {
+          "name": "soluongtonkho",
+          "type": "integer",
+          "not_null": true
+        },
+        {
+          "name": "donvitinh",
+          "type": "character varying(30)",
+          "not_null": true
+        },
+        {
+          "name": "hinhanh",
+          "type": "text",
+          "not_null": false
+        },
+        {
+          "name": "danhmuc",
+          "type": "character varying(20)",
+          "not_null": false
+        },
+        {
+          "name": "mansx",
+          "type": "character varying(20)",
+          "not_null": false
+        },
+        {
+          "name": "danhsachhinhanh",
+          "type": "jsonb",
+          "not_null": true
+        },
+        {
+          "name": "mota",
+          "type": "text",
+          "not_null": false
+        }
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "name": "giaodichthanhtoanqr_pkey",
+      "type": "p",
+      "table": "giaodichthanhtoanqr",
+      "definition": "PRIMARY KEY (magd)"
+    },
+    {
+      "name": "giaodichthanhtoanqr_sohd_key",
+      "type": "u",
+      "table": "giaodichthanhtoanqr",
+      "definition": "UNIQUE (sohd)"
+    },
+    {
+      "name": "giaodichthanhtoanqr_sotien_check",
+      "type": "c",
+      "table": "giaodichthanhtoanqr",
+      "definition": "CHECK (sotien > 0::numeric)"
+    },
+    {
+      "name": "LoaiSanPham_TenLoai_key",
+      "type": "u",
+      "table": "loaisanpham",
+      "definition": "UNIQUE (tenloai)"
+    },
+    {
+      "name": "LoaiSanPham_pkey",
+      "type": "p",
+      "table": "loaisanpham",
+      "definition": "PRIMARY KEY (maloai)"
+    },
+    {
+      "name": "PhanQuyen_TenQuyen_key",
+      "type": "u",
+      "table": "phanquyen",
+      "definition": "UNIQUE (tenquyen)"
+    },
+    {
+      "name": "PhanQuyen_pkey",
+      "type": "p",
+      "table": "phanquyen",
+      "definition": "PRIMARY KEY (maquyen)"
+    },
+    {
+      "name": "NhanVien_MaQuyen_fkey",
+      "type": "f",
+      "table": "nhanvien",
+      "definition": "FOREIGN KEY (maquyen) REFERENCES phanquyen(maquyen)"
+    },
+    {
+      "name": "NhanVien_SoDienThoai_key",
+      "type": "u",
+      "table": "nhanvien",
+      "definition": "UNIQUE (sodienthoai)"
+    },
+    {
+      "name": "NhanVien_TenDangNhap_key",
+      "type": "u",
+      "table": "nhanvien",
+      "definition": "UNIQUE (tendangnhap)"
+    },
+    {
+      "name": "NhanVien_pkey",
+      "type": "p",
+      "table": "nhanvien",
+      "definition": "PRIMARY KEY (manv)"
+    },
+    {
+      "name": "SanPham_DonGia_check",
+      "type": "c",
+      "table": "sanpham",
+      "definition": "CHECK (dongia > 0::numeric)"
+    },
+    {
+      "name": "SanPham_MaLoai_fkey",
+      "type": "f",
+      "table": "sanpham",
+      "definition": "FOREIGN KEY (maloai) REFERENCES loaisanpham(maloai)"
+    },
+    {
+      "name": "SanPham_MaSKU_key",
+      "type": "u",
+      "table": "sanpham",
+      "definition": "UNIQUE (masku)"
+    },
+    {
+      "name": "SanPham_SoLuongTonKho_check",
+      "type": "c",
+      "table": "sanpham",
+      "definition": "CHECK (soluongtonkho >= 0)"
+    },
+    {
+      "name": "SanPham_SoLuong_check",
+      "type": "c",
+      "table": "sanpham",
+      "definition": "CHECK (soluong >= 0)"
+    },
+    {
+      "name": "ck_sanpham_danhmuc",
+      "type": "c",
+      "table": "sanpham",
+      "definition": "CHECK (danhmuc IS NULL OR (danhmuc::text = ANY (ARRAY['NAM'::character varying, 'NU'::character varying, 'PHU_KIEN'::character varying]::text[])))"
+    },
+    {
+      "name": "fk_sanpham_nhasanxuat",
+      "type": "f",
+      "table": "sanpham",
+      "definition": "FOREIGN KEY (mansx) REFERENCES nhasanxuat(mansx)"
+    },
+    {
+      "name": "sanpham_pkey",
+      "type": "p",
+      "table": "sanpham",
+      "definition": "PRIMARY KEY (masku)"
+    },
+    {
+      "name": "NhaSanXuat_MaSoThue_key",
+      "type": "u",
+      "table": "nhasanxuat",
+      "definition": "UNIQUE (masothue)"
+    },
+    {
+      "name": "NhaSanXuat_pkey",
+      "type": "p",
+      "table": "nhasanxuat",
+      "definition": "PRIMARY KEY (mansx)"
+    },
+    {
+      "name": "KhuyenMai_GiaTriDonHangToiThieu_check",
+      "type": "c",
+      "table": "khuyenmai",
+      "definition": "CHECK (giatridonhangtoithieu >= 0::numeric)"
+    },
+    {
+      "name": "KhuyenMai_GiaTriGiam_check",
+      "type": "c",
+      "table": "khuyenmai",
+      "definition": "CHECK (giatrigiam > 0::numeric)"
+    },
+    {
+      "name": "KhuyenMai_check",
+      "type": "c",
+      "table": "khuyenmai",
+      "definition": "CHECK (ngayketthuc >= ngaybatdau)"
+    },
+    {
+      "name": "KhuyenMai_pkey",
+      "type": "p",
+      "table": "khuyenmai",
+      "definition": "PRIMARY KEY (makm)"
+    },
+    {
+      "name": "HoaDon_MaKH_fkey",
+      "type": "f",
+      "table": "hoadon",
+      "definition": "FOREIGN KEY (makh) REFERENCES khachhang(makh)"
+    },
+    {
+      "name": "HoaDon_MaKM_fkey",
+      "type": "f",
+      "table": "hoadon",
+      "definition": "FOREIGN KEY (makm) REFERENCES khuyenmai(makm)"
+    },
+    {
+      "name": "HoaDon_MaNV_fkey",
+      "type": "f",
+      "table": "hoadon",
+      "definition": "FOREIGN KEY (manv) REFERENCES nhanvien(manv)"
+    },
+    {
+      "name": "HoaDon_pkey",
+      "type": "p",
+      "table": "hoadon",
+      "definition": "PRIMARY KEY (sohd)"
+    },
+    {
+      "name": "ChiTietHoaDon_MaSKU_fkey",
+      "type": "f",
+      "table": "chitiethoadon",
+      "definition": "FOREIGN KEY (masku) REFERENCES sanpham(masku)"
+    },
+    {
+      "name": "ChiTietHoaDon_SoHD_fkey",
+      "type": "f",
+      "table": "chitiethoadon",
+      "definition": "FOREIGN KEY (sohd) REFERENCES hoadon(sohd) ON DELETE CASCADE"
+    },
+    {
+      "name": "ChiTietHoaDon_SoLuong_check",
+      "type": "c",
+      "table": "chitiethoadon",
+      "definition": "CHECK (soluong > 0)"
+    },
+    {
+      "name": "ChiTietHoaDon_pkey",
+      "type": "p",
+      "table": "chitiethoadon",
+      "definition": "PRIMARY KEY (sohd, masku)"
+    },
+    {
+      "name": "KhachHang_DiemTichLuy_check",
+      "type": "c",
+      "table": "khachhang",
+      "definition": "CHECK (diemtichluy >= 0)"
+    },
+    {
+      "name": "KhachHang_SoDienThoai_key",
+      "type": "u",
+      "table": "khachhang",
+      "definition": "UNIQUE (sodienthoai)"
+    },
+    {
+      "name": "KhachHang_pkey",
+      "type": "p",
+      "table": "khachhang",
+      "definition": "PRIMARY KEY (makh)"
+    },
+    {
+      "name": "PhieuNhapKho_MaNSX_fkey",
+      "type": "f",
+      "table": "phieunhapkho",
+      "definition": "FOREIGN KEY (mansx) REFERENCES nhasanxuat(mansx)"
+    },
+    {
+      "name": "PhieuNhapKho_MaNV_fkey",
+      "type": "f",
+      "table": "phieunhapkho",
+      "definition": "FOREIGN KEY (manv) REFERENCES nhanvien(manv)"
+    },
+    {
+      "name": "PhieuNhapKho_pkey",
+      "type": "p",
+      "table": "phieunhapkho",
+      "definition": "PRIMARY KEY (sophieunk)"
+    },
+    {
+      "name": "ChiTietNhapKho_MaSKU_fkey",
+      "type": "f",
+      "table": "chitietnhapkho",
+      "definition": "FOREIGN KEY (masku) REFERENCES sanpham(masku)"
+    },
+    {
+      "name": "ChiTietNhapKho_SoLuong_check",
+      "type": "c",
+      "table": "chitietnhapkho",
+      "definition": "CHECK (soluong > 0)"
+    },
+    {
+      "name": "ChiTietNhapKho_SoPhieuNK_fkey",
+      "type": "f",
+      "table": "chitietnhapkho",
+      "definition": "FOREIGN KEY (sophieunk) REFERENCES phieunhapkho(sophieunk) ON DELETE CASCADE"
+    },
+    {
+      "name": "ChiTietNhapKho_pkey",
+      "type": "p",
+      "table": "chitietnhapkho",
+      "definition": "PRIMARY KEY (sophieunk, masku)"
+    },
+    {
+      "name": "ChiTietDoiTra_MaSKUDoi_fkey",
+      "type": "f",
+      "table": "chitietdoitra",
+      "definition": "FOREIGN KEY (maskudoi) REFERENCES sanpham(masku)"
+    },
+    {
+      "name": "ChiTietDoiTra_MaSKU_fkey",
+      "type": "f",
+      "table": "chitietdoitra",
+      "definition": "FOREIGN KEY (masku) REFERENCES sanpham(masku)"
+    },
+    {
+      "name": "ChiTietDoiTra_SoLuong_check",
+      "type": "c",
+      "table": "chitietdoitra",
+      "definition": "CHECK (soluong > 0)"
+    },
+    {
+      "name": "ChiTietDoiTra_SoPhieuDT_fkey",
+      "type": "f",
+      "table": "chitietdoitra",
+      "definition": "FOREIGN KEY (sophieudt) REFERENCES phieudoitra(sophieudt) ON DELETE CASCADE"
+    },
+    {
+      "name": "ChiTietDoiTra_pkey",
+      "type": "p",
+      "table": "chitietdoitra",
+      "definition": "PRIMARY KEY (sophieudt, masku)"
+    },
+    {
+      "name": "BaoCaoDoanhThu_MaNV_fkey",
+      "type": "f",
+      "table": "baocaodoanhthu",
+      "definition": "FOREIGN KEY (manv) REFERENCES nhanvien(manv)"
+    },
+    {
+      "name": "BaoCaoDoanhThu_pkey",
+      "type": "p",
+      "table": "baocaodoanhthu",
+      "definition": "PRIMARY KEY (mabaocao)"
+    },
+    {
+      "name": "ChiTietBaoCaoDoanhThu_MaBaoCao_fkey",
+      "type": "f",
+      "table": "chitietbaocaodoanhthu",
+      "definition": "FOREIGN KEY (mabaocao) REFERENCES baocaodoanhthu(mabaocao) ON DELETE CASCADE"
+    },
+    {
+      "name": "ChiTietBaoCaoDoanhThu_MaSKU_fkey",
+      "type": "f",
+      "table": "chitietbaocaodoanhthu",
+      "definition": "FOREIGN KEY (masku) REFERENCES sanpham(masku)"
+    },
+    {
+      "name": "ChiTietBaoCaoDoanhThu_pkey",
+      "type": "p",
+      "table": "chitietbaocaodoanhthu",
+      "definition": "PRIMARY KEY (mabaocao, masku)"
+    },
+    {
+      "name": "PhieuDoiTra_MaNV_fkey",
+      "type": "f",
+      "table": "phieudoitra",
+      "definition": "FOREIGN KEY (manv) REFERENCES nhanvien(manv)"
+    },
+    {
+      "name": "PhieuDoiTra_SoHD_fkey",
+      "type": "f",
+      "table": "phieudoitra",
+      "definition": "FOREIGN KEY (sohd) REFERENCES hoadon(sohd)"
+    },
+    {
+      "name": "PhieuDoiTra_pkey",
+      "type": "p",
+      "table": "phieudoitra",
+      "definition": "PRIMARY KEY (sophieudt)"
+    },
+    {
+      "name": "ck_phieudoitra_nhanvien_trangthai",
+      "type": "c",
+      "table": "phieudoitra",
+      "definition": "CHECK (manv IS NOT NULL OR (trangthai::text = ANY (ARRAY['CHO_DUYET'::character varying, 'CHO_TIEP_NHAN'::character varying, 'TU_CHOI'::character varying]::text[])))"
+    },
+    {
+      "name": "BienBanXuLyHangLoi_MaNV_fkey",
+      "type": "f",
+      "table": "bienbanxulyhangloi",
+      "definition": "FOREIGN KEY (manv) REFERENCES nhanvien(manv)"
+    },
+    {
+      "name": "BienBanXuLyHangLoi_MaSKU_fkey",
+      "type": "f",
+      "table": "bienbanxulyhangloi",
+      "definition": "FOREIGN KEY (masku) REFERENCES sanpham(masku)"
+    },
+    {
+      "name": "BienBanXuLyHangLoi_pkey",
+      "type": "p",
+      "table": "bienbanxulyhangloi",
+      "definition": "PRIMARY KEY (mabienbanxl)"
+    },
+    {
+      "name": "ck_khuyenmaisanpham_phantram",
+      "type": "c",
+      "table": "khuyenmaisanpham",
+      "definition": "CHECK (phantramgiam > 0::numeric AND phantramgiam <= 100::numeric)"
+    },
+    {
+      "name": "fk_khuyenmaisanpham_khuyenmai",
+      "type": "f",
+      "table": "khuyenmaisanpham",
+      "definition": "FOREIGN KEY (makm) REFERENCES khuyenmai(makm) ON DELETE CASCADE"
+    },
+    {
+      "name": "fk_khuyenmaisanpham_sanpham",
+      "type": "f",
+      "table": "khuyenmaisanpham",
+      "definition": "FOREIGN KEY (masku) REFERENCES sanpham(masku) ON DELETE CASCADE"
+    },
+    {
+      "name": "pk_khuyenmaisanpham",
+      "type": "p",
+      "table": "khuyenmaisanpham",
+      "definition": "PRIMARY KEY (makm, masku)"
+    }
+  ],
+  "views": [
+    {
+      "name": "sanphamkhuyenmai_hientai",
+      "definition": " WITH muc_giam AS (\n         SELECT DISTINCT ON (ksp.masku) ksp.masku,\n            ksp.makm,\n            ksp.phantramgiam,\n            km.ngaybatdau,\n            km.ngayketthuc\n           FROM khuyenmaisanpham ksp\n             JOIN khuyenmai km ON km.makm::text = ksp.makm::text\n          WHERE km.trangthai = true AND (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Ho_Chi_Minh'::text) >= km.ngaybatdau AND (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Ho_Chi_Minh'::text) <= km.ngayketthuc\n          ORDER BY ksp.masku, ksp.phantramgiam DESC, ksp.makm\n        )\n SELECT mg.makm AS makhuyenmai,\n    sp.masp AS masanpham,\n    sp.masku,\n    sp.tensanpham,\n    sp.mausac,\n    sp.kichco,\n    sp.dongia AS giagoc,\n    mg.phantramgiam,\n    round(sp.dongia * (100::numeric - mg.phantramgiam) / 100::numeric, 0) AS giakhuyenmai,\n    mg.ngaybatdau,\n    mg.ngayketthuc,\n    sp.hinhanh\n   FROM muc_giam mg\n     JOIN sanpham sp ON sp.masku::text = mg.masku::text\n  WHERE sp.trangthai = true;"
+    }
+  ]
+}

@@ -5,9 +5,9 @@ namespace QLIShopThoiTrang.Api.Data;
 
 public sealed partial class StoreRepository
 {
-    private static bool IsCancelled(string? status) => status?.Contains("hủy",StringComparison.OrdinalIgnoreCase)==true
-        || status?.Contains("huỷ",StringComparison.OrdinalIgnoreCase)==true || status?.Contains("HUY",StringComparison.OrdinalIgnoreCase)==true
-        || status?.Trim().ToUpperInvariant() is "CANCELLED" or "CANCELED";
+    private static bool IsCancelled(string? status) => status?.Trim().ToUpperInvariant() is
+        "WEB_HUY" or "HUY" or "DA_HUY" or "DA HUY" or "CANCELLED" or "CANCELED" or
+        "ĐÃ HỦY" or "ĐÃ HUỶ" or "HỦY" or "HUỶ" or "ĐƠN ĐÃ HỦY" or "ĐƠN ĐÃ HUỶ" or "ĐÃ NHẬN TIỀN - CẦN CỬA HÀNG XỬ LÝ";
 
     private static async Task ReserveInvoiceStockAsync(NpgsqlConnection connection,NpgsqlTransaction tx,string id)
     {

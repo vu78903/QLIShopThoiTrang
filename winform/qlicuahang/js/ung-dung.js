@@ -41,7 +41,7 @@
         let crudContext = { action: '', target: '', editIndex: -1 };
         let revenueChartInstance = null;
         let topChartInstance = null;
-        const APP_STORAGE_KEY = "y_fashion_erp_state_v2";
+        // Khóa lưu theo mã nhân viên được khai báo tại du-lieu-ca-nhan.js.
         const API_BASE_URL = "http://127.0.0.1:5001";
         const VAT_RATE = 8;
         const ADDRESS_OPTIONS = window.VIETNAM_ADDRESS_OPTIONS || {
@@ -89,34 +89,122 @@
             resolver?.(confirmed);
         }
 
-        // Lấy dữ liệu từ API trước, nếu API chưa chạy thì dùng lại localStorage để app vẫn mở được.
-        async function loadAppState() {
+        // Giữ định dạng lưu cũ; chỉ gắn chủ của dữ liệu API để tránh dùng cache sai vai trò.
+        let staffHasData = false;
+        let staffLocalStateReadable = true;
+        let staffLocalSaveFailed = false;
+        let staffDraftLoaded = false;
+        let staffRetrying = false;
+        let staffExpired = false;
+        window.staffApiDataReady = false;
+
+        function showStaffApiNotice(message, expired = false) {
+            let notice = document.getElementById('staffApiNotice');
+            if (!notice) {
+                notice = document.createElement('div');
+                notice.id = 'staffApiNotice'; notice.setAttribute('role', 'alert');
+                Object.assign(notice.style, {position:'sticky',top:'0',zIndex:'10000',padding:'12px 20px',background:'#fff3cd',color:'#664d03',display:'flex',gap:'16px',alignItems:'center'});
+                const text = document.createElement('span'); text.id = 'staffApiNoticeText';
+                const retry = document.createElement('button'); retry.id = 'staffApiRetry';
+                retry.type = 'button'; retry.className = 'btn btn-secondary';
+                retry.addEventListener('click', () => {
+                    if (staffExpired) {
+                        if (window.chrome?.webview) window.chrome.webview.postMessage('staff-session-expired');
+                        else location.href = 'dang-nhap.html';
+                    } else retryStaffAppState();
+                });
+                notice.append(text, retry); document.body.prepend(notice);
+            }
+            document.getElementById('staffApiNoticeText').textContent = message;
+            const button = document.getElementById('staffApiRetry');
+            button.textContent = expired ? 'Đăng nhập lại' : 'Tải lại'; button.disabled = staffRetrying;
+            notice.hidden = false;
+        }
+
+        function handleStaffApiFailure(status) {
+            if (staffExpired) return;
+            window.staffApiDataReady = false;
+            const main = document.querySelector('main');
+            if (status === 401) {
+                saveAppState(); staffExpired = true;
+                const shell=document.querySelector('.shell'); if(shell) shell.style.display='none';
+                showStaffApiNotice('Phiên đăng nhập đã hết hạn. '+(staffLocalSaveFailed || !staffLocalStateReadable
+                    ? 'Bản lưu trước vẫn còn; cần kiểm tra những thay đổi chưa lưu được.' : 'Báo cáo và giỏ nháp trên máy vẫn được giữ.'), true);
+                if (window.chrome?.webview) window.chrome.webview.postMessage('staff-session-expired');
+                return;
+            }
+            if (staffExpired) return;
+            if (!staffHasData && main) main.style.display='none';
+            showStaffApiNotice(status === 403
+                ? 'Bạn không có quyền truy cập dữ liệu này. Vui lòng kiểm tra tài khoản hoặc liên hệ quản lý.'
+                : (staffHasData ? 'Mất kết nối dữ liệu. Dữ liệu đang xem chưa được cập nhật; vui lòng tải lại trước khi ghi thay đổi.'
+                    : 'Chưa tải được dữ liệu từ máy chủ. Báo cáo và giỏ nháp vẫn được giữ; vui lòng tải lại.'));
+        }
+        window.handleStaffApiFailure = handleStaffApiFailure;
+
+        async function retryStaffAppState() {
+            if (staffRetrying || staffExpired) return;
+            staffRetrying = true;
             try {
-                const raw = localStorage.getItem(APP_STORAGE_KEY);
+                const ok = await loadAppState();
+                if (ok) {
+                    renderAll();
+                    if (document.getElementById('stockReviewBody') && typeof loadStockReviews === 'function') await loadStockReviews();
+                    if (document.getElementById('returnHistoryBody') && typeof loadReturnHistory === 'function') await loadReturnHistory();
+                    if (document.getElementById('webReturnRequestBody') && typeof loadWebReturnRequests === 'function') await loadWebReturnRequests();
+                }
+            } finally {
+                staffRetrying = false;
+                const button = document.getElementById('staffApiRetry'); if (button) button.disabled = false;
+            }
+        }
+
+        // API xác thực dữ liệu; báo cáo và giỏ nháp vẫn lưu theo định dạng hiện có.
+        async function fetchStaffAppState(url) {
+            const controller=new AbortController();
+            const timer=setTimeout(() => controller.abort(),12000);
+            try { return await fetch(url,{cache:'no-store',signal:controller.signal}); }
+            finally { clearTimeout(timer); }
+        }
+
+        async function loadAppState() {
+            if (staffExpired) return false;
+            window.staffApiDataReady = false;
+            try {
+                const raw = APP_STORAGE_KEY ? localStorage.getItem(APP_STORAGE_KEY) : null;
                 if (raw) {
                     const data = JSON.parse(raw);
-                    productsData = normalizeProductAudiences(Array.isArray(data.productsData) ? data.productsData.filter(product => product.active !== false) : []);
-                    productTypesData = Array.isArray(data.productTypesData) ? data.productTypesData : [];
-                    partnersData = Array.isArray(data.partnersData) ? data.partnersData : [];
-                    promotionsData = Array.isArray(data.promotionsData) ? data.promotionsData : [];
-                    deliveryOrders = Array.isArray(data.deliveryOrders) ? data.deliveryOrders : [];
-                    codOrders = Array.isArray(data.codOrders) ? data.codOrders : [];
-                    cancelledOrders = Array.isArray(data.cancelledOrders) ? data.cancelledOrders : [];
-                    importRequests = Array.isArray(data.importRequests) ? data.importRequests : [];
-                    cart = Array.isArray(data.cart) ? data.cart : [];
-                    checkoutAttempt = data.checkoutAttempt || null;
-                    returnAttempt = data.returnAttempt || null;
-                    salesHistory = Array.isArray(data.salesHistory) ? data.salesHistory : [];
-                    shiftReports = Array.isArray(data.shiftReports) ? data.shiftReports : [];
-                    appliedPromotion = data.appliedPromotion || null;
+                    if (data.staffOwnerId !== STAFF_STORAGE_OWNER) throw new Error("Chủ sở hữu bản lưu không khớp tài khoản.");
+                    if (window.staffAuthenticated && data.staffOwnerId === window.currentEmployee?.id && data.staffOwnerRole === window.userRole) {
+                        productsData = normalizeProductAudiences(Array.isArray(data.productsData) ? data.productsData.filter(product => product.active !== false) : []);
+                        productTypesData = Array.isArray(data.productTypesData) ? data.productTypesData : [];
+                        partnersData = Array.isArray(data.partnersData) ? data.partnersData : [];
+                        promotionsData = Array.isArray(data.promotionsData) ? data.promotionsData : [];
+                        deliveryOrders = Array.isArray(data.deliveryOrders) ? data.deliveryOrders : [];
+                        codOrders = Array.isArray(data.codOrders) ? data.codOrders : [];
+                        cancelledOrders = Array.isArray(data.cancelledOrders) ? data.cancelledOrders : [];
+                        importRequests = Array.isArray(data.importRequests) ? data.importRequests : [];
+                        staffHasData = true;
+                    }
+                    if (!staffDraftLoaded) {
+                        cart = Array.isArray(data.cart) ? data.cart : [];
+                        checkoutAttempt = data.checkoutAttempt || null;
+                        returnAttempt = data.returnAttempt || null;
+                        if (window.staffAuthenticated && data.staffOwnerId === window.currentEmployee?.id && data.staffOwnerRole === window.userRole) salesHistory = Array.isArray(data.salesHistory) ? data.salesHistory : [];
+                        shiftReports = Array.isArray(data.shiftReports) ? data.shiftReports : [];
+                        appliedPromotion = data.appliedPromotion || null;
+                        staffDraftLoaded = true;
+                    }
                 }
+                staffDraftLoaded = true;
             } catch {
-                localStorage.removeItem(APP_STORAGE_KEY);
+                staffLocalStateReadable = false;
+                console.warn("Không đọc được dữ liệu lưu trên máy; giữ nguyên bản lưu để đối chiếu.");
             }
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/app-state`, { cache: "no-store" });
-                if (!response.ok) throw new Error("API app-state failed");
+                const response = await fetchStaffAppState(`${API_BASE_URL}/api/app-state`);
+                if (!response.ok) { handleStaffApiFailure(response.status); return false; }
                 const data = await response.json();
                 productsData = normalizeProductAudiences(Array.isArray(data.productsData) ? data.productsData : []);
                 cart = cart.map(item => {
@@ -131,23 +219,35 @@
                 deliveryOrders = Array.isArray(data.deliveryOrders) ? data.deliveryOrders : [];
                 codOrders = Array.isArray(data.codOrders) ? data.codOrders : codOrders;
                 cancelledOrders = Array.isArray(data.cancelledOrders) ? data.cancelledOrders : [];
+                staffHasData = true;
                 saveAppState();
                 // Chỉ trang quản lý lấy cả SKU đã tắt; POS và website vẫn dùng app-state đang bật.
-                if (document.querySelector('#view-products')) {
-                    const managedResponse = await fetch(`${API_BASE_URL}/api/san-pham/quan-ly`, { cache: 'no-store' });
-                    if (!managedResponse.ok) throw new Error('Không tải được danh sách quản lý sản phẩm.');
+                if (window.userRole === 'admin' && document.querySelector('#view-products')) {
+                    const managedResponse = await fetchStaffAppState(`${API_BASE_URL}/api/san-pham/quan-ly`);
+                    if (!managedResponse.ok) { handleStaffApiFailure(managedResponse.status); return false; }
                     const managedProducts = await managedResponse.json();
                     if (!Array.isArray(managedProducts)) throw new Error('Danh sách quản lý sản phẩm không hợp lệ.');
                     productsData = normalizeProductAudiences(managedProducts);
                 }
+                window.staffApiDataReady = true;
+                const main = document.querySelector('main'); if (main) main.style.removeProperty('display');
+                const notice = document.getElementById('staffApiNotice'); if (notice) notice.remove();
+                if (!staffLocalStateReadable) showStaffApiNotice('Không đọc được bản lưu cũ trên máy. Bản lưu được giữ nguyên để đối chiếu; chưa ghi đè báo cáo hoặc giỏ nháp.');
+                else if (staffLocalSaveFailed) showStaffApiNotice('Không lưu được dữ liệu trên máy. Bản lưu trước vẫn còn; báo cáo và giỏ nháp mới chưa được lưu.');
+                await showLegacyStorageNotice();
+                return true;
             } catch (error) {
-                console.warn("Không tải được dữ liệu từ API, dùng dữ liệu localStorage.", error);
+                console.warn("Không tải được dữ liệu từ API; giữ báo cáo, bản nháp và dữ liệu đã tải.", error);
+                handleStaffApiFailure('network'); return false;
             }
         }
 
         // Lưu dữ liệu demo để các trang HTML riêng vẫn dùng chung một trạng thái.
         function saveAppState() {
+            if (!APP_STORAGE_KEY || !staffLocalStateReadable || !staffDraftLoaded) return;
             const data = {
+                staffOwnerId: STAFF_STORAGE_OWNER,
+                staffOwnerRole: staffHasData ? (window.userRole || '') : '',
                 productsData: productsData.filter(product => product.active !== false),
                 productTypesData,
                 partnersData,
@@ -163,7 +263,14 @@
                 shiftReports,
                 appliedPromotion
             };
-            localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(data));
+            try {
+                localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(data));
+                staffLocalSaveFailed = false;
+            } catch (error) {
+                staffLocalSaveFailed = true;
+                console.warn('Không ghi đè bản lưu trên máy khi lưu thất bại.', error);
+                if (document.body) showStaffApiNotice('Không lưu được dữ liệu trên máy. Bản lưu trước vẫn còn; báo cáo và giỏ nháp mới chưa được lưu.');
+            }
         }
 
         // 2. HIỂN THỊ DỮ LIỆU LÊN MÀN HÌNH
@@ -1355,7 +1462,8 @@
                     <label>Giá bán</label>
                     <input id="f_price" class="input" type="number" value="${p.price}" placeholder="Giá bán">
                     <label>Số lượng tồn</label>
-                    <input id="f_stock" class="input" type="number" value="${p.stock}" placeholder="Số lượng tồn">
+                    <input id="f_stock" class="input" type="number" value="${p.stock}" readonly aria-describedby="f_stock_help">
+                    <small id="f_stock_help">Tồn kho chỉ xem tại đây; điều chỉnh bằng nghiệp vụ nhập/xuất kho.</small>
                     <label>Trạng thái SKU</label>
                     <select id="f_active" class="input">${buildProductStatusOptions(p.active)}</select>
                     ${buildProductImageField(pendingProductImages)}
@@ -2513,13 +2621,15 @@
         }
 
         // Chuyển một dòng Excel/CSV thành một đối tác và gom lỗi nếu thiếu dữ liệu.
-        function buildPartnerFromImportRow(row, index) {
+        function buildPartnerFromImportRow(row, index, codeList = partnersData) {
             const category = normalizePartnerCategory(getRowValue(row, ["nhom", "loai", "phanloai", "category", "nhóm", "phân loại"]));
             const name = getRowValue(row, ["ten", "hoten", "tendoitac", "tenkhachhang", "tennhacungcap", "tennhanvien", "name", "tên"]);
             const phone = getRowValue(row, ["sdt", "sodienthoai", "phone", "điện thoại", "số điện thoại"]);
             const email = getRowValue(row, ["email", "mail"]);
             const address = getRowValue(row, ["diachi", "address", "địa chỉ"]);
             const role = category === "Khách hàng" ? "" : getRowValue(row, ["chucvu", "vaitro", "role", "chức vụ"]);
+            const username = category === "Nhân viên" ? getRowValue(row, ["tendangnhap", "tên đăng nhập", "taikhoan", "tài khoản", "username"]) : undefined;
+            const password = category === "Nhân viên" ? getRowValue(row, ["matkhau", "mật khẩu", "password"]) : undefined;
             const points = Number(getRowValue(row, ["diem", "diemtichluy", "points", "điểm"])) || 0;
             const totalSpent = Number(getRowValue(row, ["tongchitieu", "totalspent", "chi tiêu", "tong tien"])) || 0;
             const errors = [];
@@ -2530,16 +2640,24 @@
             if (!isEmailValid(email)) errors.push("email phải đúng định dạng và kết thúc bằng .com");
             if (category === "Khách hàng") errors.push("khách hàng chỉ thêm nhanh ở POS");
             if (category === "Nhân viên" && role && !employeeRoles.includes(role)) errors.push("chức vụ nhân viên không hợp lệ");
+            if (category === "Nhân viên") {
+                if (!username) errors.push("thiếu cột hoặc giá trị Tài khoản");
+                else if (username.length > 50 || /\s/.test(username)) errors.push("tài khoản tối đa 50 ký tự, không có khoảng trắng");
+                if (!password) errors.push("thiếu cột hoặc giá trị Mật khẩu");
+                else if (password.length > 200) errors.push("mật khẩu tối đa 200 ký tự");
+            }
 
             return {
                 partner: {
                     category,
-                    id: generatePartnerCodeForList(category, partnersData),
+                    id: getRowValue(row,["ma","madoitac","manv","mansx","id","mã"]) || generatePartnerCodeForList(category, codeList),
                     name,
                     phone,
                     email,
                     address,
                     role,
+                    username,
+                    password,
                     points: category === "Khách hàng" ? points : undefined,
                     totalSpent: category === "Khách hàng" ? totalSpent : undefined
                 },
@@ -2557,32 +2675,24 @@
         }
 
         // Import nhiều đối tác; nếu có dòng lỗi thì dừng để người dùng sửa file.
-        function importPartnerRows(rows) {
-            const imported = [];
-            const errors = [];
-
-            rows.forEach((row, index) => {
-                const result = buildPartnerFromImportRow(row, index);
-                if (result.errors) {
-                    errors.push(result.errors);
-                    return;
-                }
-                imported.push(result.partner);
-                partnersData.push(result.partner);
+        async function importPartnerRows(rows) {
+            if(window.userRole!=='admin'){alert('Chỉ cửa hàng trưởng được nhập file đối tác.');return;}
+            const imported=[],errors=[],codeList=[...partnersData];
+            rows.forEach((row,index)=>{
+                const result=buildPartnerFromImportRow(row,index,codeList);
+                if(result.errors)errors.push(result.errors);
+                else {imported.push(result.partner);codeList.push(result.partner);}
             });
-
-            if (errors.length) {
-                partnersData.splice(partnersData.length - imported.length, imported.length);
-                alert("File có dữ liệu chưa hợp lệ:\n" + errors.slice(0, 8).join("\n") + (errors.length > 8 ? "\n..." : ""));
-                return;
-            }
-
-            currentPartnerCategory = imported[0]?.category || currentPartnerCategory;
-            document.querySelectorAll(".partner-tab").forEach(t => {
-                t.classList.toggle("active", t.textContent.includes(currentPartnerCategory));
-            });
-            renderPartners();
-            toast(`Đã nhập ${imported.length} dòng từ file`);
+            if(errors.length){alert('File chưa hợp lệ:\n'+errors.slice(0,8).join('\n'));return;}
+            if(!imported.length){alert('File không có dòng để nhập.');return;}
+            try {
+                const response=await fetch(API_BASE_URL+'/api/doi-tac/nhap-file',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(imported)});
+                if(!response.ok)throw Error(await getApiErrorMessage(response,'Không lưu được file đối tác. Chưa xác nhận nhập thành công.'));
+                const result=await response.json();
+                currentPartnerCategory=imported[0].category;
+                if(await loadAppState()) {renderPartners();toast('Đã lưu '+result.count+' đối tác vào database.');}
+                else alert('Database đã nhận file nhưng chưa tải lại được danh sách. Dùng Tải lại, không nhập lại file.');
+            } catch(error){alert(error.message);}
         }
 
         // Đọc file Excel/CSV đối tác từ máy rồi đưa vào hàm import.
@@ -2594,7 +2704,7 @@
             const extension = file.name.split(".").pop().toLowerCase();
             const reader = new FileReader();
 
-            reader.onload = e => {
+            reader.onload = async e => {
                 try {
                     let rows = [];
                     if (extension === "csv") {
@@ -2614,7 +2724,7 @@
                         return;
                     }
 
-                    importPartnerRows(rows);
+                    await importPartnerRows(rows);
                 } catch (error) {
                     alert("Không đọc được file. Vui lòng kiểm tra định dạng CSV/XLSX.");
                 }
@@ -2825,6 +2935,7 @@
             });
             empty.classList.toggle("hidden", cart.length > 0);
             updateCart();
+            saveAppState();
             if (window.lucide) lucide.createIcons();
         }
 
@@ -3321,6 +3432,7 @@
             } else {
                 shiftReports.push(summary);
             }
+            saveAppState();
         }
 
         // Ghi một hóa đơn đã thanh toán vào lịch sử doanh thu.

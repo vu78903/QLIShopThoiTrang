@@ -20,6 +20,7 @@ public partial class formGiaoHang : Form
         webView = new WebView2 { Dock = DockStyle.Fill };
         Controls.Add(webView);
         await webView.EnsureCoreWebView2Async(null);
+        await WebViewStaffContext.ConfigureAsync(webView.CoreWebView2);
 
         string fileHtml = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Views", "giao-hang.html");
         if (File.Exists(fileHtml)) webView.CoreWebView2.Navigate(fileHtml);
