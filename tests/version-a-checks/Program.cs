@@ -247,10 +247,28 @@ try
         {login.EnsureSuccessStatusCode();using var data=JsonDocument.Parse(await login.Content.ReadAsStringAsync());client.DefaultRequestHeaders.Authorization=new AuthenticationHeaderValue("Bearer",data.RootElement.GetProperty("token").GetString());}
         foreach(var invoiceId in new[]{"OWN","OTHER","WEB"})Check((await client.GetAsync("/api/hoa-don/"+invoiceId)).StatusCode==HttpStatusCode.OK,"HTTP cashier reads invoice "+invoiceId);
         using(var list=JsonDocument.Parse(await client.GetStringAsync("/api/hoa-don")))Check(new[]{"OWN","OTHER","WEB"}.All(id=>list.RootElement.EnumerateArray().Any(i=>i.GetProperty("id").GetString()==id)),"HTTP cashier lists all operational invoices");
+        var customerAccountPath="/api/doi-tac/"+Uri.EscapeDataString("Khách hàng")+"/KH/tai-khoan";
+        Check((await client.GetAsync(customerAccountPath)).StatusCode==HttpStatusCode.Forbidden,"Cashier cannot read customer account details");
         using(var login=await client.PostAsJsonAsync("/api/dang-nhap",new{username="manager",password="test123"}))
         {login.EnsureSuccessStatusCode();using var data=JsonDocument.Parse(await login.Content.ReadAsStringAsync());client.DefaultRequestHeaders.Authorization=new AuthenticationHeaderValue("Bearer",data.RootElement.GetProperty("token").GetString());}
         Check((await client.GetAsync("/api/bao-cao/ban-chay")).IsSuccessStatusCode,"HTTP manager reads best sellers report");
         Check((await client.GetAsync("/api/bao-cao/ban-chay?from=2020-01-02&to=2020-01-01")).StatusCode==HttpStatusCode.BadRequest,"HTTP best sellers rejects reversed dates");
+        const string storedCustomerHash="AQAAAAIAAYagAAAAEFIXTURE_HASH_MUST_NOT_LEAK";
+        await Exec("UPDATE khachhang SET matkhau='"+storedCustomerHash+"' WHERE makh='KH'");
+        using(var account=JsonDocument.Parse(await client.GetStringAsync(customerAccountPath)))
+            Check(account.RootElement.GetProperty("username").GetString()=="customer" && !account.RootElement.TryGetProperty("password",out _) && !account.RootElement.GetRawText().Contains(storedCustomerHash),"Customer account response never exposes the stored password hash");
+        var customerProfile=new PartnerUpsertDto("Khách hàng","KH","Customer","0900000007","private@example.com","Test address",null,Username:"customer");
+        using(var saved=await client.PostAsJsonAsync("/api/doi-tac",customerProfile))
+            Check(saved.IsSuccessStatusCode && await Scalar<string>("SELECT matkhau FROM khachhang WHERE makh='KH'")==storedCustomerHash,"Saving customer profile with no new password preserves the exact existing hash");
+        using(var saved=await client.PostAsJsonAsync("/api/doi-tac",customerProfile with {Password="NewCustomer123!"}))
+            Check(saved.IsSuccessStatusCode && await Scalar<string>("SELECT matkhau FROM khachhang WHERE makh='KH'")=="NewCustomer123!","An explicitly entered customer password is saved");
+        using(var account=JsonDocument.Parse(await client.GetStringAsync(customerAccountPath)))
+            Check(!account.RootElement.TryGetProperty("password",out _),"Customer account response never exposes a newly set plaintext password either");
+        using(var saved=await client.PostAsJsonAsync("/api/doi-tac",customerProfile))
+            Check(saved.IsSuccessStatusCode && await Scalar<string>("SELECT matkhau FROM khachhang WHERE makh='KH'")=="NewCustomer123!","Reopening and saving without a new password preserves the replacement");
+        await Exec("UPDATE khachhang SET matkhau='TEST HASH MUST NOT LEAK' WHERE makh='KH'");
+        using(var account=JsonDocument.Parse(await client.GetStringAsync("/api/doi-tac/"+Uri.EscapeDataString("Nhân viên")+"/C/tai-khoan")))
+            Check(account.RootElement.GetProperty("username").GetString()=="cashier" && !account.RootElement.TryGetProperty("password",out _),"Staff account response never exposes the stored password");
         using(var saved=await client.PostAsJsonAsync("/api/san-pham",stale))
         {saved.EnsureSuccessStatusCode();using var data=JsonDocument.Parse(await saved.Content.ReadAsStringAsync());Check(data.RootElement.GetProperty("stock").GetInt32()==14,"HTTP metadata save returns current stock, not stale input");}
         async Task LoginAs(string name,string password="test123")
@@ -270,6 +288,11 @@ try
         Check((await client.PostAsJsonAsync("/api/doi-tac",profileUpdate)).IsSuccessStatusCode,"Manager edits profile with unchanged credentials filled by form");
         client.DefaultRequestHeaders.Authorization=profileToken;
         Check((await client.GetAsync("/api/app-state")).IsSuccessStatusCode,"API profile edit with unchanged credential fields preserves old token");
+        await LoginAs("manager");
+        using(var saved=await client.PostAsJsonAsync("/api/doi-tac",profileUpdate with {Password=null}))
+            Check(saved.IsSuccessStatusCode,"Manager can save staff profile with the new password left blank");
+        client.DefaultRequestHeaders.Authorization=profileToken;
+        Check((await client.GetAsync("/api/app-state")).IsSuccessStatusCode && await Scalar<string>("SELECT matkhau FROM nhanvien WHERE manv='C'")=="test123","Blank new staff password preserves both existing password and session");
         await LoginAs("manager");
         Check((await client.PostAsJsonAsync("/api/doi-tac",new PartnerUpsertDto("Nhân viên","M","Manager renamed","0900000024","manager@example.com","Address changed","Cửa hàng trưởng",Username:"manager",Password:"test123"))).IsSuccessStatusCode,"Manager can edit own name/phone");
         Check((await client.GetAsync("/api/app-state")).IsSuccessStatusCode,"Own profile edit does not log manager out");

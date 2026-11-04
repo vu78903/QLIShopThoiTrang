@@ -717,10 +717,11 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
         if(table is null) return null;
         var key=category=="Khách hàng"?"MaKH":"MaNV";
         await using var connection=db.CreateConnection();await connection.OpenAsync();
-        await using var command=NewCommand(connection,null,$"SELECT TenDangNhap,MatKhau FROM {table} WHERE {key}=@id AND TrangThai=TRUE",("@id",id));
+        // Mật khẩu đã băm không thể khôi phục; form chỉ nhận tên đăng nhập để sửa tài khoản.
+        await using var command=NewCommand(connection,null,$"SELECT TenDangNhap FROM {table} WHERE {key}=@id AND TrangThai=TRUE",("@id",id));
         await using var reader=await command.ExecuteReaderAsync();
         if(!await reader.ReadAsync())return null;
-        return new {username=reader.IsDBNull(0)?"":reader.GetString(0),password=reader.IsDBNull(1)?"":reader.GetString(1)};
+        return new {username=reader.IsDBNull(0)?"":reader.GetString(0)};
     }
 
     public async Task<bool> DeactivatePartnerAsync(string category, string id)

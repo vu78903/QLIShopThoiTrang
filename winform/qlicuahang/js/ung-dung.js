@@ -1756,11 +1756,12 @@
                     ${(category === 'Khách hàng' || category === 'Nhân viên') && window.userRole === 'admin' ? `
                     <label>Tên đăng nhập</label>
                     <input id="p_username" class="input" maxlength="50" autocomplete="off" value="${escapeHtml(data.username || '')}">
-                    <label>Mật khẩu</label>
+                    <label for="p_password">${crudContext.action === 'edit' ? 'Mật khẩu mới' : 'Mật khẩu'}</label>
                     <div style="display:flex;gap:8px;align-items:center">
-                        <input id="p_password" class="input" type="password" maxlength="200" autocomplete="off" value="${escapeHtml(data.password || '')}">
+                        <input id="p_password" class="input" type="password" maxlength="200" autocomplete="new-password" aria-describedby="p_password_help" value="${crudContext.action === 'edit' ? '' : escapeHtml(data.password || '')}" placeholder="${crudContext.action === 'edit' ? 'Để trống nếu không đổi mật khẩu' : 'Nhập mật khẩu'}">
                         <button type="button" class="btn btn-secondary" onclick="togglePartnerPassword(this)" aria-label="Hiện mật khẩu" aria-pressed="false">Hiện</button>
-                    </div>` : ''}
+                    </div>
+                    <small id="p_password_help">${crudContext.action === 'edit' ? 'Để trống để giữ mật khẩu hiện tại. Nhập mật khẩu mới nếu cần đổi; không thể xem lại mật khẩu cũ.' : 'Nút Hiện/Ẩn chỉ áp dụng cho mật khẩu bạn đang nhập.'}</small>` : ''}
                 `;
         }
 
@@ -1836,11 +1837,12 @@
                 try {
                     const response = await fetch(`${API_BASE_URL}/api/doi-tac/${encodeURIComponent(p.category)}/${encodeURIComponent(p.id)}/tai-khoan`, {cache:'no-store'});
                     if (!response.ok) throw new Error(await getApiErrorMessage(response, 'Không đọc được tài khoản.'));
-                    credentials = await response.json();
+                    const account = await response.json();
+                    credentials = { username: account.username };
                 } catch (error) { alert(error.message); return; }
             }
             document.getElementById("crudModalTitle").textContent = p.category === "Khách hàng" ? "Cập Nhật Khách Hàng" : "Cập Nhật Đối Tác";
-            document.getElementById("crudModalFields").innerHTML = buildPartnerModalFields(p.category, {...p, ...credentials});
+            document.getElementById("crudModalFields").innerHTML = buildPartnerModalFields(p.category, {...p, ...credentials, password: ''});
             document.getElementById("crudModalBg").classList.add("open");
         }
 

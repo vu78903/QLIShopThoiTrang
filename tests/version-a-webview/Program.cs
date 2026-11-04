@@ -225,6 +225,16 @@ internal static class Program
             }
             await Js(reportView,"openAddProduct()");
             Check(await Js(reportView,"!document.getElementById('f_stock').readOnly")=="true","New SKU can still set initial stock");
+            await Js(reportView,"openEditPartner(partnersData.findIndex(p=>p.id==='C'))");
+            await Wait(reportView,"document.getElementById('p_username')?.value==='cashier'");
+            Check(await Js(reportView,"document.getElementById('p_password').value==='' && document.getElementById('p_password_help').textContent.includes('Để trống')")=="true","Editing an account never prefills a password, even from a legacy API response");
+            await Js(reportView,"togglePartnerPassword(document.querySelector('[onclick=\"togglePartnerPassword(this)\"]'))");
+            Check(await Js(reportView,"document.getElementById('p_password').type==='text' && document.getElementById('p_password').value===''")=="true","Show password never reveals the previous stored hash");
+            await Js(reportView,"document.getElementById('p_password').value='NewPassword123!';togglePartnerPassword(document.querySelector('[onclick=\"togglePartnerPassword(this)\"]'))");
+            Check(await Js(reportView,"document.getElementById('p_password').type==='password' && getCurrentPartnerFormData().password==='NewPassword123!'")=="true","Hide password keeps the newly entered value for saving");
+            await Js(reportView,"openEditPartner(partnersData.findIndex(p=>p.id==='C2'))");
+            await Wait(reportView,"!activeFormActions.has('openEditPartner')");
+            Check(await Js(reportView,"document.getElementById('p_password').value===''")=="true","Opening another account clears the previous unsaved password");
             await Js(reportView,"document.getElementById('crudModalBg').classList.remove('open');window.testAlerts=[];window.alert=m=>testAlerts.push(m)");
             var imports=api.PartnerImports;
             await Js(reportView,"importPartnerRows([{nhom:'Nhân viên',ma:'NV-911',ten:'CSV employee',sdt:'0900099911',email:'employee@example.com',chucvu:'Nhân viên kho'}])");
@@ -295,6 +305,8 @@ internal static class Program
                     if(responseStatus==-2){await Task.Delay(13000);responseStatus=200;}
                     c.Response.StatusCode=responseStatus;c.Response.ContentType="application/json";
                     var body="[]";
+                    if(c.Request.Url!.AbsolutePath.EndsWith("/tai-khoan"))
+                        body=JsonSerializer.Serialize(new{username="cashier",password="AQAAAA_LEGACY_HASH_MUST_NOT_APPEAR"});
                     if(c.Request.Url!.AbsolutePath=="/api/app-state")
                     {
                         var state=System.Text.Json.Nodes.JsonNode.Parse(data)!;
