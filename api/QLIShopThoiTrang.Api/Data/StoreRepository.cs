@@ -1,4 +1,4 @@
-using Npgsql;
+﻿using Npgsql;
 using QLIShopThoiTrang.Api.Models;
 using System.Globalization;
 using System.Text;
@@ -303,9 +303,9 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
         var sku = (input.Sku ?? string.Empty).Trim().ToUpperInvariant();
         var productId = (input.ProductId ?? string.Empty).Trim().ToUpperInvariant();
         if (!Regex.IsMatch(productId, @"^SP-\d{3,}$"))
-            throw new InvalidOperationException("Mã sản phẩm phải có dạng SP-001.");
+            throw new StoreValidationException("Mã sản phẩm phải có dạng SP-001.");
         if (!Regex.IsMatch(sku, @"^[A-Z0-9][A-Z0-9-]{2,19}$"))
-            throw new InvalidOperationException("Mã SKU chỉ được gồm chữ, số, dấu gạch ngang và tối đa 20 ký tự.");
+            throw new StoreValidationException("Mã SKU chỉ được gồm chữ, số, dấu gạch ngang và tối đa 20 ký tự.");
 
         await using var connection = db.CreateConnection();
         await connection.OpenAsync();
@@ -318,19 +318,19 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
         if (string.IsNullOrWhiteSpace(supplier) || await ScalarLongAsync(connection, tx,
                 "SELECT COUNT(*) FROM NhaSanXuat WHERE MaNSX=@supplier AND TrangThai=TRUE",
                 ("@supplier", supplier)) == 0)
-            throw new InvalidOperationException("Nhà cung cấp không tồn tại hoặc đã ngừng hoạt động.");
+            throw new StoreValidationException("Nhà cung cấp không tồn tại hoặc đã ngừng hoạt động.");
         var color = string.IsNullOrWhiteSpace(input.Color) ? "Mặc định" : input.Color.Trim();
         var size = string.IsNullOrWhiteSpace(input.Size) ? "Free size" : input.Size.Trim();
         var productImages = NormalizeProductImages(input.Images, input.Image);
         var maLoai = await ScalarStringAsync(connection, tx,
             "SELECT MaLoai FROM LoaiSanPham WHERE TrangThai=TRUE AND (TenLoai=@type OR MaLoai=@type) LIMIT 1",
             ("@type", type));
-        if (maLoai is null) throw new InvalidOperationException("Loại sản phẩm không tồn tại.");
+        if (maLoai is null) throw new StoreValidationException("Loại sản phẩm không tồn tại.");
         var typeName = await ScalarStringAsync(connection, tx,
             "SELECT TenLoai FROM LoaiSanPham WHERE MaLoai=@type", ("@type", maLoai)) ?? type;
         var expectedSupplier = ExpectedSupplierId(typeName, audience);
         if (!supplier.Equals(expectedSupplier, StringComparison.OrdinalIgnoreCase))
-            throw new InvalidOperationException($"Loại {typeName} phải thuộc {SupplierLabel(expectedSupplier)}.");
+            throw new StoreValidationException($"Loại {typeName} phải thuộc {SupplierLabel(expectedSupplier)}.");
 
         var duplicateVariant = await ScalarLongAsync(connection, tx, """
             SELECT COUNT(*) FROM SanPham
@@ -338,7 +338,7 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
               AND lower(trim(KichCo))=lower(trim(@size)) AND MaSKU<>@sku
             """, ("@productId", productId), ("@color", color), ("@size", size), ("@sku", sku));
         if (duplicateVariant > 0)
-            throw new InvalidOperationException("Sản phẩm đã có biến thể màu và size này.");
+            throw new StoreValidationException("Sản phẩm đã có biến thể màu và size này.");
 
         // Danh mục và nhà cung cấp thuộc cấp MaSP, nên sửa một SKU sẽ đồng bộ toàn bộ màu/size.
         await ExecuteAsync(connection, tx,
@@ -421,7 +421,7 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
             "NAM" => "NAM",
             "NU" => "NU",
             "PHU_KIEN" or "PHUKIEN" => "PHU_KIEN",
-            _ => throw new InvalidOperationException("Danh mục phải là Nam, Nữ hoặc Phụ kiện.")
+            _ => throw new StoreValidationException("Danh mục phải là Nam, Nữ hoặc Phụ kiện.")
         };
     }
 
@@ -436,7 +436,7 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
             "NAM" => "NCC-003",
             "NU" => "NCC-005",
             "PHU_KIEN" => "NCC-002",
-            _ => throw new InvalidOperationException("Không xác định được nhà cung cấp phù hợp.")
+            _ => throw new StoreValidationException("Không xác định được nhà cung cấp phù hợp.")
         };
     }
 
@@ -744,7 +744,7 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
             .Select(group => new PromotionProductUpsertDto(group.Key, group.Last().Percent))
             .ToList();
         if (products.Any(item => item.Percent <= 0 || item.Percent > 100))
-            throw new InvalidOperationException("Phần trăm giảm của sản phẩm phải từ 1 đến 100.");
+            throw new StoreValidationException("Phần trăm giảm của sản phẩm phải từ 1 đến 100.");
         var startDate = ParseDate(input.StartDate);
         var endDate = ParseDate(input.EndDate);
         if (products.Count == 0)
@@ -753,7 +753,7 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
             endDate = endDate.Date.AddDays(1).AddMilliseconds(-1);
         }
         if (endDate <= startDate)
-            throw new InvalidOperationException("Thời gian kết thúc phải sau thời gian bắt đầu.");
+            throw new StoreValidationException("Thời gian kết thúc phải sau thời gian bắt đầu.");
 
         await using var connection = db.CreateConnection();
         await connection.OpenAsync();
@@ -775,7 +775,7 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
             if (await ScalarLongAsync(connection, tx,
                 "SELECT COUNT(*) FROM SanPham WHERE MaSKU=@sku AND TrangThai=TRUE",
                 ("@sku", item.Sku)) == 0)
-                throw new InvalidOperationException($"Mã SKU {item.Sku} không tồn tại hoặc đã ngừng kinh doanh.");
+                throw new StoreValidationException($"Mã SKU {item.Sku} không tồn tại hoặc đã ngừng kinh doanh.");
             await ExecuteAsync(connection, tx, """
                 INSERT INTO KhuyenMaiSanPham(MaKM,MaSKU,PhanTramGiam)
                 VALUES(@code,@sku,@percent)
@@ -816,22 +816,22 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
         var digest=Fingerprint(input);
         if(!string.IsNullOrEmpty(requestKey))
         {
-            if(requestKey.Length>80)throw new InvalidOperationException("Mã yêu cầu nhập kho quá dài.");
+            if(requestKey.Length>80)throw new StoreValidationException("Mã yêu cầu nhập kho quá dài.");
             await ExecuteAsync(connection,tx,"SELECT pg_advisory_xact_lock(hashtext(@key))",("@key","import:"+requestKey));
             await using var previous=NewCommand(connection,tx,"SELECT SoPhieuNK,DauVanTayYeuCau FROM PhieuNhapKho WHERE MaYeuCau=@key",("@key",requestKey));
             await using var reader=await previous.ExecuteReaderAsync();
             if(await reader.ReadAsync())
             {
-                if(reader.GetString(1)!=digest)throw new InvalidOperationException("Mã yêu cầu nhập kho đã dùng cho nội dung khác.");
+                if(reader.GetString(1)!=digest)throw new StoreValidationException("Mã yêu cầu nhập kho đã dùng cho nội dung khác.");
                 var previousId=reader.GetString(0);await reader.DisposeAsync();await tx.CommitAsync();return previousId;
             }
         }
         var supplier = input.SupplierId.Trim();
         if (await ScalarLongAsync(connection, tx,
             "SELECT COUNT(*) FROM NhaSanXuat WHERE MaNSX=@id AND TrangThai=TRUE", ("@id", supplier)) == 0)
-            throw new InvalidOperationException("Nhà cung cấp không tồn tại.");
+            throw new StoreValidationException("Nhà cung cấp không tồn tại.");
         if (input.Items is null || input.Items.Count == 0)
-            throw new InvalidOperationException("Phiếu nhập kho phải có ít nhất một sản phẩm.");
+            throw new StoreValidationException("Phiếu nhập kho phải có ít nhất một sản phẩm.");
 
         var lines = new List<(string Sku, int Qty, decimal UnitCost, decimal Total)>();
         var usedSkus = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -839,16 +839,16 @@ public sealed partial class StoreRepository(SqlServerConnectionFactory db)
         {
             var sku = (item.Sku ?? string.Empty).Trim().ToUpperInvariant();
             if (string.IsNullOrWhiteSpace(sku) || !usedSkus.Add(sku))
-                throw new InvalidOperationException("Mỗi SKU chỉ được xuất hiện một lần trên phiếu nhập kho.");
+                throw new StoreValidationException("Mỗi SKU chỉ được xuất hiện một lần trên phiếu nhập kho.");
             if (item.Qty < ImportRequestCreateDto.MinimumQuantity || item.Qty % ImportRequestCreateDto.MinimumQuantity != 0)
-                throw new InvalidOperationException("Mỗi SKU phải nhập số kiện nguyên, tối thiểu 1 kiện (50 cái).");
+                throw new StoreValidationException("Mỗi SKU phải nhập số kiện nguyên, tối thiểu 1 kiện (50 cái).");
             if (item.UnitCost <= 0)
-                throw new InvalidOperationException("Giá gốc phải lớn hơn 0.");
+                throw new StoreValidationException("Giá gốc phải lớn hơn 0.");
             if (await ScalarLongAsync(connection, tx, """
                     SELECT COUNT(*) FROM SanPham
                     WHERE MaSKU=@sku AND MaNSX=@supplier AND TrangThai=TRUE
                     """, ("@sku", sku), ("@supplier", supplier)) == 0)
-                throw new InvalidOperationException($"SKU {sku} không thuộc nhà cung cấp đã chọn.");
+                throw new StoreValidationException($"SKU {sku} không thuộc nhà cung cấp đã chọn.");
             lines.Add((sku, item.Qty, item.UnitCost, item.Qty * item.UnitCost));
         }
 

@@ -1252,9 +1252,10 @@
         // Tạo danh sách option loại sản phẩm cho form sản phẩm.
         function productTypeAudience(typeName) {
             const name = normalizeSkuText(typeName);
-            if (name === "DAM" || name === "VAY" || name.endsWith(" NU")) return "NU";
-            if (name === "NON" || name === "VO") return "PHU_KIEN";
-            if (name.endsWith(" NAM")) return "NAM";
+            if (/\b(NON|VO)\b/.test(name)) return "PHU_KIEN";
+            if (/\bNU\b/.test(name)) return "NU";
+            if (/\bNAM\b/.test(name)) return "NAM";
+            if (/^(DAM|VAY)\b/.test(name)) return "NU";
             return "";
         }
 
@@ -1262,7 +1263,7 @@
             if (productTypesData.length === 0) {
                 return `<option value="">Chưa có loại sản phẩm</option>`;
             }
-            const visibleTypes = productTypesData.filter(type => !audience || productTypeAudience(type.name) === audience);
+            const visibleTypes = productTypesData.filter(type => !audience || !productTypeAudience(type.name) || productTypeAudience(type.name) === audience);
             return `<option value="">Chọn loại sản phẩm</option>` + visibleTypes.map(type =>
                 `<option value="${type.name}" ${selected === type.name ? "selected" : ""}>${type.id} - ${type.name}</option>`
             ).join("");
@@ -2569,10 +2570,11 @@
 
         // Đưa tên nhóm trong file import về đúng 3 nhóm hệ thống đang dùng.
         function normalizePartnerCategory(value) {
-            const text = String(value || currentPartnerCategory).trim().toLowerCase();
-            if (text.includes("ncc") || text.includes("cung") || text.includes("xưởng") || text.includes("xuong")) return "Nhà cung cấp";
-            if (text.includes("nv") || text.includes("nhân") || text.includes("nhan")) return "Nhân viên";
-            return "Nhà cung cấp";
+            const text = normalizeSkuText(value || currentPartnerCategory);
+            if (text === "KH" || text.includes("KHACH HANG")) return "Khách hàng";
+            if (text === "NCC" || text.includes("CUNG CAP") || text.includes("XUONG")) return "Nhà cung cấp";
+            if (text === "NV" || text.includes("NHAN VIEN")) return "Nhân viên";
+            return "";
         }
 
         // Đọc file CSV đơn giản thành danh sách object theo dòng.
@@ -2627,9 +2629,9 @@
             const phone = getRowValue(row, ["sdt", "sodienthoai", "phone", "điện thoại", "số điện thoại"]);
             const email = getRowValue(row, ["email", "mail"]);
             const address = getRowValue(row, ["diachi", "address", "địa chỉ"]);
-            const role = category === "Khách hàng" ? "" : getRowValue(row, ["chucvu", "vaitro", "role", "chức vụ"]);
-            const username = category === "Nhân viên" ? getRowValue(row, ["tendangnhap", "tên đăng nhập", "taikhoan", "tài khoản", "username"]) : undefined;
-            const password = category === "Nhân viên" ? getRowValue(row, ["matkhau", "mật khẩu", "password"]) : undefined;
+            const role = category === "Khách hàng" ? "" : getRowValue(row, ["chucvu", "vaitro", "role", "chức vụ", "masothue", "mã số thuế"]);
+            const username = ["Nhân viên", "Khách hàng"].includes(category) ? getRowValue(row, ["tendangnhap", "tên đăng nhập", "taikhoan", "tài khoản", "username"]) || undefined : undefined;
+            const password = ["Nhân viên", "Khách hàng"].includes(category) ? getRowValue(row, ["matkhau", "mật khẩu", "password"]) || undefined : undefined;
             const points = Number(getRowValue(row, ["diem", "diemtichluy", "points", "điểm"])) || 0;
             const totalSpent = Number(getRowValue(row, ["tongchitieu", "totalspent", "chi tiêu", "tong tien"])) || 0;
             const errors = [];
@@ -2638,7 +2640,7 @@
             if (!name) errors.push("thiếu tên");
             if (!isPhoneValid(phone)) errors.push("số điện thoại phải là số và không được trống");
             if (!isEmailValid(email)) errors.push("email phải đúng định dạng và kết thúc bằng .com");
-            if (category === "Khách hàng") errors.push("khách hàng chỉ thêm nhanh ở POS");
+            if (!category) errors.push("nhóm phải là Nhà cung cấp, Nhân viên hoặc Khách hàng");
             if (category === "Nhân viên" && role && !employeeRoles.includes(role)) errors.push("chức vụ nhân viên không hợp lệ");
             if (category === "Nhân viên") {
                 if (!username) errors.push("thiếu cột hoặc giá trị Tài khoản");
@@ -2659,7 +2661,9 @@
                     username,
                     password,
                     points: category === "Khách hàng" ? points : undefined,
-                    totalSpent: category === "Khách hàng" ? totalSpent : undefined
+                    totalSpent: category === "Khách hàng" ? totalSpent : undefined,
+                    gender: category === "Khách hàng" ? getRowValue(row, ["gioitinh", "giới tính", "gender"]) || undefined : undefined,
+                    birthDate: category === "Khách hàng" ? getRowValue(row, ["ngaysinh", "ngày sinh", "birthdate"]) || undefined : undefined
                 },
                 errors: errors.length ? `Dòng ${index + 2}: ${errors.join(", ")}` : ""
             };

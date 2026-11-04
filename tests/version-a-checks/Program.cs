@@ -331,6 +331,16 @@ try
         await Exec("UPDATE nhanvien SET maquyen='TN' WHERE manv='C2'");
         await LoginAs("manager");
         var provider=new PartnerUpsertDto("Nhà cung cấp","NCC-900","Imported supplier","0900099900","supplier@example.com","Address","");
+        var csvCustomer=new PartnerUpsertDto("Khách hàng","KH-CSV","CSV customer","0900099980","csvcustomer@example.com","Test address","",Username:"csv_customer",Password:"ExplicitTestPassword!",Gender:"Nữ",BirthDate:"2000-01-02");
+        Check((await client.PostAsJsonAsync("/api/doi-tac/nhap-file",new[]{csvCustomer})).IsSuccessStatusCode,"Manager imports customer CSV in customer category");
+        using(var csvState=JsonDocument.Parse(await client.GetStringAsync("/api/app-state")))
+        {
+            var row=csvState.RootElement.GetProperty("partnersData").EnumerateArray().Single(p=>p.GetProperty("id").GetString()=="KH-CSV");
+            Check(row.GetProperty("category").GetString()=="Khách hàng" && row.GetProperty("gender").GetString()=="Nữ" && row.GetProperty("birthDate").GetString()=="2000-01-02","Customer CSV preserves gender and birthday");
+        }
+        Check(await Scalar<long>("SELECT count(*) FROM nhasanxuat WHERE mansx='KH-CSV'")==0,"Customer CSV never creates supplier row");
+        using(var duplicateCustomer=await client.PostAsJsonAsync("/api/doi-tac/nhap-file",new[]{provider with{Id="NCC-CSV-ROLLBACK"},csvCustomer}))
+            Check(duplicateCustomer.StatusCode==HttpStatusCode.Conflict && await Scalar<long>("SELECT count(*) FROM nhasanxuat WHERE mansx='NCC-CSV-ROLLBACK'")==0,"Duplicate customer rolls back entire mixed CSV batch");
         var importedStaff=new PartnerUpsertDto("Nhân viên","NV-900","Imported staff","0900099901","staff@example.com","Address","Nhân viên kho",Username:"csv_staff",Password:"test123");
         Check((await client.PostAsJsonAsync("/api/doi-tac/nhap-file",new[]{provider,importedStaff})).IsSuccessStatusCode,"Partner file persists suppliers and staff through API");
         Check(await Scalar<long>("SELECT count(*) FROM nhasanxuat WHERE mansx='NCC-900'")==1 && await Scalar<long>("SELECT count(*) FROM nhanvien WHERE manv='NV-900'")==1,"Imported partners exist in database");
@@ -352,6 +362,7 @@ try
         Check(supplierBefore==await Scalar<string>("SELECT to_jsonb(s)::text FROM nhasanxuat s WHERE mansx='NCC-001'"),"Duplicate import preserves original partner");
         await LoginAs("cashier");
         Check((await client.PostAsJsonAsync("/api/doi-tac/nhap-file",new[]{provider with{Id="NCC-FORBIDDEN"}})).StatusCode==HttpStatusCode.Forbidden,"Cashier cannot use import endpoint");
+        Check((await client.PostAsJsonAsync("/api/doi-tac/nhap-file",new[]{csvCustomer with{Id="KH-FORBIDDEN"}})).StatusCode==HttpStatusCode.Forbidden,"Cashier cannot import customer CSV");
 
         using(var login=await client.PostAsJsonAsync("/api/dang-nhap",new{username="warehouse",password="test123"}))
         {login.EnsureSuccessStatusCode();using var data=JsonDocument.Parse(await login.Content.ReadAsStringAsync());client.DefaultRequestHeaders.Authorization=new AuthenticationHeaderValue("bearer",data.RootElement.GetProperty("token").GetString());}

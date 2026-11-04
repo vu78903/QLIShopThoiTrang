@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.RegularExpressions;
 using Npgsql;
 using QLIShopThoiTrang.Api.Models;
@@ -27,8 +27,8 @@ public sealed partial class StoreRepository
     public async Task ImportPartnersAsync(List<PartnerUpsertDto> rows)
     {
         if(rows.Count is <1 or >500)throw new InvalidOperationException("Mỗi lần nhập từ 1 đến 500 đối tác.");
-        if(rows.Any(p=>p.Category is not ("Nhân viên" or "Nhà cung cấp")))
-            throw new InvalidOperationException("File đối tác chỉ nhận nhân viên hoặc nhà cung cấp. Khách hàng được thêm nhanh tại POS.");
+        if(rows.Any(p=>p.Category is not ("Nhân viên" or "Nhà cung cấp" or "Khách hàng")))
+            throw new InvalidOperationException("File đối tác chỉ nhận Nhân viên, Nhà cung cấp hoặc Khách hàng.");
         await using var connection=db.CreateConnection();await connection.OpenAsync();
         await using var tx=await connection.BeginTransactionAsync();
         for(var i=0;i<rows.Count;i++)

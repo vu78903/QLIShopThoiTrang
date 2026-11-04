@@ -122,6 +122,10 @@ app.MapPost("/api/san-pham", async (ProductUpsertDto input, StoreRepository stor
                 await images.DeleteManagedFileAsync(oldImage);
         return Results.Ok(savedProduct with { Stock = await store.GetProductStockAsync(savedProduct.Sku!) });
     }
+    catch (StoreValidationException ex)
+    {
+        return Results.BadRequest(new { message = ex.Message });
+    }
     catch (Exception ex)
     {
         return Results.Problem("Khong luu duoc san pham: " + ex.Message);
@@ -306,6 +310,10 @@ app.MapPost("/api/khuyen-mai", async (PromotionUpsertDto input, StoreRepository 
         await store.SavePromotionAsync(input);
         return Results.Ok(input);
     }
+    catch (StoreValidationException ex)
+    {
+        return Results.BadRequest(new { message = ex.Message });
+    }
     catch (Exception ex)
     {
         return Results.Problem("Khong luu duoc khuyen mai: " + ex.Message);
@@ -335,6 +343,10 @@ app.MapPost("/api/phieu-nhap-kho", async (ImportRequestCreateDto input, StoreRep
     try
     {
         return Results.Ok(new { id = await store.CreateImportRequestAsync(input) });
+    }
+    catch (StoreValidationException ex)
+    {
+        return Results.BadRequest(new { message = ex.Message });
     }
     catch (Exception ex)
     {
