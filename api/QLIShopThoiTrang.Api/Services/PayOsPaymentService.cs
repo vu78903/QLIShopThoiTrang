@@ -142,6 +142,8 @@ public sealed class PayOsPaymentService(
     public async Task HandleWebhookAsync(Webhook webhook, CancellationToken cancellationToken)
     {
         var verified = await Client.Webhooks.VerifyAsync(webhook);
+        if(webhook.Success!=true || !string.Equals(webhook.Code,"00",StringComparison.Ordinal) || !string.Equals(verified.Code,"00",StringComparison.Ordinal))
+            throw new InvalidOperationException("payOS chưa xác nhận giao dịch thành công.");
         if (verified.Amount != await GetExpectedAmountAsync(verified.OrderCode, cancellationToken))
             throw new InvalidOperationException("Số tiền webhook không khớp phiên thanh toán.");
         await FinalizeAsync(verified.OrderCode, verified.Reference, cancellationToken);
@@ -211,27 +213,15 @@ public sealed class PayOsPaymentService(
     {
         await using var connection = db.CreateConnection();
         await connection.OpenAsync(cancellationToken);
+        // Chỉ kiểm tra bảng đã có; thanh toán không được tự tạo bảng/index hoặc sửa schema.
         await using var command = new NpgsqlCommand("""
-            CREATE TABLE IF NOT EXISTS giaodichthanhtoanqr (
-                magd bigint PRIMARY KEY,
-                sohd varchar(30) UNIQUE NOT NULL,
-                nguondon varchar(10) NOT NULL,
-                sotien numeric(18,2) NOT NULL CHECK(sotien>0),
-                malienket varchar(100) NOT NULL,
-                duongdanthanhtoan text NOT NULL,
-                manganhang varchar(20) NOT NULL,
-                sotaikhoan varchar(50) NOT NULL,
-                tentaikhoan varchar(200) NOT NULL,
-                noidung varchar(50) NOT NULL,
-                trangthai varchar(20) NOT NULL,
-                mathamchieu varchar(100),
-                dulieuhoadon jsonb,
-                ngaytao timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                ngaythanhtoan timestamp without time zone
-            );
-            CREATE INDEX IF NOT EXISTS ix_giaodichthanhtoanqr_sohd ON giaodichthanhtoanqr(sohd);
+            SELECT magd,sohd,nguondon,sotien,malienket,duongdanthanhtoan,manganhang,sotaikhoan,
+                   tentaikhoan,noidung,trangthai,mathamchieu,dulieuhoadon,ngaytao,ngaythanhtoan
+            FROM public.giaodichthanhtoanqr LIMIT 0
             """, connection);
-        await command.ExecuteNonQueryAsync(cancellationToken);
+        try { await using var reader=await command.ExecuteReaderAsync(cancellationToken); }
+        catch(PostgresException ex) when(ex.SqlState is "42P01" or "42703")
+        { throw new InvalidOperationException("Cấu trúc bảng giao dịch QR chưa tương thích. API không tự tạo hoặc sửa bảng.",ex); }
     }
 
     private static long NewOrderCode() => checked(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() * 1000

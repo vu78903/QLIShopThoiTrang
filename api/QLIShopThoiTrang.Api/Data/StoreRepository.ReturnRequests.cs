@@ -12,33 +12,38 @@ public sealed partial class StoreRepository
         var items=new List<ReturnRequestedLineDto>();
         await using var command=NewCommand(connection,tx,"""
             SELECT c.MaSKU,s.TenSanPham,s.MauSac,s.KichCo,c.SoLuong,COALESCE(c.LyDoTra,''),
-                   COALESCE(NULLIF(c.LoaiGiaoDich,''),p.HinhThucXuLy),c.MaSKUDoi,n.TenSanPham,c.SoLuongDoi
+                   COALESCE(NULLIF(c.LoaiGiaoDich,''),p.HinhThucXuLy),c.MaSKUDoi,n.TenSanPham,c.SoLuongDoi,n.MauSac,n.KichCo
             FROM ChiTietDoiTra c JOIN PhieuDoiTra p ON p.SoPhieuDT=c.SoPhieuDT
             JOIN SanPham s ON s.MaSKU=c.MaSKU LEFT JOIN SanPham n ON n.MaSKU=c.MaSKUDoi
             WHERE c.SoPhieuDT=@id ORDER BY c.MaSKU
             """,("@id",id));
         await using var reader=await command.ExecuteReaderAsync();
         while(await reader.ReadAsync())items.Add(new(reader.GetString(0),reader.GetString(1),reader.GetString(2),reader.GetString(3),reader.GetInt32(4),reader.GetString(5),reader.GetString(6),
-            reader.IsDBNull(7)?null:reader.GetString(7),reader.IsDBNull(8)?null:reader.GetString(8),reader.GetInt32(9)));
+            reader.IsDBNull(7)?null:reader.GetString(7),reader.IsDBNull(8)?null:reader.GetString(8),reader.GetInt32(9),reader.IsDBNull(10)?null:reader.GetString(10),reader.IsDBNull(11)?null:reader.GetString(11)));
         return items;
     }
 
-    public async Task<List<ReturnRequestDto>> GetWebReturnRequestsAsync()
+    public async Task<List<ReturnRequestDto>> GetWebReturnRequestsAsync(bool includeBankAccount=false)
     {
         await using var connection=db.CreateConnection();await connection.OpenAsync();
-        var headers=new List<(string Id,string Invoice,string Name,string Phone,DateTime Date,string Status,string? Reason,List<string> Images)>();
+        var headers=new List<ReturnRequestDto>();
         await using(var command=NewCommand(connection,null,"""
             SELECT p.SoPhieuDT,p.SoHD,COALESCE(k.HoTen,'Khách hàng'),COALESCE(h.SoDienThoai_KH,''),p.NgayLap,
-                   p.TrangThai,p.LyDoTuChoi,p.AnhMinhChung::text
+                   p.TrangThai,p.LyDoTuChoi,p.AnhMinhChung::text,p.TenNguoiNhanDoi,p.SoDienThoaiDoi,p.DiaChiDoiHang,
+                   p.ChuTaiKhoanHoanTien,p.TenNganHangHoanTien,p.SoTaiKhoanHoanTien,p.SoTienHoan,p.SoTienThuThem
             FROM PhieuDoiTra p JOIN HoaDon h ON h.SoHD=p.SoHD LEFT JOIN KhachHang k ON k.MaKH=h.MaKH
-            WHERE UPPER(TRIM(p.NguonDon)) IN ('WEB','WEBSITE') AND p.TrangThai IN ('CHO_DUYET','CHO_TIEP_NHAN','TU_CHOI')
+            WHERE UPPER(TRIM(p.NguonDon)) IN ('WEB','WEBSITE') AND p.TrangThai IN ('CHO_DUYET','CHO_TIEP_NHAN','TU_CHOI','HOAN_TAT')
             ORDER BY p.NgayLap DESC,p.SoPhieuDT LIMIT 200
             """))
         await using(var reader=await command.ExecuteReaderAsync())while(await reader.ReadAsync())
-            headers.Add((reader.GetString(0),reader.GetString(1),reader.GetString(2),reader.GetString(3),reader.GetDateTime(4),reader.GetString(5),reader.IsDBNull(6)?null:reader.GetString(6),
-                JsonSerializer.Deserialize<List<string>>(reader.GetString(7))??[]));
+        {
+            string? Text(int index)=>reader.IsDBNull(index)?null:reader.GetString(index);
+            var account=Text(13);if(!includeBankAccount && account is not null)account="•••• "+account[^Math.Min(4,account.Length)..];
+            headers.Add(new(reader.GetString(0),reader.GetString(1),reader.GetString(2),reader.GetString(3),reader.GetDateTime(4).ToString("dd/MM/yyyy HH:mm"),reader.GetString(5),Text(6),
+                JsonSerializer.Deserialize<List<string>>(Text(7)??"[]")??[],[],Text(8),Text(9),Text(10),Text(11),Text(12),account,reader.GetDecimal(14),reader.GetDecimal(15)));
+        }
         var result=new List<ReturnRequestDto>();
-        foreach(var h in headers)result.Add(new(h.Id,h.Invoice,h.Name,h.Phone,h.Date.ToString("dd/MM/yyyy HH:mm"),h.Status,h.Reason,h.Images,await RequestedLinesAsync(connection,null,h.Id)));
+        foreach(var h in headers)result.Add(h with {Items=await RequestedLinesAsync(connection,null,h.Id)});
         return result;
     }
 
@@ -129,7 +134,11 @@ public sealed partial class StoreRepository
             decimal newValue=0;var newQty=0;
             if(line.Resolution=="DOI_SAN_PHAM")
             {
+                if(requestId is not null && line.ReplacementQty!=line.Qty)
+                    throw new InvalidOperationException("Số lượng hàng đổi phải bằng số lượng hàng gửi lại. Khách mua thêm bằng hóa đơn khác.");
                 if(string.IsNullOrWhiteSpace(line.ReplacementSku))throw new InvalidOperationException("Yêu cầu đổi hàng chưa có mã SKU muốn nhận.");
+                if(requestId is not null && await ScalarLongAsync(connection,tx,"SELECT COUNT(*) FROM SanPham original JOIN SanPham replacement ON replacement.MaSP=original.MaSP WHERE original.MaSKU=@old AND replacement.MaSKU=@new",("@old",line.Sku),("@new",line.ReplacementSku))!=1)
+                    throw new InvalidOperationException("Yêu cầu website chỉ được đổi màu/size trong cùng sản phẩm đã mua.");
                 newQty=line.ReplacementQty>0?line.ReplacementQty:line.Qty;
                 var price=await EffectivePriceAsync(connection,tx,line.ReplacementSku);
                 newValue=RoundMoney(price*newQty*1.08m);

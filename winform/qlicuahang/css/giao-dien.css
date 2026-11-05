@@ -2540,3 +2540,24 @@
 #productFilters { align-items:flex-end; }
 #view-products .data-table td:last-child { min-width:170px; }
 #view-products .data-table td:last-child .btn { margin:3px 0; }
+.return-inspection-filters { display:flex;gap:16px;flex-wrap:wrap;margin:16px 0; }
+.return-inspection-filters label { display:grid;gap:6px;min-width:240px; }
+.return-inspection-table { min-width:1250px; }
+.return-inspection-table td { vertical-align:top; }
+.return-inspection-table td:last-child .btn { display:block;margin-bottom:6px; }
+.return-inspection-history { width:min(1000px,94vw);max-width:1000px; }
+.return-inspection-history .table-wrap { max-height:55vh; }
+.stock-review-spinner { display:inline-block;width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:stock-review-spin .8s linear infinite; }
+@keyframes stock-review-spin { to { transform:rotate(360deg); } }
+@media (prefers-reduced-motion:reduce) { .stock-review-spinner { animation:none; } }
+/* Thông báo bận dùng chung cho các màn hình WebView. */
+.staff-busy-dialog {width:min(360px,calc(100vw - 40px));padding:30px 26px;border:1px solid #d6e1ef;border-radius:18px;outline:0;background:#fff;color:#163253;box-shadow:0 24px 80px rgba(18,40,70,.22);text-align:center;font:inherit;}
+.staff-busy-dialog:not([open]) {display:none;}
+.staff-busy-dialog[open] {display:flex;flex-direction:column;align-items:center;gap:16px;}
+.staff-busy-dialog::backdrop {background:rgba(20,38,62,.32);backdrop-filter:blur(2px);}
+.staff-busy-dialog strong {font-size:16px;line-height:1.5;}
+.staff-busy-dialog p {font-size:13px;line-height:1.7;margin:0;color:#53667d;}
+.staff-busy-spinner {display:inline-block;width:38px;height:38px;border:4px solid #e2eaf7;border-top-color:#3465dc;border-radius:50%;animation:staff-busy-spin .8s linear infinite;flex:none;}
+.staff-ui-busy,.staff-ui-busy * {cursor:wait!important;}
+@keyframes staff-busy-spin {to {transform:rotate(360deg);}}
+@media(prefers-reduced-motion:reduce) {.staff-busy-spinner {animation-duration:1.8s;}}

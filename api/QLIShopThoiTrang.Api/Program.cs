@@ -536,7 +536,8 @@ app.MapPost("/api/kiem-nhan-kho/{source}/{id}/{sku}",async(string source,string 
     catch(InvalidOperationException ex){return Results.Conflict(new{message=ex.Message});}
 });
 
-app.MapGet("/api/doi-tra/yeu-cau", async (StoreRepository store) => Results.Ok(await store.GetWebReturnRequestsAsync()));
+app.MapGet("/api/doi-tra/yeu-cau", async (StoreRepository store,HttpContext context) => Results.Ok(await store.GetWebReturnRequestsAsync(((LoginResultDto)context.Items["StaffUser"]!).Role=="CuaHangTruong")));
+app.MapGet("/api/doi-tra/kiem-nhan", async (StoreRepository store) => Results.Ok(await store.GetStockReviewsAsync("DOI_TRA")));
 
 app.MapPost("/api/doi-tra/yeu-cau/{id}/duyet", async (string id,ReturnRequestActionDto input,StoreRepository store,HttpContext context) =>
 {

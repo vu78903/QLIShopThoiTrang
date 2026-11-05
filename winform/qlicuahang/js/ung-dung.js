@@ -4519,6 +4519,7 @@
                 returnAttempt=null;saveAppState();
                 await loadAppState();
                 await loadReturnHistory();
+                if(typeof loadStockReviews==='function')await loadStockReviews();
                 clearReturnInvoice();
                 const search = document.getElementById("returnSearchInput");
                 if (search) search.value = "";

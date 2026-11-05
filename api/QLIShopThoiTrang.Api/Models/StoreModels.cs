@@ -356,14 +356,22 @@ public sealed record ReturnReceiptDto(
 public sealed record ReturnReceiptLineDto(string Sku, string Name, string Color, string Size, int Qty,
     decimal ReturnValue, string? ReplacementSku, string? ReplacementName, decimal ReplacementValue, string Reason, int ReplacementQty = 0);
 public sealed record ReturnRequestedLineDto(string Sku, string Name, string Color, string Size, int Qty,
-    string Reason, string Resolution, string? ReplacementSku, string? ReplacementName, int ReplacementQty = 0);
+    string Reason, string Resolution, string? ReplacementSku, string? ReplacementName, int ReplacementQty = 0,
+    string? ReplacementColor=null,string? ReplacementSize=null);
 public sealed record ReturnRequestDto(string Id, string InvoiceId, string CustomerName, string Phone,
-    string CreatedAt, string Status, string? RejectionReason, List<string> Images, List<ReturnRequestedLineDto> Items);
+    string CreatedAt, string Status, string? RejectionReason, List<string> Images, List<ReturnRequestedLineDto> Items,
+    string? Recipient=null,string? ExchangePhone=null,string? ExchangeAddress=null,string? AccountHolder=null,
+    string? BankName=null,string? BankAccount=null,decimal RefundAmount=0,decimal ExtraAmount=0);
 public sealed record ReturnRequestActionDto(string? EmployeeId, string? Reason = null);
 
 public sealed record StockReviewDto(string Source, string DocumentId, string InvoiceId, string Sku,
-    string Name, string Color, string Size, int Qty, string Status, string Reason, string? ReviewedBy, string? ReviewedAt);
-public sealed record StockReviewActionDto(bool Restock, string? Note, bool Received = false);
+    string Name, string Color, string Size, int Qty, string Status, string Reason, string? ReviewedBy, string? ReviewedAt,
+    int ReceivedQty = 0, int RestockedQty = 0, string? PaymentStatus = null, decimal RefundAmount = 0,
+    decimal ExtraAmount = 0, List<StockReviewEventDto>? History = null);
+public sealed record StockReviewEventDto(Guid ReviewId, int ReceivedQty, int RestockQty, string Note,
+    string EmployeeId, DateTime ReviewedAt);
+public sealed record StockReviewActionDto(bool Restock, string? Note, bool Received = false,
+    int? ReceivedQty = null, int? RestockQty = null, Guid? ReviewId = null, int? ExpectedReceivedQty = null);
 public sealed record StockReconcileDto(bool AlreadyDeducted);
 public sealed record StockUnconfirmedDto(string InvoiceId, string Type, string Status, bool? Deducted, bool KnownUnreserved);
 public sealed record CancelShipmentDto(string? Reason);

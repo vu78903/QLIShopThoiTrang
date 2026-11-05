@@ -158,6 +158,8 @@
         .login-button:hover { background: #183b62; }
         .login-button:focus-visible { outline: 3px solid #f5a000; outline-offset: 3px; }
         .login-button:disabled { cursor: wait; opacity: .65; }
+        .login-spinner {display:inline-block;width:17px;height:17px;margin-right:9px;vertical-align:-3px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:login-spin .8s linear infinite;}
+        @keyframes login-spin {to {transform:rotate(360deg);}}
         .support {
             margin: 20px 0 0;
             color: #6b7b8f;
@@ -206,6 +208,7 @@
         const loginButton = document.getElementById('loginButton');
         const errorMessage = document.getElementById('errorMessage');
         const togglePassword = document.getElementById('togglePassword');
+        let loginBusy = false;
 
         togglePassword.addEventListener('click', () => {
             const isPassword = password.type === 'password';
@@ -217,6 +220,7 @@
 
         form.addEventListener('submit', event => {
             event.preventDefault();
+            if (loginBusy) return;
             errorMessage.textContent = '';
             if (!username.value.trim() || !password.value) {
                 errorMessage.textContent = 'Vui lòng nhập đầy đủ tên tài khoản và mật khẩu.';
@@ -233,16 +237,18 @@
         });
 
         window.setLoginBusy = busy => {
-            loginButton.disabled = busy;
-            loginButton.textContent = busy ? 'Đang đăng nhập...' : 'Đăng nhập';
+            loginBusy = busy;
+            [loginButton,username,password,togglePassword].forEach(control => control.disabled = busy);
+            form.setAttribute('aria-busy',String(busy));
+            loginButton.innerHTML = busy ? '<span class="login-spinner" aria-hidden="true"></span>Đang đăng nhập…' : 'Đăng nhập';
         };
 
         window.completeLogin = (success, message) => {
+            setLoginBusy(false);
             if (!success) {
                 errorMessage.textContent = message || 'Không thể đăng nhập.';
                 password.select();
             }
-            setLoginBusy(false);
         };
     </script>
 </body>

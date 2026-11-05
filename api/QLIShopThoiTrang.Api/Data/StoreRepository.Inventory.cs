@@ -82,30 +82,41 @@ public sealed partial class StoreRepository
         await tx.CommitAsync();
     }
 
-    public async Task<List<StockReviewDto>> GetStockReviewsAsync()
+    public async Task<List<StockReviewDto>> GetStockReviewsAsync(string? source=null)
     {
         await using var connection=db.CreateConnection();await connection.OpenAsync();var result=new List<StockReviewDto>();
         await using var command=NewCommand(connection,null,"""
             SELECT 'DON_HUY',h.SoHD,h.SoHD,c.MaSKU,s.TenSanPham,s.MauSac,s.KichCo,c.SoLuong,
                 CASE WHEN h.DaTruTonKho IS NULL THEN 'CAN_DOI_CHIEU' ELSE COALESCE(c.TrangThaiKiemNhan,'CHO_KIEM') END,
-                COALESCE(c.GhiChuKiemNhan,h.GhiChuGiaoHang,''),c.MaNVKiemNhan,c.NgayKiemNhan
+                COALESCE(c.GhiChuKiemNhan,h.GhiChuGiaoHang,''),c.MaNVKiemNhan,c.NgayKiemNhan,
+                CASE WHEN c.TrangThaiKiemNhan IN ('DA_NHAP_LAI','KHONG_NHAP_LAI') THEN c.SoLuong ELSE 0 END,
+                CASE WHEN c.TrangThaiKiemNhan='DA_NHAP_LAI' THEN c.SoLuong ELSE 0 END,NULL::text,0::numeric,0::numeric,'[]'::jsonb
             FROM HoaDon h JOIN ChiTietHoaDon c ON c.SoHD=h.SoHD JOIN SanPham s ON s.MaSKU=c.MaSKU
             WHERE (h.DaTruTonKho IS DISTINCT FROM FALSE) AND (UPPER(h.LoaiHoaDon) IN ('WEB_HUY','HUY','DA_HUY','CANCELLED','CANCELED') OR h.TrangThaiGiaoHang ILIKE '%hủy%' OR h.TrangThaiGiaoHang ILIKE '%huỷ%' OR UPPER(h.TrangThaiGiaoHang) LIKE '%HUY%' OR UPPER(h.TrangThaiGiaoHang) IN ('CANCELLED','CANCELED'))
             UNION ALL
             SELECT 'DOI_TRA',p.SoPhieuDT,p.SoHD,c.MaSKU,s.TenSanPham,s.MauSac,s.KichCo,c.SoLuong,
                 CASE WHEN h.DaTruTonKho IS DISTINCT FROM TRUE THEN 'CAN_DOI_CHIEU' ELSE COALESCE(c.TrangThaiKiemNhan,'CHO_KIEM') END,
-                COALESCE(c.GhiChuKiemNhan,c.LyDoTra,''),c.MaNVKiemNhan,c.NgayKiemNhan
+                COALESCE(c.GhiChuKiemNhan,c.LyDoTra,''),c.MaNVKiemNhan,c.NgayKiemNhan,
+                c.SoLuongDaKiemNhan,c.SoLuongNhapLai,
+                CASE WHEN p.SoTienHoan>0 THEN CASE WHEN NULLIF(to_jsonb(p)->>'ngayhoantien','') IS NOT NULL THEN 'DA_HOAN_TIEN' ELSE 'CHO_HOAN_TIEN' END
+                     WHEN p.SoTienThuThem>0 THEN 'CAN_DOI_SOAT_THU_THEM' ELSE 'KHONG_CHENH_LECH' END,
+                p.SoTienHoan,p.SoTienThuThem,c.NhatKyKiemNhan
             FROM PhieuDoiTra p JOIN HoaDon h ON h.SoHD=p.SoHD JOIN ChiTietDoiTra c ON c.SoPhieuDT=p.SoPhieuDT JOIN SanPham s ON s.MaSKU=c.MaSKU
             WHERE p.TrangThai='HOAN_TAT'
             ORDER BY 2,4
             """);
         await using var reader=await command.ExecuteReaderAsync();
-        while(await reader.ReadAsync())result.Add(new(reader.GetString(0),reader.GetString(1),reader.GetString(2),reader.GetString(3),reader.GetString(4),reader.GetString(5),reader.GetString(6),reader.GetInt32(7),reader.GetString(8),reader.GetString(9),reader.IsDBNull(10)?null:reader.GetString(10),reader.IsDBNull(11)?null:reader.GetDateTime(11).ToString("dd/MM/yyyy HH:mm")));
+        while(await reader.ReadAsync())
+        {
+            if(source is not null && reader.GetString(0)!=source)continue;
+            result.Add(new(reader.GetString(0),reader.GetString(1),reader.GetString(2),reader.GetString(3),reader.GetString(4),reader.GetString(5),reader.GetString(6),reader.GetInt32(7),reader.GetString(8),reader.GetString(9),reader.IsDBNull(10)?null:reader.GetString(10),reader.IsDBNull(11)?null:reader.GetDateTime(11).ToString("dd/MM/yyyy HH:mm"),reader.GetInt32(12),reader.GetInt32(13),reader.IsDBNull(14)?null:reader.GetString(14),reader.GetDecimal(15),reader.GetDecimal(16),System.Text.Json.JsonSerializer.Deserialize<List<StockReviewEventDto>>(reader.GetString(17),InspectionJson)));
+        }
         return result;
     }
 
     public async Task ReviewReturnedStockAsync(string source,string id,string sku,StockReviewActionDto input,string employee)
     {
+        if(source=="DOI_TRA"){await InspectReturnLineAsync(id,sku,input,employee);return;}
         var (table,key,header,headerKey)=source switch {
             "DON_HUY" => ("ChiTietHoaDon","SoHD","HoaDon","SoHD"),
             "DOI_TRA" => ("ChiTietDoiTra","SoPhieuDT","PhieuDoiTra","SoPhieuDT"),

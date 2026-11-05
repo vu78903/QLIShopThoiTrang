@@ -109,6 +109,9 @@ try
     foreach (var c in fixture.RootElement.GetProperty("constraints").EnumerateArray().OrderBy(c => c.GetProperty("type").GetString() == "f" ? 1 : 0))
         await Exec("ALTER TABLE public." + Q(c.GetProperty("table").GetString()!) + " ADD CONSTRAINT " + Q(c.GetProperty("name").GetString()!) + " " + c.GetProperty("definition").GetString());
     foreach(var view in fixture.RootElement.GetProperty("views").EnumerateArray())await Exec("CREATE VIEW public."+Q(view.GetProperty("name").GetString()!)+" AS "+view.GetProperty("definition").GetString());
+    var inspectionMigration=await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory,"BoSung-KiemNhanDoiTra.sql"));
+    await Exec(inspectionMigration);
+    await Exec(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory,"BoSung-ThongTinDoiTraWeb.sql")));
     await Exec("ALTER TABLE hoadon ALTER COLUMN datrutonkho SET DEFAULT FALSE; ALTER TABLE hoadon ALTER COLUMN daghinhanthanhtoan SET DEFAULT FALSE;");
     await Exec("""
         INSERT INTO phanquyen(maquyen,tenquyen) VALUES('CHT','Manager'),('TN','Cashier'),('TC','Shift'),('KHO','Warehouse');
@@ -227,6 +230,67 @@ try
     await repository.CancelShipmentAsync("IN-TRANSIT","Test actual cancellation");
     Check(await Scalar<string>("SELECT trangthaigiaohang FROM hoadon WHERE sohd='IN-TRANSIT'")=="Đã hủy","Cancel shipment does not mistake CHUYEN for HUY and skip the update");
 
+    // Kiểm nhận từng phần dùng dữ liệu riêng; không tác động fixture nghiệp vụ bên trên.
+    await Exec("""
+        INSERT INTO sanpham(masp,masku,maloai,tensanpham,kichco,mausac,dongia,soluong,soluongtonkho,danhmuc,mansx)
+        VALUES('SP-901','INSPECT-OLD','AO','Returned product','L','Đen',100000,10,10,'NAM','NCC-001'),
+              ('SP-902','INSPECT-NEW','AO','Replacement product','M','Đen',100000,3,3,'NAM','NCC-001');
+        INSERT INTO hoadon(sohd,manv,makh,loaihoadon,nguondon,trangthaithanhtoan,datrutonkho,daghinhanthanhtoan)
+        VALUES('INSPECT-INVOICE','M','KH','TAI_QUAY','POS','DA_THANH_TOAN',TRUE,TRUE);
+        INSERT INTO phieudoitra(sophieudt,sohd,manv,hinhthucxuly,trangthai,nguondon,sotienhoan,sotienthuthem)
+        VALUES('INSPECT-RETURN','INSPECT-INVOICE','M','HOAN_TIEN','HOAN_TAT','WEB',500000,0);
+        INSERT INTO chitietdoitra(sophieudt,masku,soluong,loaigiaodich,tinhtrang,lydotra)
+        VALUES('INSPECT-RETURN','INSPECT-OLD',5,'HOAN_TIEN','Đã tiếp nhận','Test inspection');
+        """);
+    var moneyBefore=await Scalar<string>("SELECT to_jsonb(p)::text FROM phieudoitra p WHERE sophieudt='INSPECT-RETURN'");
+    async Task<bool> RejectInspection(StockReviewActionDto input,string employee="M")
+    {try{await repository.ReviewReturnedStockAsync("DOI_TRA","INSPECT-RETURN","INSPECT-OLD",input,employee);return false;}catch(InvalidOperationException){return true;}}
+    var firstReview=new StockReviewActionDto(true,"Two good products received",true,2,2,Guid.NewGuid(),0);
+    Check(await RejectInspection(firstReview with {Received=false}),"Inspection rejects goods not actually received");
+    Check(await RejectInspection(firstReview,"C"),"Inspection rejects non-manager even when repository is called directly");
+    Check(await RejectInspection(firstReview with {ReceivedQty=6}),"Inspection rejects quantity above remaining return");
+    Check(await RejectInspection(firstReview with {RestockQty=3}),"Inspection rejects accepted quantity above received quantity");
+    Check(await RejectInspection(firstReview with {ReviewId=null}),"Partial inspection requires an idempotency identifier");
+    await Task.WhenAll(repository.ReviewReturnedStockAsync("DOI_TRA","INSPECT-RETURN","INSPECT-OLD",firstReview,"M"),repository.ReviewReturnedStockAsync("DOI_TRA","INSPECT-RETURN","INSPECT-OLD",firstReview,"M"));
+    var firstLine=(await repository.GetStockReviewsAsync("DOI_TRA")).Single(x=>x.DocumentId=="INSPECT-RETURN");
+    Check(firstLine.ReceivedQty==2 && firstLine.RestockedQty==2 && firstLine.Status=="DANG_KIEM","Partial receipt keeps the remaining three products pending");
+    Check(await Scalar<int>("SELECT soluongtonkho FROM sanpham WHERE masku='INSPECT-OLD'")==12 && firstLine.History?.Count==1,"Concurrent retries restock only once and record one audit event");
+    Check(firstLine.PaymentStatus=="CHO_HOAN_TIEN" && firstLine.RefundAmount==500000,"Stock inspection keeps refund status separate");
+    Check(await RejectInspection(firstReview with {ReviewId=Guid.NewGuid()}),"A second operator using stale checked quantity must refresh");
+    Check(await RejectInspection(firstReview with {Note="Changed content"}),"Reusing inspection identifier with changed content is rejected");
+    Check(await RejectInspection(firstReview with {Restock=false}),"Retry with contradictory restock flag cannot bypass quantity validation");
+    await Exec(inspectionMigration);
+    Check(await Scalar<int>("SELECT soluongtonkho FROM sanpham WHERE masku='INSPECT-OLD'")==12 && await Scalar<int>("SELECT soluongdakiemnhan FROM chitietdoitra WHERE sophieudt='INSPECT-RETURN'")==2,"Reapplying inspection migration preserves stock and partial progress");
+    var finalReview=new StockReviewActionDto(true,"Received remaining three; one good and two damaged",true,3,1,Guid.NewGuid(),2);
+    await repository.ReviewReturnedStockAsync("DOI_TRA","INSPECT-RETURN","INSPECT-OLD",finalReview,"M");
+    var finalLine=(await repository.GetStockReviewsAsync("DOI_TRA")).Single(x=>x.DocumentId=="INSPECT-RETURN");
+    Check(finalLine.Status=="NHAP_LAI_MOT_PHAN" && finalLine.ReceivedQty==5 && finalLine.RestockedQty==3,"Mixed-quality receipt records accepted and rejected quantities separately");
+    Check(finalLine.History?.Count==2 && finalLine.History.All(x=>x.EmployeeId=="M") && finalLine.History.All(x=>x.ReviewedAt!=default),"Each receipt records employee, timestamp, quantities and condition");
+    await repository.ReviewReturnedStockAsync("DOI_TRA","INSPECT-RETURN","INSPECT-OLD",firstReview,"M");
+    Check(await Scalar<int>("SELECT soluongtonkho FROM sanpham WHERE masku='INSPECT-OLD'")==13 && await Scalar<int>("SELECT soluong FROM sanpham WHERE masku='INSPECT-OLD'")==13,"Retrying an earlier batch after completion cannot restock again; both stock columns agree");
+    Check(await Scalar<int>("SELECT soluongtonkho FROM sanpham WHERE masku='INSPECT-NEW'")==3 && moneyBefore==await Scalar<string>("SELECT to_jsonb(p)::text FROM phieudoitra p WHERE sophieudt='INSPECT-RETURN'"),"Receiving old goods does not change replacement stock or refund/payment fields");
+    Check(await RejectInspection(finalReview with {ReviewId=Guid.NewGuid(),ExpectedReceivedQty=5}),"A completed line cannot receive additional goods");
+    await Exec("""
+        INSERT INTO phieudoitra(sophieudt,sohd,manv,hinhthucxuly,trangthai,nguondon,sotienhoan,sotienthuthem)
+        VALUES('INSPECT-REJECT','INSPECT-INVOICE','M','HOAN_TIEN','HOAN_TAT','WEB',200000,0),
+              ('INSPECT-PENDING','INSPECT-INVOICE','M','HOAN_TIEN','CHO_DUYET','WEB',100000,0),
+              ('INSPECT-LEGACY','INSPECT-INVOICE','M','HOAN_TIEN','HOAN_TAT','POS',200000,0);
+        INSERT INTO chitietdoitra(sophieudt,masku,soluong,loaigiaodich,tinhtrang,lydotra,trangthaikiemnhan)
+        VALUES('INSPECT-REJECT','INSPECT-OLD',2,'HOAN_TIEN','Đã tiếp nhận','Damaged',NULL),
+              ('INSPECT-PENDING','INSPECT-OLD',1,'HOAN_TIEN','Chờ duyệt','Pending',NULL),
+              ('INSPECT-LEGACY','INSPECT-OLD',2,'HOAN_TIEN','Đã nhận','Legacy','DA_NHAP_LAI');
+        """);
+    var rejectedReview=new StockReviewActionDto(false,"Both returned products are damaged",true,2,0,Guid.NewGuid(),0);
+    await repository.ReviewReturnedStockAsync("DOI_TRA","INSPECT-REJECT","INSPECT-OLD",rejectedReview,"M");
+    var rejectedLine=(await repository.GetStockReviewsAsync("DOI_TRA")).Single(x=>x.DocumentId=="INSPECT-REJECT");
+    Check(rejectedLine.Status=="KHONG_NHAP_LAI" && rejectedLine.ReceivedQty==2 && rejectedLine.RestockedQty==0 && await Scalar<int>("SELECT soluongtonkho FROM sanpham WHERE masku='INSPECT-OLD'")==13,"Fully rejected goods are recorded as received without increasing saleable stock");
+    var pendingRejected=false;try{await repository.ReviewReturnedStockAsync("DOI_TRA","INSPECT-PENDING","INSPECT-OLD",new(false,"Not yet approved",true,1,0,Guid.NewGuid(),0),"M");}catch(InvalidOperationException){pendingRejected=true;}
+    Check(pendingRejected,"Unapproved customer request cannot be stock-inspected");
+    await Exec(inspectionMigration);await Exec(inspectionMigration);
+    var legacyLine=(await repository.GetStockReviewsAsync("DOI_TRA")).Single(x=>x.DocumentId=="INSPECT-LEGACY");
+    Check(legacyLine.ReceivedQty==2 && legacyLine.RestockedQty==2 && legacyLine.Status=="DA_NHAP_LAI" && await Scalar<int>("SELECT soluongtonkho FROM sanpham WHERE masku='INSPECT-OLD'")==13,"Migration backfills legacy completed inspections without restocking them again");
+    Check(await Scalar<long>("SELECT count(*) FROM pg_tables WHERE schemaname='public'")==18,"Inspection upgrade retains the existing 18-table schema");
+
     var apiDll = args.FirstOrDefault();
     if (!string.IsNullOrWhiteSpace(apiDll))
     {
@@ -248,6 +312,9 @@ try
         foreach(var invoiceId in new[]{"OWN","OTHER","WEB"})Check((await client.GetAsync("/api/hoa-don/"+invoiceId)).StatusCode==HttpStatusCode.OK,"HTTP cashier reads invoice "+invoiceId);
         using(var list=JsonDocument.Parse(await client.GetStringAsync("/api/hoa-don")))Check(new[]{"OWN","OTHER","WEB"}.All(id=>list.RootElement.EnumerateArray().Any(i=>i.GetProperty("id").GetString()==id)),"HTTP cashier lists all operational invoices");
         var customerAccountPath="/api/doi-tac/"+Uri.EscapeDataString("Khách hàng")+"/KH/tai-khoan";
+        using(var inspected=await client.GetAsync("/api/doi-tra/kiem-nhan"))
+            Check(inspected.IsSuccessStatusCode && (await inspected.Content.ReadAsStringAsync()).Contains("INSPECT-RETURN"),"Cashier can read return inspections on the returns page without inventory permissions");
+        Check((await client.PostAsJsonAsync("/api/kiem-nhan-kho/DOI_TRA/INSPECT-RETURN/INSPECT-OLD",firstReview)).StatusCode==HttpStatusCode.Forbidden,"Cashier cannot write stock inspections through HTTP");
         Check((await client.GetAsync(customerAccountPath)).StatusCode==HttpStatusCode.Forbidden,"Cashier cannot read customer account details");
         using(var login=await client.PostAsJsonAsync("/api/dang-nhap",new{username="manager",password="test123"}))
         {login.EnsureSuccessStatusCode();using var data=JsonDocument.Parse(await login.Content.ReadAsStringAsync());client.DefaultRequestHeaders.Authorization=new AuthenticationHeaderValue("Bearer",data.RootElement.GetProperty("token").GetString());}
@@ -394,7 +461,8 @@ try
         Check((await client.PostAsync("/api/dang-xuat",null)).IsSuccessStatusCode && (await client.GetAsync("/api/app-state")).StatusCode==HttpStatusCode.Unauthorized,"Logout revokes bearer token");
         api.Kill(true);await api.WaitForExitAsync();api.Dispose();api=null;
     }
-    Console.WriteLine($"PASS {checks} checks including database, concurrency and real HTTP.");
+    await QrConfirmationChecks.RunAsync(settings.ConnectionString,Check);
+    Console.WriteLine($"PASS {checks} checks including database, concurrency, real HTTP and QR confirmation.");
 }
 catch(Exception ex)
 {

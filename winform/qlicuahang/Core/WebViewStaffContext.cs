@@ -26,9 +26,12 @@ internal static class WebViewStaffContext
     {
         var sessionToken=formDangNhap.ApiToken;
         var sessionEmployee=formDangNhap.MaNhanVien;
+        var pageBusy=false;
         core.NavigationStarting += (_, args) =>
         {
+            if(pageBusy && args.IsUserInitiated){args.Cancel=true;return;}
             if (args.Uri != "about:blank" && !IsTrustedDocument(args.Uri)) args.Cancel = true;
+            if(!args.Cancel)pageBusy=false;
         };
         core.WebMessageReceived += (_, args) =>
         {
@@ -36,6 +39,11 @@ internal static class WebViewStaffContext
             string message;
             try { message = args.TryGetWebMessageAsString(); }
             catch (ArgumentException) { return; }
+            if(message is "staff-ui-busy" or "staff-ui-idle")
+            {
+                if(string.Equals(args.Source,core.Source,StringComparison.OrdinalIgnoreCase))pageBusy=message=="staff-ui-busy";
+                return;
+            }
             if (message == "staff-session-expired" && sessionToken==formDangNhap.ApiToken && sessionEmployee==formDangNhap.MaNhanVien) SessionExpired?.Invoke();
         };
         var views = Path.Combine(AppContext.BaseDirectory, "Views");

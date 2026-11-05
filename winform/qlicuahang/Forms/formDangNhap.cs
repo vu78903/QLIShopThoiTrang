@@ -108,7 +108,7 @@ public partial class formDangNhap : Form
 
         try
         {
-            using HttpClient client = new() { BaseAddress = new Uri("http://127.0.0.1:5001") };
+            using HttpClient client = new() { BaseAddress = new Uri("http://127.0.0.1:5001"), Timeout=TimeSpan.FromSeconds(30) };
             using HttpResponseMessage response = await client.PostAsJsonAsync("/api/dang-nhap",
                 new { username = taiKhoan, password = matKhau });
 
@@ -127,6 +127,10 @@ public partial class formDangNhap : Form
             ApiToken = login.Token;
             DialogResult = DialogResult.OK;
             Close();
+        }
+        catch (TaskCanceledException)
+        {
+            await BaoKetQuaAsync(false, "Hệ thống phản hồi quá lâu. Vui lòng thử đăng nhập lại.");
         }
         catch (HttpRequestException)
         {

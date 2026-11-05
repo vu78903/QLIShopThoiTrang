@@ -6,6 +6,8 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Npgsql" Version="10.0.1" />
+    <PackageReference Include="payOS" Version="2.1.0" />
+    <Compile Include="../../api/QLIShopThoiTrang.Api/Services/PayOsPaymentService.cs" Link="PayOsPaymentService.cs" />
     <Compile Include="../../api/QLIShopThoiTrang.Api/Data/*.cs" Link="Data/%(Filename)%(Extension)" />
     <Compile Include="../../api/QLIShopThoiTrang.Api/Models/*.cs" Link="Models/%(Filename)%(Extension)" />
     <Compile Include="../../api/QLIShopThoiTrang.Api/Services/StaffSessions.cs" Link="StaffSessions.cs" />
@@ -14,6 +16,8 @@
     <Using Include="Microsoft.AspNetCore.Http" /><Using Include="Microsoft.Extensions.Configuration" />
     <None Include="../../api/QLIShopThoiTrang.Api/Data/SchemaContract.json" Link="Data/SchemaContract.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../database/BoSung-PhienBanBaoMat.sql" Link="BoSung-PhienBanBaoMat.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../database/BoSung-KiemNhanDoiTra.sql" Link="BoSung-KiemNhanDoiTra.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../database/BoSung-ThongTinDoiTraWeb.sql" Link="BoSung-ThongTinDoiTraWeb.sql" CopyToOutputDirectory="PreserveNewest" />
     <None Update="fixture-schema.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

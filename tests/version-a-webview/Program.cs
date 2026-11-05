@@ -10,6 +10,7 @@ using qlicuahang;
 internal static class Program
 {
     private static int checks;
+    private static Uri fakeApiAddress=null!;
     private static readonly string Today=DateTime.Now.ToString("yyyy-MM-dd");
     private static void Check(bool ok,string message){if(!ok)throw new Exception(message);checks++;}
 
@@ -27,6 +28,7 @@ internal static class Program
 
         Environment.SetEnvironmentVariable("WEBVIEW2_USER_DATA_FOLDER",Path.Combine(AppContext.BaseDirectory,"profile-"+Guid.NewGuid().ToString("N")));
         using var api=new FakeApi();
+        fakeApiAddress=api.Address;
         using var context=new ApplicationContext();
         var started=false;
         Application.Idle+=async (_,_)=>
@@ -69,6 +71,30 @@ internal static class Program
                 view.CoreWebView2.NavigationCompleted+=(_,e)=>Console.WriteLine("TRACE navigation-completed "+view.Source+" success="+e.IsSuccess);
             }
             view.CoreWebView2.AddWebResourceRequestedFilter("https://*",CoreWebView2WebResourceContext.All);
+            view.CoreWebView2.AddWebResourceRequestedFilter("http://127.0.0.1:5001/*",CoreWebView2WebResourceContext.All);
+            view.CoreWebView2.WebResourceRequested+=async (_,e)=>
+            {
+                var uri=new Uri(e.Request.Uri);if(uri.Scheme!="http"||uri.Host!="127.0.0.1"||uri.Port!=5001)return;
+                using var deferral=e.GetDeferral();
+                try
+                {
+                    using var client=new HttpClient{Timeout=TimeSpan.FromSeconds(20)};
+                    using var request=new HttpRequestMessage(new HttpMethod(e.Request.Method),new Uri(fakeApiAddress,uri.PathAndQuery.TrimStart('/')));
+                    if(e.Request.Headers.Contains("Authorization"))request.Headers.TryAddWithoutValidation("Authorization",e.Request.Headers.GetHeader("Authorization"));
+                    if(e.Request.Content is {} input)
+                    {
+                        using var bytes=new MemoryStream();await input.CopyToAsync(bytes);request.Content=new ByteArrayContent(bytes.ToArray());
+                        request.Content.Headers.ContentType=new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+                    }
+                    using var response=await client.SendAsync(request);var body=new MemoryStream(await response.Content.ReadAsByteArrayAsync());
+                    var headers="Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Headers: Authorization,Content-Type,X-Request-ID\r\nAccess-Control-Allow-Methods: GET,POST,PUT,DELETE,HEAD,OPTIONS";
+                    e.Response=view.CoreWebView2.Environment.CreateWebResourceResponse(body,(int)response.StatusCode,response.ReasonPhrase??"OK",headers);
+                }
+                catch(Exception)
+                {
+                    try{e.Response=view.CoreWebView2.Environment.CreateWebResourceResponse(new MemoryStream(Encoding.UTF8.GetBytes("{}")),503,"Fixture unavailable","Access-Control-Allow-Origin: *");}catch(Exception){}
+                }
+            };
             view.CoreWebView2.WebResourceRequested+=(_,e)=>
             {
                 // Không tải CDN hoặc tài nguyên Internet trong phép thử dữ liệu giả.
@@ -77,7 +103,7 @@ internal static class Program
             await view.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync("window.lucide={createIcons(){}};window.Chart=class{destroy(){}};");
         }
         view.CoreWebView2InitializationCompleted+=(_,_)=>Install();Install();
-        var ready="document.readyState==='complete' && window.staffApiDataReady===true && typeof STAFF_STORAGE_OWNER!=='undefined' && STAFF_STORAGE_OWNER==="+JsonSerializer.Serialize(expectedEmployee);
+        var ready="document.readyState==='complete' && window.staffApiDataReady===true && !window.staffUiBusy?.isBusy && !document.getElementById('staffBusyDialog')?.open && typeof STAFF_STORAGE_OWNER!=='undefined' && STAFF_STORAGE_OWNER==="+JsonSerializer.Serialize(expectedEmployee);
         if(expectedPage is not null)ready+=" && location.pathname.toLowerCase().endsWith("+JsonSerializer.Serialize("/"+expectedPage)+")";
         await Wait(view,ready);
         if(Environment.GetEnvironmentVariable("FORM_TEST_TRACE")=="1")Console.WriteLine("TRACE start-ready "+await Snapshot(view));
@@ -119,6 +145,13 @@ internal static class Program
         using var main=new formTongQuan();var view=await Start(main);
         Check(view.Source.IsFile,"Keep file origin");
         Check(api.LastAuthorization=="Bearer TEST-A","Main form sends bearer token");
+        api.DelayMilliseconds=700;
+        await Js(view,"window.busyProbe=loadAppState();");await Wait(view,"staffUiBusy.isBusy && document.getElementById('staffBusyDialog')?.open");
+        Check(await Js(view,"document.querySelector('.shell').inert && document.body.getAttribute('aria-busy')==='true' && !!document.querySelector('.staff-busy-spinner')")=="true","Real WebView shows loading spinner and locks the page during a slow API call");
+        await Js(view,"document.querySelector('.nav-btn[data-view=returns]').click()");
+        Check(view.Source.LocalPath.EndsWith("ban-hang.html"),"Busy WebView blocks queued clicks that would navigate away");
+        await Wait(view,"!staffUiBusy.isBusy && !document.getElementById('staffBusyDialog').open");api.DelayMilliseconds=0;
+        Check(await Js(view,"!document.querySelector('.shell').inert && document.querySelector('.nav-btn[data-view=products]').disabled")=="true","Unlocking preserves role-disabled controls in the real WebView");
         var legacy=new
         {
             productsData=Array.Empty<object>(),productTypesData=Array.Empty<object>(),partnersData=Array.Empty<object>(),promotionsData=Array.Empty<object>(),deliveryOrders=Array.Empty<object>(),codOrders=Array.Empty<object>(),cancelledOrders=Array.Empty<object>(),importRequests=Array.Empty<object>(),salesHistory=Array.Empty<object>(),
@@ -276,6 +309,8 @@ internal static class Program
         private readonly HttpListener listener=new();private readonly Task loop;
         private int status=200,writes,partnerImports;private readonly List<string> importedPartners=[];public int PartnerImports=>Volatile.Read(ref partnerImports);public string LastAuthorization="",LastImportedUsername="",LastImportedPassword="";
         public int Status{get=>Volatile.Read(ref status);set=>Volatile.Write(ref status,value);}public int Writes=>Volatile.Read(ref writes);
+        public Uri Address{get;}
+        public int DelayMilliseconds{get;set;}
         private readonly string data=JsonSerializer.Serialize(new
         {
             productsData=new[]{new{productId="SP-900",sku="TEST-M",name="Demo",type="Áo thun nam",audience="NAM",supplierId="NCC-001",supplierName="Supplier",color="Đen",size="M",unit="Cái",price=100000,stock=20,image=(string?)null,images=Array.Empty<string>(),active=true,salePrice=(decimal?)null,salePercent=0}},
@@ -285,8 +320,8 @@ internal static class Program
         });
         public FakeApi()
         {
-            using(var probe=new TcpListener(IPAddress.Loopback,5001)){probe.Start();probe.Stop();}
-            listener.Prefixes.Add("http://127.0.0.1:5001/");listener.Start();loop=Serve();
+            int port;using(var probe=new TcpListener(IPAddress.Loopback,0)){probe.Start();port=((IPEndPoint)probe.LocalEndpoint).Port;probe.Stop();}
+            Address=new Uri($"http://127.0.0.1:{port}/");listener.Prefixes.Add(Address.AbsoluteUri);listener.Start();loop=Serve();
         }
         private async Task Serve()
         {
@@ -300,6 +335,7 @@ internal static class Program
                     LastAuthorization=c.Request.Headers["Authorization"]??"";
                     if(c.Request.HttpMethod is not ("GET" or "HEAD"))Interlocked.Increment(ref writes);
                     var responseStatus=Status;
+                    if(DelayMilliseconds>0)await Task.Delay(DelayMilliseconds);
                     if(c.Request.Url!.AbsolutePath=="/api/app-state" && int.TryParse(Environment.GetEnvironmentVariable("FORM_TEST_APPSTATE_DELAY_MS"),out var delay))await Task.Delay(Math.Clamp(delay,0,1000));
                     if(responseStatus==-1){c.Response.Abort();continue;}
                     if(responseStatus==-2){await Task.Delay(13000);responseStatus=200;}

@@ -6,7 +6,7 @@
     <title>Đổi trả sản phẩm - Y-Fashion ERP</title>
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
-    <link rel="stylesheet" href="../css/giao-dien.css?v=20261023-3">
+    <link rel="stylesheet" href="../css/giao-dien.css?v=20261105-busy1">
 </head>
 <body data-view="returns">
     <div class="shell">
@@ -114,6 +114,14 @@
                         </section>
                     </div>
 
+                    <section class="card pad return-history-card" id="returnStockReviewCard" aria-labelledby="returnStockReviewTitle">
+                        <div class="section-heading"><div><strong id="returnStockReviewTitle">Nhận và kiểm hàng đổi/trả</strong><p class="cell-note">Duyệt yêu cầu chưa cộng hàng cũ vào kho. Chỉ lượng đã nhận và đạt chất lượng mới được nhập lại; kiểm hàng không xác nhận đã hoàn tiền.</p></div><button class="btn btn-secondary" type="button" onclick="loadStockReviews()">Tải kiểm nhận</button></div>
+                        <input id="stockReviewSource" type="hidden" value="DOI_TRA">
+                        <div class="return-inspection-filters"><label for="stockReviewSearch">Tìm phiếu, hóa đơn hoặc sản phẩm<input id="stockReviewSearch" class="input" type="search" oninput="renderStockReviews()" placeholder="Nhập số phiếu, tên sản phẩm…"></label><label for="stockReviewStatus">Trạng thái kiểm hàng<select id="stockReviewStatus" class="input" onchange="renderStockReviews()"><option value="CHO_KIEM">Còn chờ nhận/kiểm hàng</option><option value="">Tất cả</option><option value="DA_NHAP_LAI">Đã nhập lại toàn bộ</option><option value="NHAP_LAI_MOT_PHAN">Đã kiểm đủ, nhập lại một phần</option><option value="KHONG_NHAP_LAI">Đã kiểm đủ, không nhập lại</option></select></label></div>
+                        <p class="cell-note">Cửa hàng trưởng xác nhận kiểm nhận; các vai trò được xem phiếu có thể theo dõi tiến độ tại đây.</p>
+                        <div class="table-wrap"><table class="data-table return-inspection-table"><thead><tr><th>Phiếu / Hóa đơn</th><th>Sản phẩm</th><th>Màu / Size</th><th>Số lượng kiểm nhận</th><th>Tình trạng hàng</th><th>Trạng thái kiểm hàng</th><th>Người kiểm / Thời gian</th><th>Tiền theo phiếu (riêng)</th><th>Thao tác</th></tr></thead><tbody id="stockReviewBody"><tr><td colspan="9" class="table-message">Đang tải kiểm nhận…</td></tr></tbody></table></div>
+                    </section>
+
                     <section class="card pad return-history-card">
                         <div class="section-heading"><div><strong>Phiếu đổi trả đã tạo</strong></div></div>
                         <div class="table-wrap">
@@ -150,6 +158,6 @@
     <script src="../js/ung-dung.js?v=20261103-member1"></script>
     <script src="../js/pos-doi-tra.js?v=20261103-1"></script>
     <script src="../js/kiem-nhan-kho.js?v=20261103-1"></script>
-    <script src="../js/thao-tac-an-toan.js?v=20261103-2"></script>
+    <script src="../js/thao-tac-an-toan.js?v=20261105-busy1"></script>
 </body>
 </html>
